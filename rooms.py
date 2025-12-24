@@ -1,4 +1,5 @@
 from Player import player
+from combat import combats
 def old_bunker(player):
     while True:
         print("you are in an old bunker and you see a dusty old table with the items of you fallen friend on it.")
@@ -45,9 +46,24 @@ def wasteland(player):
         print("3) run away")
         choice = input("> ")
         if choice == "1":
-            print(" you aproched the alien with your rusty knife, it speeted acid at you, causing you to lose 2 health points.")
-            print("you then successfuly stabbed the alien who shrieked and colapsed.")
-            player["health"] -= 2
+            alien = {
+                "health": 6,
+                "hit_chance": 60  # percent
+            }
+            if "rusty knife" in player["inventory"]:
+                result = combats(player, alien)
+
+            if result == "win":
+                print(" you aproched the alien with your rusty knife, it speeted acid at you, causing you to lose  health points.")
+                print("you then successfuly stabbed the alien who shrieked and colapsed.")
+                return
+
+
+            elif result == "lose":
+                print("Game over.")
+                exit()
+            else:
+                print("You have nothing to fight with.")
             print(f"your health is now {player['health']}")
             print("you survived for now...")
             return

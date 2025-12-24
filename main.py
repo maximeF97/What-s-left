@@ -1,6 +1,7 @@
 from Player import player
 from rooms import old_bunker
-
+from combat import combats
+import random
 def main():
     print("welcome to what's left of us")
 
