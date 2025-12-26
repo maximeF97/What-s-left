@@ -4,7 +4,7 @@ from combat import combats
 import random
 def main():
     print("welcome to what's left of us")
-
+    
     running = True
     while running:
         print("\nWhat do you want to do?")
