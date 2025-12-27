@@ -82,7 +82,7 @@ def combats(player, enemy):
         # Enemy defeated
         if enemy["health"] <= 0:
             print("The alien collapses. You survived!")
-            return "win"
+            return {"result": "win", "xp": 10}
 
         # Alien turn
         alien_hit = random.randint(1, 100)
@@ -96,3 +96,4 @@ def combats(player, enemy):
     if player["health"] <= 0:
         print("You have been killed...")
         return "lose"
+
