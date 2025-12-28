@@ -35,8 +35,8 @@ player = {
     "hospital_metamorph_killed": False,
     "hospital_scavenger_killed": False,
     "has_hospital_left_room_been_searched": False,
-    "has_defeated_hospital_boss": False,#to use
-    "has_help_alien_prisoner": False#to use
+    "has_defeated_hospital_boss": False,
+    "has_help_basement_prisoner": False,
 }
 
 

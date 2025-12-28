@@ -13,6 +13,20 @@ WEAPONS = {
         "hit_chance": 85,
         "uses_ammo": True,
         "ammo_type": "revolver_ammo"
+    },
+    "alien_laser_rifle": {
+        "min_damage": 5,
+        "max_damage": 10,
+        "hit_chance": 90,
+        "uses_ammo": True,
+        "ammo_type": "alien_energy_cell"
+    },
+    "shotgun": {
+        "min_damage": 4,
+        "max_damage": 8,
+        "hit_chance": 75,
+        "uses_ammo": True,
+        "ammo_type": "shotgun_shells"
     }
 }
 
@@ -30,9 +44,13 @@ def combats(player, enemy):
             player["weapon"] = "revolver"
         else:
             player["weapon"] = "knife"
+   
+    elif "alien_laser_rifle" in player["inventory"]:
+        player["weapon"] = "alien_laser_rifle"
+    elif "shotgun" in player["inventory"]:
+        player["weapon"] = "shotgun"
     else:
         player["weapon"] = "knife"
-
     while player["health"] > 0 and enemy["health"] > 0:
         print(f"\nYour health: {player['health']}")
         print(f"Alien health: {enemy['health']}")
