@@ -37,6 +37,9 @@ player = {
     "has_hospital_left_room_been_searched": False,
     "has_defeated_hospital_boss": False,
     "has_help_basement_prisoner": False,
+    "hospital_flower_pot_check": False,
+    "hospital_trash_pot_check": False,"
+
 }
 
 

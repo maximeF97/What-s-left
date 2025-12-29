@@ -373,7 +373,7 @@ def hospital_side_entrance(player):
                 "hit_chance": 0,   # never hits
                 "damage": 0,       # no damage
                 "xp": 0            # no XP reward
-}
+                }
 
             result = combats(player, cactus)
             if result["result"] == "win":
@@ -528,6 +528,8 @@ def scavenger_room(player):
                             return
                         elif result["result"] == "lose":
                             exit()
+                else:
+                    print("Invalid choice")            
         else:
             print("you enter the room ahead to that The scavenger lies motionless. Whatever it was, it's dead.")                
 
@@ -658,7 +660,8 @@ def hospital_basement(player):
             print("you go back upstairs")
             hospital_inside(player)
             return
-
+        else:
+            print("Invalid choice")
 
 def hospital_basement_boss_defeated(player):
     print("you look around the room and see various alien experiments and equipment, but nothing useful.")
@@ -674,8 +677,8 @@ def hospital_basement_boss_defeated(player):
             continue
         if choice == "1":
             if not player.get("has_help_basement_prisoner", False):
-                print("you free the prisoner from the cell, he thanks you and gives you a third key for the hospital safe as a reward.")
-                player["inventory"].append()
+                print("you free the prisoner from the cell, he thanks you and gives you map to a secret humain base.")
+                player["inventory"].append("map_to_base")
                 player["has_help_basement_prisoner"] = True
                 return
             else:
@@ -690,28 +693,109 @@ def hospital_basement_boss_defeated(player):
             print("you go back upstairs")
             hospital_inside(player)
             return
-        
+        else:
+            print("Invalid choice")
 def questione_prisoner(player):
     while True:
-        print("1) ask about the alien metamorph")
-        print("2) ask about the alien cyborg scavenger")
-        print("3) ask about the alien scientist")
-        print("4) ask about what appended since the alien laser touchdown")
-        
-        print("5) go back")
-        print("I) Open inventory")  
+        print("1) Ask about the alien metamorph")
+        print("2) Ask about the alien cyborg scavenger")
+        print("3) Ask about the alien scientist")
+        print("4) Ask about what happened since the alien laser touchdown")
+        print("5) Go back")
+        print("I) Open inventory")
         choice = get_choice()   
         if handle_global_input(choice, player):
             continue
         if choice == "1":
-            print("the prisoner tells you that the alien metamorph is a dangerous creature that can mimic human forms and is highly aggressive, but they dont mimic perfectly with some perception you can spot them.")
+            print(
+                "The prisoner tells you that the alien metamorph is a dangerous creature "
+                "that can mimic human forms and is highly aggressive. However, they do not "
+                "mimic perfectly, and with enough perception, you can spot them.")
         elif choice == "2":
-            print("the prisoner explains that the alien cyborg scavenger was a friend of its who got captured by the alien scientist and experimented on, turning him into a cyborg against his will. allien has heavily experimented on humains since the invasion technologycly and biologically.")
-        elif choice == "3":
-            print("the prisoner reveals that the alien scientist was conducting experiments on humans to create hybrid creatures for the aliens and thank you to the assisance saying he was next.")
-        elif choice == "4":
-            print("the prisoner recounts that a few weeks after the laser scorched the earth a massive ship from landed and started terraforming the planet the zone around the crash site became unbreathable to humain without equipment,if you see they're flora turn around ")
-        
+            print(
+                "The prisoner explains that the alien cyborg scavenger was a friend of his "
+                "who got captured by the alien scientist and experimented on, turning him "
+                "into a cyborg against his will. The aliens have heavily experimented on "
+                "humans since the invasion, both technologically and biologically."
+            )
 
+        elif choice == "3":
+            print(
+                "The prisoner reveals that the alien scientist was conducting experiments "
+                "on humans to create hybrid creatures for the aliens. He thanks you for "
+                "your assistance, saying he was next."
+            )
+
+        elif choice == "4":
+            print(
+                "The prisoner recounts that a few weeks after the laser scorched the Earth, "
+                "a massive ship from space landed and started terraforming. The area around "
+                "the landing site became unbreathable for humans without proper equipment. "
+                "If you see their flora, turn around."
+            )
+
+        elif choice == "5":
+            return
 def hospital_first_floor(player):
-    pass#to do: implement first floor exploration
+    while True:
+        print("you get up the stairs and see 2 room, a flower pot and a trash can")
+        print("1)Go to the room and de left")
+        print("2)Go to the room and the right")
+        print("3)Inspect the flower pot")
+        print("4)Inspect the trash can")
+        print("I)Open inventory")
+        choice = get_choice()   
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            Hospital_first_floor_left_room(player)
+            return
+        elif choice == "2":
+            Hospital_first_floor_right_room(player)
+            return
+        elif choice == "3":
+            Hospital_flower_pot(player)
+        elif choice == "4" :
+            if player.get("hospital_trash_pot_check", False):
+                print("You search through the trash and find some coins.")
+                player["inventory"].extend(["coin", "coin", "coin"])
+                player["hospital_trash_pot_check"] = True
+        else:
+            print("Invalid choice")
+                          
+def Hospital_flower_pot(player):
+    while True:
+        if player.get("hospital_flower_pot_checked", False):
+            if skill_check(player, "perception", 30):
+                print("Something feels off about a neat little flower pot in the middle of an alien-infested hospital.")
+                print("3) Shoot the flower!")
+
+        print("1) Check the flower pot")
+        print("2) Go back")
+        print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            print("You carefully examine the flower pot...")
+            print("Suddenly, a tentacle lashes out!")
+            alien = {"health": 3, "hit_chance": 70, "xp": 0}
+            fight_enemy(player, alien)
+            player["hospital_flower_pot_checked"] = True
+            return
+
+        elif choice == "3" and player.get("hospital_flower_pot_checked", False):
+            print("You attack the flower pot before it can react. It dies instantly.")
+            player["hospital_flower_pot_checked"] = True
+            return
+
+        elif choice == "2":
+            return
+
+        else:
+            print("Invalid choice.")
+
+        
+        
