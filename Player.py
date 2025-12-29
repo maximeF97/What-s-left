@@ -38,8 +38,9 @@ player = {
     "has_defeated_hospital_boss": False,
     "has_help_basement_prisoner": False,
     "hospital_flower_pot_check": False,
-    "hospital_trash_pot_check": False,"
-
+    "hospital_trash_pot_check": False,
+    "try_hacking_hospital_pc": False,
+    "has_taken_hospital_pc_fafe": False,
 }
 
 

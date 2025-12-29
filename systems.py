@@ -38,11 +38,17 @@ def skill_check(player, skill_name, difficulty):
 
 
 def gain_xp(player, amount):
-    player["experience"] += amount
-    print(f"You gained {amount} XP!")
+    intelligence = player.get("intelligence", 0)
+    bonus_multiplier = 1 + (intelligence * 0.05)  # 5% per INT
+
+    gained_xp = int(amount * bonus_multiplier)
+    player["experience"] += gained_xp
+
+    print(f"You gained {gained_xp} XP!")
 
     while player["experience"] >= xp_needed(player["level"]):
         level_up(player)
+
 
 def xp_needed(level):
     return 20 + (level - 1) * 10

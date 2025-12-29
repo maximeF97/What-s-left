@@ -201,10 +201,10 @@ def police_station(player):
             print("Invalid choice.")
 
 def inspect_desk(player):
-    if not player["has_seen_police_station_alien"]:
+    if not player.get("has_seen_police_station_alien", False):
         print("The mug suddenly transforms into a small alien!")
 
-        alien = {"health": 4, "hit_chance": 65}
+        alien = {"health": 4, "hit_chance": 65, "xp": 25}
         result = combats(player, alien)
 
         player["has_seen_police_station_alien"] = True
@@ -215,12 +215,13 @@ def inspect_desk(player):
             player["inventory"].append("revolver")
             player["inventory"].extend(["revolver_ammo"] * 3)
             player["inventory"].append("police_station_key")
-            gain_xp(player, 15)
+            gain_xp(player, 15)  # bonus XP
 
         elif result["result"] == "lose":
             exit()
     else:
         print("Just an empty desk and a broken mug.")
+
 
 def explore_cells(player):
     while True:
@@ -764,6 +765,7 @@ def hospital_first_floor(player):
             print("Invalid choice")
                           
 def Hospital_flower_pot(player):
+
     while True:
         if player.get("hospital_flower_pot_checked", False):
             if skill_check(player, "perception", 30):
@@ -796,6 +798,86 @@ def Hospital_flower_pot(player):
 
         else:
             print("Invalid choice.")
+def Hospital_first_floor_left_room(player):
+    while True:
+        print("You enter the room on the left. You see a desk with an old PC. It looks like it still works.")
 
+        # PC NOT hacked yet
+        if not player.get("hospital_pc_hacked", False):
+            print("1) Try to hack the PC")
+            print("2) Go back")
+            print("I) Open inventory")
+
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                if skill_check(player, "intelligence", 20):
+                    player["hospital_pc_hacked"] = True
+                    print("You successfully hack through the PC defenses.")
+                else:
+                    print("The PC defenses are too complex.")
+            elif choice == "2":
+                return
+            else:
+                print("Invalid choice")
+
+        # PC hacked
+        else:
+            print("1) Read first message")
+            print("2) Read second message")
+            print("3) Unlock the desk safe")
+            print("4) Go back")
+            print("I) Open inventory")
+
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                print(
+                    "From: Dr John Fry\n"
+                    "To: Millie\n"
+                    "01/01/2000\n\n"
+                    "Hey Millie, I hope you're doing well. The hospital is full of the usual "
+                    "New Year missing fingers and drunk fools. I think I'll have to work all night."
+                )
+
+            elif choice == "2":
+                print(
+                    "From: Dr John Fry\n"
+                    "To: Millie\n"
+                    "02/01/2000\n\n"
+                    "God, Millie, what was that? A bright flash and most of everything wiped out. "
+                    "The grid shut down, all patients on life support were lost. "
+                    "I heard millions died. I hope you're alright. Please answer me."
+                )
+
+            elif choice == "3":
+                if not player.get("has_taken_hospital_pc_safe", False):
+                    print("You unlock the safe and find some ammo and a medkit.")
+                    player["inventory"].append("revolver_ammo")
+                    player["inventory"].append("medkit")
+                    player["has_taken_hospital_pc_safe"] = True
+                else:
+                    print("The safe is empty.")
+
+            elif choice == "4":
+                return
+            else:
+                print("Invalid choice")
+def Hospital_first_floor_right_room(player):
+    while True:
+        print("you enter the room on the right"
+              "nothig to see")
+        print("1)Go back")
+        print("I)Open inventory")
+        choice = get_choice()   
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            return 
+            
         
         
