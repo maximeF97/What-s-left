@@ -1,10 +1,16 @@
 import random
 
 WEAPONS = {
-    "knife": {
+    "rusty_knife": {
         "min_damage": 1,
         "max_damage": 3,
         "hit_chance": 70,
+        "uses_ammo": False
+    },
+    "sharp_kitchen_knife": {
+        "min_damage": 2,
+        "max_damage": 4,
+        "hit_chance": 75,
         "uses_ammo": False
     },
     "revolver": {
@@ -29,37 +35,50 @@ WEAPONS = {
         "ammo_type": "shotgun_shells"
     }
 }
+
+# -------------------------
+# STAMINA DAMAGE REDUCTION
+# -------------------------
 def apply_stamina_damage_reduction(player, damage):
-    stamina = player.get("stamina", 0)
-
-    reduction = stamina * 0.01      # 1% per stamina level
-    reduction = min(reduction, 0.5) # cap at 50%
-
+    stamina = player["skills"].get("stamina", 0)
+    reduction = min(stamina * 0.01, 0.5)  # cap at 50%
     reduced_damage = int(damage * (1 - reduction))
+    return max(1, reduced_damage)
 
-    return max(1, reduced_damage)   # always at least 1 damage
+# -------------------------
+# WEAPON SELECTION
+# -------------------------
+def choose_weapon(player):
+    # Default melee
+    if "sharp_kitchen_knife" in player["inventory"]:
+        player["weapon"] = "sharp_kitchen_knife"
+    else:
+        player["weapon"] = "rusty_knife"
 
-def combats(player, enemy):
-    print("\nCombat starts!")
+    firearms = []
+    for gun in ("revolver", "shotgun", "alien_laser_rifle"):
+        if gun in player["inventory"]:
+            firearms.append(gun)
 
-    # Weapon selection (once)
-    if "revolver" in player["inventory"]:
+    if firearms:
         print("Choose your weapon:")
-        print("1) Rusty knife")
-        print("2) Revolver")
+        print("1) Melee")
+        for i, gun in enumerate(firearms, 2):
+            print(f"{i}) {gun.replace('_', ' ').title()}")
 
         choice = input("> ")
-        if choice == "2":
-            player["weapon"] = "revolver"
-        else:
-            player["weapon"] = "knife"
-   
-    elif "alien_laser_rifle" in player["inventory"]:
-        player["weapon"] = "alien_laser_rifle"
-    elif "shotgun" in player["inventory"]:
-        player["weapon"] = "shotgun"
-    else:
-        player["weapon"] = "knife"
+        if choice.isdigit():
+            index = int(choice) - 2
+            if 0 <= index < len(firearms):
+                player["weapon"] = firearms[index]
+
+# -------------------------
+# COMBAT
+# -------------------------
+def combats(player, enemy):
+    print("\nCombat starts!")
+    choose_weapon(player)
+
     while player["health"] > 0 and enemy["health"] > 0:
         print(f"\nYour health: {player['health']}")
         print(f"Alien health: {enemy['health']}")
@@ -67,26 +86,22 @@ def combats(player, enemy):
 
         print("1) Attack")
         print("2) Run")
-
         choice = input("> ")
 
         if choice == "1":
             weapon = WEAPONS[player["weapon"]]
 
-            # Ammo check
             if weapon["uses_ammo"]:
                 ammo = weapon["ammo_type"]
                 if ammo not in player["inventory"]:
-                    print("Click! You have no revolver ammo.")
-                    print("You switch back to your knife.")
-                    player["weapon"] = "knife"
-                    weapon = WEAPONS["knife"]
+                    print("Click! You're out of ammo.")
+                    print("You switch back to your melee weapon.")
+                    choose_weapon(player)
+                    continue
                 else:
                     player["inventory"].remove(ammo)
-                    print("You fire the revolver!")
 
-            hit_roll = random.randint(1, 100)
-            if hit_roll <= weapon["hit_chance"]:
+            if random.randint(1, 100) <= weapon["hit_chance"]:
                 damage = random.randint(
                     weapon["min_damage"],
                     weapon["max_damage"]
@@ -106,14 +121,12 @@ def combats(player, enemy):
             print("Invalid choice.")
             continue
 
-        # Enemy defeated
         if enemy["health"] <= 0:
             print("The alien collapses. You survived!")
-            return {"result": "win", "xp": 10}
+            return {"result": "win", "xp": enemy.get("xp", 0)}
 
         # Alien turn
-        alien_hit = random.randint(1, 100)
-        if alien_hit <= enemy["hit_chance"]:
+        if random.randint(1, 100) <= enemy["hit_chance"]:
             base_damage = random.randint(1, 2)
             damage = apply_stamina_damage_reduction(player, base_damage)
             player["health"] -= damage
@@ -121,7 +134,5 @@ def combats(player, enemy):
         else:
             print("The alien misses!")
 
-    if player["health"] <= 0:
-        print("You have been killed...")
-        return "lose"
-
+    print("You have been killed...")
+    return "lose"

@@ -5,7 +5,7 @@ player = {
     "max_health": 15,
     "base_health": 15,
     "inventory": [],
-    "weapon": "knife",
+    "weapon": "rusty_knife",
 
     "level": 1,
     "experience": 0,
@@ -43,7 +43,9 @@ player = {
     "hospital_trash_pot_check": False,
     "try_hacking_hospital_pc": False,
     "has_taken_hospital_pc_fafe": False,
-    "has_oppen hospital_back_door": False,
+    "has_opened_hospital_back_door": False,
+    "passed_wastland_3_skill_check": False, #still thinking to use or not
+    "looted_the_bedroll": False,
 }
 
 

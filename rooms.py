@@ -5,42 +5,50 @@ from combat import combats
 import random
 def old_bunker(player):
     while True:
-        print("you are in an old bunker and you see a dusty old table with the items of you fallen friend on it.")
+        print(
+            "You are in an old bunker. You see a dusty table with the items\n"
+            "of your fallen friend resting on it."
+        )
         print("1) Inspect the table")
-        print("2) open the door")
-        print("3) go back")
+        print("2) Open the door")
+        print("3) Go back")
         print("I) Open inventory")
 
         choice = get_choice()
 
-        
         if handle_global_input(choice, player):
             continue
-        
 
         if choice == "1":
-            
-            
-            if not player["bunker_items_taken"]:
-                print("you find a rusty knife and a old_key.")
-                player['inventory'].append('old_key')
-                player['inventory'].append('rusty knife')
+            if not player.get("bunker_items_taken", False):
+                print("You find a rusty_knife and an old key.")
+                
+                player["inventory"].append("rusty_knife")     
+                player["inventory"].append("old_key")
+                
                 player["bunker_items_taken"] = True
-                print("items added to your inventory.")
+                print("Items added to your inventory.")
             else:
                 print("The table is empty.")
+
         elif choice == "2":
-            if "old_key"  in player["inventory"]:
-                print ("you use the old_key to unlock the door and step outside into the wasteland.")
+            if "old_key" in player["inventory"]:
+                print(
+                    "You use the old key to unlock the door and step outside\n"
+                    "into the wasteland."
+                )
                 player["bunker_door_unlocked"] = True
                 wasteland(player)
                 return
             else:
-                print("the door is locked. you need a key to open it.")
+                print("The door is locked. You need a key.")
+
         elif choice == "3":
             return
+
         else:
-            print("Invalid choice")
+            print("Invalid choice.")
+
 
 def new_func():
     choice = input("> ")
@@ -48,77 +56,75 @@ def new_func():
 
 def fight_enemy(player, enemy):
     result = combats(player, enemy)
-    if result["result"] == "win":
-        gain_xp(player, enemy.get("xp", 0))
+
+    if isinstance(result, dict) and result["result"] == "win":
+        gain_xp(player, result["xp"])
         return True
-    exit()
+
+    return False
+
 def wasteland(player):
     while True:
-        print("you took you first steps into the wasteland")
-        print("everithing is desolate and quiet... when sudenly you hear a shivering noise behind you.")
+        print("your took you first steps into the wasteland")
+        print("everithing is desolate and quiet... when suddenly you hear a shivering noise behind you.")
         
-        if not player["has_seen_alien"]:
+        if not player.get("has_seen_alien", False):
             print("an small alien creature stands in the distance, looking at you with curious eyes.")
             player["has_seen_alien"] = True
         
+    
+        print("what do you want to do?")
+        print("1) approach the alien with your rusty knife")
+        print("2) keep your distance and observe")
+        print("3) run away")
+        print("I) Open inventory")
+
+        choice = get_choice()
+
+            
+        if handle_global_input(choice, player):
+            continue
         
-            print("what do you want to do?")
-            print("1) approach the alien with your rusty knife")
-            print("2) keep your distance and observe")
-            print("3) run away")
-            print("I) Open inventory")
+        if choice == "1":
+            if "rusty_knife" not in player["inventory"]:
+                print("You have nothing to fight with.")
+                return
 
-            choice = get_choice()
+            alien = {
+                "health": 6,
+                "hit_chance": 60,
+                "xp": 10
+            }
 
-            
-            if handle_global_input(choice, player):
-                continue
-            
-            if choice == "1":
-                if "rusty knife" not in player["inventory"]:
-                    print("You have nothing to fight with.")
-                    return
+            result = combats(player, alien)
 
-                alien = {
-                    "health": 6,
-                    "hit_chance": 60
-                }
-
-                result = combats(player, alien)
-
-                if result == "win":
-                    gain_xp(player, result["xp"])
-                    print("You approached the alien with your rusty knife.")
-                    print("It spits acid, but you manage to stab it.")
-                    player["has_seen_alien"] = True
-                    wasteland_cross_road(player)
-                    return
-
-                elif result == "run":
-                    print("You escape back to the bunker.")
-                    old_bunker(player)
-                    return
-
-                elif result == "lose":
-                    print("Game over.")
-                    exit()
-
-            elif choice == "2":
-                print("you kept your distance and observed the alien, it seemed harmless and eventually walked away.")
-                print("you survived for now...")
+            if isinstance(result, dict) and result["result"] == "win":
+                gain_xp(player, result["xp"])
+                print("your continue your journey")
                 wasteland_cross_road(player)
                 return
-            elif choice == "3":
-                print("you ran away from the alien, tripping over a rock and injuring yourself, losing 1 health point.")
-                player["health"] -= 1
-                print(f"your health is now {player['health']}")
-                print("you survived for now...")
+            elif result == "run":
+                old_bunker(player)
                 return
-            else:
-                print("Invalid choice")
+            elif result == "lose":
+                exit()
+
+        elif choice == "2":
+            print("you kept your distance and observed the alien, it seemed harmless and eventually walked away.")
+            print("you survived for now...")
+            wasteland_cross_road(player)
+            return
+        elif choice == "3":
+            print("you ran away from the alien, tripping over a rock and injuring yourself, losing 1 health point.")
+            player["health"] -= 1
+            print(f"your health is now {player['health']}")
+            print("you survived for now...")
+            return
+        else:
+            print("Invalid choice")
 
 def wasteland_cross_road(player):
-    print("you arived at a a crossroad you see and old post with two signs.")
+    print("you arrived at a a crossroad you see and old post with two signs.")
     while True:
         print("1) follow the sign to the left 'grove_town'")
         print("2) follow the sign to the right 'hospital'")
@@ -141,7 +147,7 @@ def wasteland_cross_road(player):
             return
         elif choice == "3":
             print("you walk straight ahead into the wasteland")
-            wasteland3(player)
+            wasteland_3(player)
             return
 
 def grove_town(player):
@@ -211,7 +217,7 @@ def inspect_desk(player):
 
         if result["result"] == "win":
             gain_xp(player, result["xp"])
-            print("You defeat the alien and find supplies.")
+            print("You defeat the alien and find supplies and the key to the police station.")
             player["inventory"].append("revolver")
             player["inventory"].extend(["revolver_ammo"] * 3)
             player["inventory"].append("police_station_key")
@@ -220,7 +226,7 @@ def inspect_desk(player):
         elif result["result"] == "lose":
             exit()
     else:
-        print("Just an empty desk and a broken mug.")
+        print("Just an empty desk and dead alien")
 
 
 def explore_cells(player):
@@ -250,7 +256,7 @@ def explore_cells(player):
 
             if result["result"] == "win":
                 gain_xp(player, result["xp"])
-                print("You defeated the alien prisoner.")
+                print("You defeated the alien prisoner and find a weid looking key.")
                 player["inventory"].append("hospital_safe_key")
                 gain_xp(player, 30)
                 player["has_freed_police_station_prisoner"] = True
@@ -269,7 +275,7 @@ def evidence_room(player):
     if player["has_unlocked_police_station_evidence_room"]:
         print("The evidence room is empty.")
         return
-
+    print("your using the police station key to unlock the door")
     print("You find ammo and a medkit.")
     player["inventory"].extend(["revolver_ammo"] * 2)
     player["inventory"].append("medkit")
@@ -465,11 +471,17 @@ def hospital_inside(player):
                 print("you take the stairs going down to the basement again.")
                 hospital_basement(player)
         elif choice == "5":
-            if not player.get("has_oppen hospital_back_door", False)
+            if not player.get("has_opened_hospital_back_door", False):
                 if "hospital_back_door_key" in player["inventory"]:
-                    print("you use the key and go toward the wasteland")
+                    print("You use the key and step out toward the wasteland.")
+                    player["has_opened_hospital_back_door"] = True
+                    wasteland_4(player)
+                    return
                 else:
-                    print("the door is locked you need a key")
+                    print("The door is locked. You need a key.")
+            else:
+                print("The back door is already open.")
+
         elif choice == "6":
             print("you go back to the hospital entrance")
             hospital(player)
@@ -898,5 +910,68 @@ def Hospital_first_floor_right_room(player):
             continue
         if choice == "1":
             return 
+def wasteland_3(player):
+    print(
+        "You arrive at an empty camp. You see a fire still hot\n"
+        "and an old bedroll open on the floor."
+    )
 
-        
+    while True:
+        print("\nWhat do you do?")
+        print("1) Look at the fire")
+        print("2) Move forward")
+        print("3) Look under the bedroll")
+        print("4) Go back")
+        print("I) Open inventory")
+
+        choice = get_choice()
+
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            print(
+                "You come near the fire. You see fresh footprints, they look human.\n"
+                "Better not stay here too long."
+            )
+            continue
+
+        elif choice == "2":
+            print("You proceed forward.")
+            wastland_stranger_encounter(player)
+            return
+
+        elif choice == "3":
+            if player.get("looted_the_bedroll", False):
+                print("You already took everything that was here.")
+                continue
+
+            if skill_check(player, "scavenging", 30):
+                print(
+                    "Your scavenging experience reminds you that people often bury valuables\n"
+                    "under their bedroll."
+                )
+                print(
+                    "You dig under the bedroll and find a sharpened kitchen knife\n"
+                    "and some revolver ammo."
+                )
+                player["inventory"].append("sharp_kitchen_knife")
+                player["inventory"].append("revolver_ammo")
+                player["inventory"].append("bobby_pin")
+                player["looted_the_bedroll"] = True
+            else:
+                print("You search around but fail to find anything useful.")
+
+        elif choice == "4":
+            wasteland_cross_road(player)
+            return
+
+        else:
+            print("Invalid choice.")
+def wastland_stranger_encounter(player):
+    print("not donne yet")
+    #to do
+
+def wasteland_4(player):
+    print("not donne yet")
+    # to do
