@@ -2,6 +2,8 @@ import random
 from systems import level_up, skill_check
 player = {
     "health": 10,
+    "max_health": 15,
+    "base_health": 15,
     "inventory": [],
     "weapon": "knife",
 
@@ -41,7 +43,9 @@ player = {
     "hospital_trash_pot_check": False,
     "try_hacking_hospital_pc": False,
     "has_taken_hospital_pc_fafe": False,
+    "has_oppen hospital_back_door": False,
 }
+
 
 
 

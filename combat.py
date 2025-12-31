@@ -29,6 +29,15 @@ WEAPONS = {
         "ammo_type": "shotgun_shells"
     }
 }
+def apply_stamina_damage_reduction(player, damage):
+    stamina = player.get("stamina", 0)
+
+    reduction = stamina * 0.01      # 1% per stamina level
+    reduction = min(reduction, 0.5) # cap at 50%
+
+    reduced_damage = int(damage * (1 - reduction))
+
+    return max(1, reduced_damage)   # always at least 1 damage
 
 def combats(player, enemy):
     print("\nCombat starts!")
@@ -105,7 +114,8 @@ def combats(player, enemy):
         # Alien turn
         alien_hit = random.randint(1, 100)
         if alien_hit <= enemy["hit_chance"]:
-            damage = random.randint(1, 2)
+            base_damage = random.randint(1, 2)
+            damage = apply_stamina_damage_reduction(player, base_damage)
             player["health"] -= damage
             print(f"The alien hits you for {damage} damage!")
         else:

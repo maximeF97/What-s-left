@@ -276,12 +276,15 @@ def evidence_room(player):
     player["has_unlocked_police_station_evidence_room"] = True
 
 def burned_houses(player):
-    print("you explore the burned down houses and find an leaking healing salve, you une it before it run out and recover 3 health points.")
+    
     if not player.get("burned_houses_looted", False):
+        print("you explore the burned down houses and find an leaking healing salve, you une it before it run out and recover 3 health points.")
         player["health"] += 3
-    player["burned_houses_looted"] = True
-
-    print(f"your health is now {player['health']}")
+        print(f"your health is now {player['health']}")
+        player["burned_houses_looted"] = True
+    else:
+        print("nothing else of interest here")
+    
 
 def hospital(player):
     print("you arrived at the hospital, the building is mostly intact but the front door is locked.")
@@ -420,7 +423,8 @@ def hospital_inside(player):
         print("2) search the hospital right room")
         print("3) search the room ahead")
         print("4) search the left room")
-        print("5) go back to the hospital entrance")
+        print("5) go to the back door")
+        print("6) go back to the hospital entrance")
         print("I) Open inventory")  
         choice = get_choice()   
         if handle_global_input(choice, player):
@@ -461,6 +465,12 @@ def hospital_inside(player):
                 print("you take the stairs going down to the basement again.")
                 hospital_basement(player)
         elif choice == "5":
+            if not player.get("has_oppen hospital_back_door", False)
+                if "hospital_back_door_key" in player["inventory"]:
+                    print("you use the key and go toward the wasteland")
+                else:
+                    print("the door is locked you need a key")
+        elif choice == "6":
             print("you go back to the hospital entrance")
             hospital(player)
             return
@@ -581,88 +591,98 @@ def hospital_metamorph_encounter(player):
             print("Invalid choice")  
 
 def hospital_basement(player):
-    print("you entered the basement, as you go down the stairs you here pained moans comming from below.")
-    print("you arrive down the stairs and see a large alien this one look differnet from the other it wear a white lab suits and have a more humanoid shape.")
+    
+    print(
+        "You enter the basement. As you descend the stairs, you hear pained moans coming from below.\n"
+        "At the bottom, a large alien stands before you — humanoid, wearing a white lab coat."
+    )
+
     while True:
-        print("1) try to sneak attack the alien")
-        print("2) charge at the alien with your weapon drawn")
-        print("3) try to look around the room")
-        print("4) go back upstairs")
-        print("I) Open inventory")  
+        print("\n1) Try to sneak attack the alien")
+        print("2) Charge at the alien with your weapon drawn")
+        print("3) Look around the room")
+        print("4) Go back upstairs")
+        print("I) Open inventory")
+
         choice = get_choice()
         if handle_global_input(choice, player):
             continue
+
+        # ───────────────────────────────
+        # Sneak attack
+        # ───────────────────────────────
         if choice == "1":
             if player.get("has_defeated_hospital_boss", False):
-                print("you try to sneak attack the alien")
-                if skill_check(player, "stealth", 40):
-                    print("you successfully sneak attack the alien catching it off guard and dealing critical damage!")
-                    alien_lab_boss = {"health": 15, "hit_chance": 70, "xp": 150}
-                    result = combats(player, alien_lab_boss)
-
-                    if result["result"] == "win":
-                        gain_xp(player, result["xp"])
-                        print("You defeated the alien scientist.")
-                        player["inventory"].append("second_hospital_safe_key")
-                        player["inventory"].append("alien scientist_suit")
-                        player["has_defeated_hospital_boss"] = True
-                        hospital_basement_boss_defeated(player)
-                        return
-
-                    elif result["result"] == "lose":
-                        exit()
-                else:
-                    print("you failed to sneak attack the alien, it notices you and attacks!")
-                    alien_lab = {"health": 20, "hit_chance": 70, "xp": 150}
-                    result = combats(player, alien_lab)
-
-                    if result["result"] == "win":
-                        gain_xp(player, result["xp"])
-                        print("You defeated the alien scientist.")
-                        player["inventory"].append("second_hospital_safe_key")
-                        player["inventory"].append("alien scientist_suit")
-                        player["has_defeated_hospital_boss"] = True
-                        hospital_basement_boss_defeated(player)
-                        return
-
-                    elif result["result"] == "lose":
-                        exit()
-            else:
-                hospital_basement_boss_defeated(player) 
+                hospital_basement_boss_defeated(player)
                 return
+
+            print("You attempt to sneak closer...")
+            if skill_check(player, "stealth", 40):
+                print("You catch the alien off guard!")
+                alien = {"health": 15, "hit_chance": 70, "xp": 150}
+            else:
+                print("You fail to sneak — the alien turns toward you!")
+                alien = {"health": 20, "hit_chance": 70, "xp": 150}
+
+            result = combats(player, alien)
+            if result["result"] == "win":
+                finish_hospital_boss(player, result["xp"])
+                return
+            else:
+                exit()
+
+        # ───────────────────────────────
+        # Direct attack
+        # ───────────────────────────────
         elif choice == "2":
+            if player.get("has_defeated_hospital_boss", False):
+                hospital_basement_boss_defeated(player)
+                return
+
+            print("You charge at the alien!")
+            alien = {"health": 20, "hit_chance": 70, "xp": 150}
+            result = combats(player, alien)
+
+            if result["result"] == "win":
+                finish_hospital_boss(player, result["xp"])
+                return
+            else:
+                exit()
+
+        # ───────────────────────────────
+        # Look around
+        # ───────────────────────────────
+        elif choice == "3":
             if not player.get("has_defeated_hospital_boss", False):
-                print("you charge at the alien with your weapon drawn")
-                alien_lab = {"health": 20, "hit_chance": 70, "xp": 150}
-                result = combats(player, alien_lab)
-
-                if result["result"] == "win":
-                    gain_xp(player, result["xp"])
-                    print("You defeated the alien scientist.")
-                    player["inventory"].append("second_hospital_safe_key")
-                    player["inventory"].append("alien scientist_suit")
-                    player["has_defeated_hospital_boss"] = True
-                    hospital_basement_boss_defeated(player)
-                    return
-
-                elif result["result"] == "lose":
-                    exit()
+                print("you see a jailed man but the alien blocks your path — you’ll need to deal with it first.")
             else:
                 hospital_basement_boss_defeated(player)
                 return
-        elif choice == "3":
-            if player.get("has_defeated_hospital_boss", False):
-                print("you look around the room and see various alien experiments and equipment, but nothing useful,there is also a cell in the corner with a prisoner inside.")
-                print(" but we can do nothing before kiling the alien.")
-                continue
-            else:
-                hospital_basement_boss_defeated(player)
+
+        # ───────────────────────────────
+        # Leave
+        # ───────────────────────────────
         elif choice == "4":
-            print("you go back upstairs")
+            print("You retreat back upstairs.")
             hospital_inside(player)
             return
+
         else:
-            print("Invalid choice")
+            print("Invalid choice.")
+
+def finish_hospital_boss(player, xp):
+    gain_xp(player, xp)
+    print("You defeated the alien scientist.")
+
+    player["inventory"].extend([
+        "second_hospital_safe_key",
+        "alien_scientist_suit",
+        "hospital_back_door_key"
+    ])
+
+    player["has_defeated_hospital_boss"] = True
+    hospital_basement_boss_defeated(player)
+
 
 def hospital_basement_boss_defeated(player):
     print("you look around the room and see various alien experiments and equipment, but nothing useful.")
@@ -870,7 +890,7 @@ def Hospital_first_floor_left_room(player):
 def Hospital_first_floor_right_room(player):
     while True:
         print("you enter the room on the right"
-              "nothig to see")
+              "there nothig to see")
         print("1)Go back")
         print("I)Open inventory")
         choice = get_choice()   
@@ -878,6 +898,5 @@ def Hospital_first_floor_right_room(player):
             continue
         if choice == "1":
             return 
-            
-        
+
         

@@ -1,11 +1,10 @@
 import random 
 def level_up(player):
     player["level"] += 1
-    player["health"] += 5
     player["experience"] = 0
-    print(f"\nYou reached level {player['level']}!")
-    print("Health increased by 5.")
 
+    print(f"\nYou reached level {player['level']}!")
+    
     while True:
         print("\nChoose a skill to upgrade:")
         skills = list(player["skills"].keys())
@@ -19,9 +18,17 @@ def level_up(player):
             selected_skill = skills[int(choice) - 1]
             player["skills"][selected_skill] += 1
             print(f"{selected_skill} increased to {player['skills'][selected_skill]}!")
+
+            # 👇 Apply stamina effects immediately
+            if selected_skill == "stamina":
+                apply_stamina_health_bonus(player)
+                player["health"] = player["max_health"]
+                print("You feel refreshed. Health fully restored!")
+
             break
         else:
             print("Invalid choice.")
+
 
 
 
@@ -53,15 +60,16 @@ def gain_xp(player, amount):
 def xp_needed(level):
     return 20 + (level - 1) * 10
 
-def open_inventory(player, item):
+def open_inventory(player):
     while True:
-        print("/n--- Inventory ---")
+        print("\n--- Inventory ---")
 
         if not player["inventory"]:
             print("Your inventory is empty.")
         else:
             for i, inv_item in enumerate(player["inventory"], 1):
-                print(f"{i}) {item}")
+                print(f"{i}) {inv_item}")
+
 
         print("\nOptions:")
         print("1) Use item")
@@ -103,7 +111,17 @@ def use_item(player):
         player["inventory"].remove(item)
         print("You used a medkit and recovered 5 health.")
         print(f"Health: {player['health']}")
-
+    elif item == "healing salve":
+        player["health"] += 3
+        player["inventory"].remove(item)
+        print("you use a healing salve and recover 3 health")
+        print(f"Health: {player['health']}")
+    elif item == "map_to_base":
+        print(
+            "The map says: from the crossroad near Grovetown, go straight into the wasteland "
+            "until you find an old farmhouse. "
+            "The entry is hidden behind the farm at the bottom of the mountain."
+        )
     else:
         print(f"You can’t use {item} right now.")
 
@@ -116,6 +134,16 @@ def handle_global_input(choice, player):
         open_inventory(player)
         return True
     return False
+
+def apply_stamina_health_bonus(player):
+    stamina = player["skills"].get("stamina", 0)
+
+    bonus_multiplier = 1 + (stamina * 0.05)
+    player["max_health"] = int(player["base_health"] * bonus_multiplier)
+
+    if player["health"] > player["max_health"]:
+        player["health"] = player["max_health"]
+
 
 
               
