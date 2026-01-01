@@ -57,11 +57,17 @@ def new_func():
 def fight_enemy(player, enemy):
     result = combats(player, enemy)
 
-    if isinstance(result, dict) and result["result"] == "win":
+    if result["result"] == "win":
         gain_xp(player, result["xp"])
-        return True
+        return "win"
 
-    return False
+    if result["result"] == "run":
+        return "run"
+
+    if result["result"] == "lose":
+        print("Game over.")
+        exit()
+
 
 def wasteland(player):
     while True:
@@ -96,23 +102,23 @@ def wasteland(player):
                 "xp": 10
             }
 
-            result = combats(player, alien)
+            outcome = fight_enemy(player, alien)
 
-            if isinstance(result, dict) and result["result"] == "win":
-                gain_xp(player, result["xp"])
-                print("your continue your journey")
-                wasteland_cross_road(player)
-                return
-            elif result == "run":
+            if outcome == "win":
+                print("You defeated the alien and find somme coins."
+                      "you continue forward")
+                player["inventory"].extend("coin","coin","coin")
+                wasteland_2(player)
+            elif outcome == "run":
+                print("You escaped.")
                 old_bunker(player)
                 return
-            elif result == "lose":
-                exit()
+
 
         elif choice == "2":
             print("you kept your distance and observed the alien, it seemed harmless and eventually walked away.")
             print("you survived for now...")
-            wasteland_cross_road(player)
+            wasteland_2(player)
             return
         elif choice == "3":
             print("you ran away from the alien, tripping over a rock and injuring yourself, losing 1 health point.")
@@ -123,13 +129,57 @@ def wasteland(player):
         else:
             print("Invalid choice")
 
+def wasteland_2(player):
+    print("you move forward and see a body on the ground what do you do")
+    while True:
+        print("1) inspect the body")
+        print("2) move forward")
+        print("3) go back")
+        print("I) Open inventory")
+        choice = get_choice()
+
+        
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if not player.get("wasteland_2_body_looted", False):
+                if skill_check(player, "perception", 40):
+                    print("\nYou notice claw marks around the body.")
+                    gain_xp(player,10)
+
+                print("1) you inspect the body and find a note and a few coins")
+                player["inventory"].extend(["coin"] *3)
+                player["inventory"].append("wasteland_2_note")
+                print(
+                    "They’re everywhere.\n"
+                    "I don’t know when it started.\n\n"
+                    "They don’t always look alien.\n"
+                    "Sometimes they look… familiar.\n\n"
+                    "If you’re reading this,\n"
+                    "don’t trust what you see.\n"
+                    "Don’t sleep."
+                )
+                player["wasteland_2_body_looted"] = True
+            else:
+                print("you already took everything from him")
+        elif choice == "2":
+            wasteland_cross_road(player)
+            return
+        elif choice == "3": 
+            wasteland(player)
+            return
+        else:
+            print("incorect choice")
 def wasteland_cross_road(player):
     print("you arrived at a a crossroad you see and old post with two signs.")
     while True:
         print("1) follow the sign to the left 'grove_town'")
         print("2) follow the sign to the right 'hospital'")
         print("3) you dont trust signs and walk straight ahead into the wasteland")
+        print("4) go back ")
         print("I) Open inventory")
+        print("S) Save game")
+        print("L) Load game")
 
         choice = get_choice()
 
@@ -149,7 +199,10 @@ def wasteland_cross_road(player):
             print("you walk straight ahead into the wasteland")
             wasteland_3(player)
             return
-
+        elif choice == "4":
+            return
+        else:
+            print("invalid choice")
 def grove_town(player):
     print("you arrived at grove_town, nothing remains but the ruins of a police station and a few burned down houses.")
     while True:
@@ -300,6 +353,9 @@ def hospital(player):
         print("3) look through the windows")
         print("4) go back to the crossroad")
         print("I) Open inventory")
+        print("S) Save game")
+        print("L) Load game")
+
         choice = get_choice()   
 
         if handle_global_input(choice, player):
@@ -615,6 +671,9 @@ def hospital_basement(player):
         print("3) Look around the room")
         print("4) Go back upstairs")
         print("I) Open inventory")
+        print("S) Save game")
+        print("L) Load game")
+
 
         choice = get_choice()
         if handle_global_input(choice, player):
@@ -901,14 +960,34 @@ def Hospital_first_floor_left_room(player):
                 print("Invalid choice")
 def Hospital_first_floor_right_room(player):
     while True:
-        print("you enter the room on the right"
-              "there nothig to see")
-        print("1)Go back")
+        print("You enter the room on the right.\n"
+            "There is a note lying on the floor.")
+        print("1)read the note")
+        print("2)Go back")
         print("I)Open inventory")
-        choice = get_choice()   
+        print("S) Save game")
+        print("L) Load game")
+
+        choice = get_choice()  
+
         if handle_global_input(choice, player):
             continue
+
         if choice == "1":
+            if not player.get("Hospital_first_floor_right_room_note_taken", False):
+                player["inventory"].append("hospital_note_doctor")
+                player["Hospital_first_floor_right_room_note_taken"] = True
+                print("you pick up the note")
+                print(
+                    "The handwriting is shaky.\n\n"
+                    "They can’t breathe our air.\n"
+                    "That’s why they don’t stay long.\n\n"
+                    "The small ones don’t mind.\n"
+                    "They belong here now."
+                        )           
+            else:
+                print("nothing else to do here")
+        elif choice == "2":
             return 
 def wasteland_3(player):
     print(

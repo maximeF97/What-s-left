@@ -24,7 +24,7 @@ player = {
     "has_seen_alien": False,
     "bunker_items_taken": False,
     "bunker_door_unlocked": False,
-
+    "wasteland_2_body_looted": False,
     "has_seen_police_station_alien": False,
     "has_freed_police_station_prisoner": False,
     "has_taken_police_station_evidence_items": False,
@@ -43,6 +43,7 @@ player = {
     "hospital_trash_pot_check": False,
     "try_hacking_hospital_pc": False,
     "has_taken_hospital_pc_fafe": False,
+    "Hospital_first_floor_right_room_note_taken": False,
     "has_opened_hospital_back_door": False,
     "passed_wastland_3_skill_check": False, #still thinking to use or not
     "looted_the_bedroll": False,
