@@ -1,35 +1,38 @@
 {
-    "health": 13,
-    "max_health": 16,
+    "health": 15,
+    "max_health": 15,
     "base_health": 15,
-    "inventory": [
-        "rusty_knife",
-        "old_key",
-        "coin",
-        "coin",
-        "coin",
-        "coin",
-        "coin",
-        "coin",
-        "wasteland_2_note",
-        "revolver",
-        "police_station_key",
-        "hospital_safe_key",
-        "revolver_ammo",
-        "revolver_ammo",
-        "medkit"
-    ],
+    "inventory": {
+        "rusty_knife": 1,
+        "old_key": 1,
+        "coin": 6,
+        "wasteland_2_note": 1,
+        "revolver": 1,
+        "revolver_ammo": 7,
+        "police_station_key": 1,
+        "hospital_safe_key": 1,
+        "medkit": 1,
+        "grovetown_note_2": 1
+    },
     "weapon": "rusty_knife",
-    "level": 4,
-    "experience": 0,
+    "level": 3,
+    "experience": 30,
+    "equipment": {
+        "head": null,
+        "body": null,
+        "hand": null,
+        "boot": null,
+        "implant": null
+    },
     "skills": {
         "stealth": 1,
         "perception": 1,
         "scavenging": 2,
         "lockpicking": 1,
-        "intelligence": 1,
-        "stamina": 2,
-        "luck": 1
+        "intelligence": 2,
+        "stamina": 1,
+        "luck": 1,
+        "charisma": 1
     },
     "has_seen_alien": true,
     "bunker_items_taken": true,
@@ -56,5 +59,6 @@
     "Hospital_first_floor_right_room_note_taken": false,
     "has_opened_hospital_back_door": false,
     "passed_wastland_3_skill_check": false,
-    "looted_the_bedroll": false
+    "looted_the_bedroll": false,
+    "met_wasteland_stranger_near_farm": false
 }

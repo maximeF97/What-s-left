@@ -665,15 +665,15 @@ def hospital_metamorph_encounter(player):
             if "revolver" not in player["inventory"]:
                 print("You don't have a revolver.")
                 continue
-            if "revolver_ammo" not in player["inventory"]:
-                print("Click. You're out of ammo.")
-                continue
+            if not remove_item(player, "revolver_ammo", 1):
+                print("Click! You're out of ammo.")
+
             print("you sneak and shoot the chair for critical dammage whitch killed the alien metamorph")
             player["hospital_metamorph_killed"] = True
-            player["inventory"].append("healing_salve")
+            add_item(player,"healing_salve", 1)
 
             gain_xp(player, 50)
-            player["inventory"].remove("revolver_ammo")
+            
             return
         elif choice == "2":
             print("you aproach the chair and the alien metamorph attacks you!")
@@ -682,7 +682,7 @@ def hospital_metamorph_encounter(player):
 
             if result["result"] == "win":
                 gain_xp(player, result["xp"])
-                player["inventory"].append("healing_salve")
+                add_item(player, "healing_salve", 1)
                 print("You defeated the alien metamorph.")
                 player["hospital_metamorph_killed"] = True  
                 return
@@ -783,11 +783,11 @@ def finish_hospital_boss(player, xp):
     gain_xp(player, xp)
     print("You defeated the alien scientist.")
 
-    player["inventory"].extend([
-        "second_hospital_safe_key",
-        "alien_scientist_suit",
-        "hospital_back_door_key"
-    ])
+    
+    add_item(player, "second_hospital_safe_key", 1)
+    add_item(player, "alien_scientist_suit", 1)
+    add_item(player, "hospital_back_door_key", 1)
+    
 
     player["has_defeated_hospital_boss"] = True
     hospital_basement_boss_defeated(player)
@@ -808,7 +808,7 @@ def hospital_basement_boss_defeated(player):
         if choice == "1":
             if not player.get("has_help_basement_prisoner", False):
                 print("you free the prisoner from the cell, he thanks you and gives you map to a secret humain base.")
-                player["inventory"].append("map_to_base")
+                add_item(player, "map_to_base",1)
                 player["has_help_basement_prisoner"] = True
                 return
             else:
@@ -888,7 +888,7 @@ def hospital_first_floor(player):
         elif choice == "4" :
             if player.get("hospital_trash_pot_check", False):
                 print("You search through the trash and find some coins.")
-                player["inventory"].extend(["coin", "coin", "coin"])
+                add_item(player, "coin",3)
                 player["hospital_trash_pot_check"] = True
         else:
             print("Invalid choice")
@@ -986,8 +986,8 @@ def Hospital_first_floor_left_room(player):
             elif choice == "3":
                 if not player.get("has_taken_hospital_pc_safe", False):
                     print("You unlock the safe and find some ammo and a medkit.")
-                    player["inventory"].append("revolver_ammo")
-                    player["inventory"].append("medkit")
+                    add_item(player, "revolver_ammo", 3)
+                    add_item(player, "medkit", 1)
                     player["has_taken_hospital_pc_safe"] = True
                 else:
                     print("The safe is empty.")
@@ -1013,7 +1013,7 @@ def Hospital_first_floor_right_room(player):
 
         if choice == "1":
             if not player.get("Hospital_first_floor_right_room_note_taken", False):
-                player["inventory"].append("hospital_note_doctor")
+                add_item(player, "hospital_note_doctor", 1)
                 player["Hospital_first_floor_right_room_note_taken"] = True
                 print("you pick up the note")
                 print(
@@ -1072,9 +1072,9 @@ def wasteland_3(player):
                     "You dig under the bedroll and find a sharpened kitchen knife\n"
                     "and some revolver ammo."
                 )
-                player["inventory"].append("sharp_kitchen_knife")
-                player["inventory"].append("revolver_ammo")
-                player["inventory"].append("bobby_pin")
+                add_item(player, "sharp_kitchen_knife", 1)
+                add_item(player, "revolver_ammo", 1)
+                add_item(player, "bobby_pin", 1)
                 player["looted_the_bedroll"] = True
             else:
                 print("You search around but fail to find anything useful.")
@@ -1164,9 +1164,9 @@ def wastland_stranger_encounter(player):
                         "The tall ones mimic *us*."
                     )
 
-                    player["inventory"].extend(["revolver_ammo"] * 6)
-                    player["inventory"].append("cowboy_hat")
-                    player["inventory"].append("grovetown_note_1")
+                    add_item(player, "revolver_ammo", 6)
+                    add_item(player, "cowboy_hat", 1)
+                    add_item(player, "grovetown_note_1", 1)
 
                     old_farm_house(player)
                     return
@@ -1176,7 +1176,7 @@ def wastland_stranger_encounter(player):
                     return
 
             elif choice == "3":
-                return
+                wasteland_3(player)
 
             else:
                 print("Invalid choice.")
@@ -1191,7 +1191,9 @@ def wastland_stranger_encounter(player):
             return
 
 def old_farm_house(player):
+    pass
 def wastland_stranger_encounter_dialoge(player):
+    pass
 
 def wasteland_4(player):
     print("not donne yet")

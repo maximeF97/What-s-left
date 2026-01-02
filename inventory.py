@@ -71,7 +71,8 @@ def unequip_menu(player):
 def add_item(player, item, amount=1):
     inventory = player["inventory"]
     inventory[item] = inventory.get(item, 0) + amount
-    print(f"Added {amount} x {item.replace('_', ' ')}")
+    print(f"You received {amount} x {item.replace('_', ' ')}.")
+
 
 
 def remove_item(player, item, amount=1):
