@@ -35,6 +35,12 @@ WEAPONS = {
         "ammo_type": "shotgun_shells"
     }
 }
+def take_damage(player, amount):
+    reduction = player["stats"].get("damage_reduction", 0)
+    final_damage = max(0, amount - reduction)
+
+    player["health"] -= final_damage
+    print(f"You take {final_damage} damage.")
 
 # -------------------------
 # STAMINA DAMAGE REDUCTION

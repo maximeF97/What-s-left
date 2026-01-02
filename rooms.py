@@ -1,8 +1,9 @@
 from unittest import result
-from systems import use_item, gain_xp, handle_global_input, get_choice
+from systems import gain_xp, handle_global_input, get_choice
 from Player import skill_check
 from combat import combats
 import random
+from inventory import use_item, add_item,remove_item
 def old_bunker(player):
     while True:
         print(
@@ -22,10 +23,8 @@ def old_bunker(player):
         if choice == "1":
             if not player.get("bunker_items_taken", False):
                 print("You find a rusty_knife and an old key.")
-                
-                player["inventory"].append("rusty_knife")     
-                player["inventory"].append("old_key")
-                
+                add_item(player, "rusty_knife", 1)
+                add_item(player, "old_key", 1)
                 player["bunker_items_taken"] = True
                 print("Items added to your inventory.")
             else:
@@ -76,10 +75,11 @@ def wasteland(player):
         
         if not player.get("has_seen_alien", False):
             print("an small alien creature stands in the distance, looking at you with curious eyes.")
-            player["has_seen_alien"] = True
+            
         
     
         print("what do you want to do?")
+        
         print("1) approach the alien with your rusty knife")
         print("2) keep your distance and observe")
         print("3) run away")
@@ -105,9 +105,10 @@ def wasteland(player):
             outcome = fight_enemy(player, alien)
 
             if outcome == "win":
-                print("You defeated the alien and find somme coins."
+                print("You defeated the alien and find somme coins.\n"
                       "you continue forward")
-                player["inventory"].extend("coin","coin","coin")
+                add_item(player,"coin",3)
+                player["has_seen_alien"] = True
                 wasteland_2(player)
             elif outcome == "run":
                 print("You escaped.")
@@ -147,9 +148,9 @@ def wasteland_2(player):
                     print("\nYou notice claw marks around the body.")
                     gain_xp(player,10)
 
-                print("1) you inspect the body and find a note and a few coins")
-                player["inventory"].extend(["coin"] *3)
-                player["inventory"].append("wasteland_2_note")
+                print(" you inspect the body and find a note and a few coins")
+                add_item(player,"coin", 3)
+                add_item(player,"wasteland_2_note", 1)
                 print(
                     "They’re everywhere.\n"
                     "I don’t know when it started.\n\n"
@@ -209,6 +210,7 @@ def grove_town(player):
         print("1) explore the police station")
         print("2) explore the burned down houses")
         print("3) go back to the crossroad")
+        print("4) move forward")
         print("I) Open inventory")
 
         choice = get_choice()
@@ -225,6 +227,10 @@ def grove_town(player):
             print("you go back to the crossroad")
             wasteland_cross_road(player)
             return
+        elif choice =="4":
+            montain_tunel(player)
+            return
+                
         else:
             print("Invalid choice")
 
@@ -271,9 +277,9 @@ def inspect_desk(player):
         if result["result"] == "win":
             gain_xp(player, result["xp"])
             print("You defeat the alien and find supplies and the key to the police station.")
-            player["inventory"].append("revolver")
-            player["inventory"].extend(["revolver_ammo"] * 3)
-            player["inventory"].append("police_station_key")
+            add_item(player,"revolver", 1)
+            add_item(player,"revolver_ammo", 3)
+            add_item(player,"police_station_key",1)
             gain_xp(player, 15)  # bonus XP
 
         elif result["result"] == "lose":
@@ -310,7 +316,7 @@ def explore_cells(player):
             if result["result"] == "win":
                 gain_xp(player, result["xp"])
                 print("You defeated the alien prisoner and find a weid looking key.")
-                player["inventory"].append("hospital_safe_key")
+                add_item(player,"hospital_safe_key", 1)
                 gain_xp(player, 30)
                 player["has_freed_police_station_prisoner"] = True
 
@@ -330,8 +336,16 @@ def evidence_room(player):
         return
     print("your using the police station key to unlock the door")
     print("You find ammo and a medkit.")
-    player["inventory"].extend(["revolver_ammo"] * 2)
-    player["inventory"].append("medkit")
+    add_item(player,"revolver_ammo", 4)
+    add_item(player,"medkit",1)
+    add_item(player,"grovetown_note_2",1)
+    print(
+        "The humanoids don’t hunt like animals.\n"
+        "They set traps.\n"
+        "They wait.\n\n"
+        "One of them watched me eat.\n"
+        "Like it was studying how."
+    )
     player["has_unlocked_police_station_evidence_room"] = True
 
 def burned_houses(player):
@@ -400,65 +414,68 @@ def hospital(player):
             print("Invalid choice")
 
 def hospital_side_entrance(player):
-
     while True:
-        print("1) sneak past the cactus")
-        print("2) shoot the cactus with your revolver")
-        print("3) go back to the hospital entrance")
+        print("1) Sneak past the cactus")
+        print("2) Shoot the cactus with your revolver")
+        print("3) Go back to the hospital entrance")
         print("I) Open inventory")
+
         choice = get_choice()
 
         if handle_global_input(choice, player):
             continue
 
+        # 🥷 Sneak
         if choice == "1":
-            print("the paranoia of the metamorph wastelang is geting to you and  you try to sneak past the evil cactus.")
+            print(
+                "The paranoia of the metamorph wasteland gets to you.\n"
+                "You try to sneak past the suspicious cactus."
+            )
+
             if skill_check(player, "stealth", 50):
-                print("you successfully sneak past the cactus and enter the hospital through the side entrance.")
-                hospital_inside(player)
-                return
+                print("You slip past unnoticed.")
             else:
-                print("you failed to sneak past the cactus but lucky for you the castus is just a cactus...")
-                hospital_inside(player)
-                return
+                print(
+                    "Your heart races… but nothing happens.\n"
+                    "It was just a cactus."
+                )
+
+            hospital_inside(player)
+            return
+
+        # 🔫 Shoot cactus
         elif choice == "2":
             if "revolver" not in player["inventory"]:
                 print("You don't have a revolver.")
                 continue
-            if player["has_killed_cactus"]:
-                print("the cactus is already destroyed.")
-                continue
-            if "revolver_ammo" not in player["inventory"]:
-                print("Click. You're out of ammo.")
-                continue
-            
-            print("you shoot the cactus and it turn out that the evil cactus was juste a inocent plants...")
-            player["inventory"].remove("revolver_ammo")
-            cactus = {
-                "health": 1,
-                "hit_chance": 0,   # never hits
-                "damage": 0,       # no damage
-                "xp": 0            # no XP reward
-                }
 
-            result = combats(player, cactus)
-            if result["result"] == "win":
-                print("You killed the only vegetation left in the wasteland for miles...")
-                player["has_killed_cactus"] = True
-                hospital_inside(player)
-                
-                return
-            
+            if player.get("has_killed_cactus", False):
+                print("The cactus is already dead. Truly dead.")
+                continue
 
-            elif result["result"] == "lose":
-                exit()
-        
+            if not remove_item(player, "revolver_ammo", 1):
+                print("Click! You're out of ammo.")
+                continue
+
+            print(
+                "You fire a shot.\n"
+                "The cactus explodes into splinters.\n\n"
+                "…It was just a plant."
+            )
+
+            player["has_killed_cactus"] = True
+            hospital_inside(player)
+            return
+
+        # 🔙 Go back
         elif choice == "3":
-            print("you go back to the hospital entrance")
+            print("You step away from the side entrance.")
             hospital(player)
             return
+
         else:
-            print("Invalid choice")
+            print("Invalid choice.")
+
 
 def hospital_inside(player):
     while True:
@@ -500,10 +517,10 @@ def hospital_inside(player):
 
                 if "hospital_safe_key" in player["inventory"] and "second_hospital_safe_key" in player["inventory"] and "third_hospital_safe_key" in player["inventory"]:
                     print("you use the hospital safe keys to open the safe and find some medical supplies,a alien laser rifle,and a alien energy cell.")
-                    player["inventory"].append("medkit")
-                    player["inventory"].append("healing_salve")
-                    player["inventory"].append("alien_laser_rifle")
-                    player["inventory"].append("alien_energy_cell")
+                    add_item(player, "medkit",1)
+                    add_item(player, "healing_salve",1)
+                    add_item(player, "alien_laser_rifle",1)
+                    add_item(player, "alien_energy_cell",1)
                     player["has_opened_hospital_safe"] = True
                     continue
                 else:
@@ -517,7 +534,7 @@ def hospital_inside(player):
         elif choice == "4":
             if not player.get("has_hospital_left_room_been_searched", False):
                 print("you search the left there is an bobby pin on the floor and stairs going down to the basement.")
-                player["inventory"].append("bobby_pins")
+                add_item(player, "bobby_pins", 3)
                 player["has_hospital_left_room_been_searched"] = True
                 print("you pick up the bobby pins and add them to your inventory.")
                 print("you take the stairs going down to the basement.")
@@ -546,71 +563,92 @@ def hospital_inside(player):
             print("Invalid choice")
 def scavenger_room(player):
     while True:
-        if not player.get("hospital_scavenger_killed", False):
-                print("you enter the room ahead to find the remains of a scavenger, you notice some piece of his head have been altered with strange alien technology.")
-                if skill_check(player, "perception", 20):
-                    print("you see a red light blinking on the scavenger's head, indicating some sort of active alien tech.")
+        if player.get("hospital_scavenger_killed", False):
+            print("You enter the room again. The scavenger lies motionless. Whatever it was, it's dead.")
+            return
 
-                else:
-                    print("you don't notice anything unusual appart for the scavenger's head.")
+        print(
+            "You enter the room ahead to find the remains of a scavenger.\n"
+            "You notice some pieces of his head have been altered with strange alien technology."
+        )
 
-                print("1) search the body")
-                print("2) shoot the body with your revolver, just to be sure")
-                print("I) Open inventory")
-                choice = get_choice()
-                if handle_global_input(choice, player):
-                    continue
-
-                if choice == "1":
-                    print("you try to search the body but suddenly the scavenger comes back to life as a hostile alien cyborg!")
-                    cyborg_alien = {"health": 11, "hit_chance": 70, "xp": 80}
-                    result = combats(player, cyborg_alien)  
-                    if result["result"] == "win":
-                        gain_xp(player, result["xp"])
-                        print("You defeated the alien cyborg scavenger.")
-                        player["hospital_scavenger_killed"] = True
-                        player["inventory"].append("alien_implant")
-                        
-                        return
-                    elif result["result"] == "lose":    
-                        exit()
-                elif choice == "2":
-                    if "revolver" not in player["inventory"]:
-                        print("You don't have a revolver.")
-                        continue
-                    if "revolver_ammo" not in player["inventory"]:
-                        print("Click. You're out of ammo.")
-                        continue
-                    if skill_check(player, "luck", 30):
-                        player["inventory"].remove("revolver_ammo")
-                        print("you shoot the body with your revolver, just to be sure,you hit for a near fatal wound the scavenger awakens like a cyborg and attacks you!")
-                        hurt_cyborg_alien = {"health": 4, "hit_chance": 70, "xp": 80}
-                        result = combats(player, hurt_cyborg_alien)
-                        if result["result"] == "win":
-                            gain_xp(player, result["xp"])
-                            print("You defeated the alien cyborg scavenger.")
-                            player["hospital_scavenger_killed"] = True
-                            player["inventory"].append("alien_implant")
-                            return
-                        elif result["result"] == "lose":
-                            exit()
-                    else:
-                        player["inventory"].remove("revolver_ammo")
-                        print("you shoot the body with your revolver, you miss and the scavenger awakens like a cyborg and attacks you!")
-                        cyborg_alien = {"health": 11, "hit_chance": 70, "xp": 80}
-                        result = combats(player, cyborg_alien)  
-                        if result["result"] == "win":
-                            gain_xp(player, result["xp"])
-                            print("You defeated the alien cyborg scavenger.")
-                            player["hospital_scavenger_killed"] = True
-                            player["inventory"].append("alien_implant")
-                            return
-                        elif result["result"] == "lose":
-                            exit()
-                else:
-                    print("Invalid choice")            
+        if skill_check(player, "perception", 20):
+            print("You see a red light blinking on the scavenger's head, indicating active alien tech.")
         else:
-            print("you enter the room ahead to that The scavenger lies motionless. Whatever it was, it's dead.")                
+            print("You don't notice anything unusual apart from the scavenger's head.")
+
+        print("1) Search the body")
+        print("2) Shoot the body with your revolver, just to be sure")
+        print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        # --- SEARCH BODY ---
+        if choice == "1":
+            print("The scavenger suddenly reanimates as a hostile alien cyborg!")
+
+            cyborg = {
+                "health": 11,
+                "hit_chance": 70,
+                "damage": 3,
+                "xp": 80
+            }
+
+            result = combats(player, cyborg)
+            if result["result"] == "win":
+                gain_xp(player, cyborg["xp"])
+                player["hospital_scavenger_killed"] = True
+                add_item(player, "alien_implant", 1)
+                print("You defeated the alien cyborg scavenger.")
+                return
+            else:
+                exit()
+
+        # --- SHOOT BODY ---
+        elif choice == "2":
+            if player.get("weapon") != "revolver":
+                print("You don't have a revolver.")
+                continue
+
+            if not remove_item(player, "revolver_ammo", 1):
+                print("Click! You're out of ammo.")
+                continue
+
+            if skill_check(player, "luck", 17):
+                print(
+                    "You fire a precise shot. The scavenger awakens badly damaged and attacks!"
+                )
+                cyborg = {
+                    "health": 4,
+                    "hit_chance": 70,
+                    "damage": 3,
+                    "xp": 80
+                }
+            else:
+                print(
+                    "You miss! The scavenger awakens fully and attacks!"
+                )
+                cyborg = {
+                    "health": 11,
+                    "hit_chance": 70,
+                    "damage": 3,
+                    "xp": 80
+                }
+
+            result = combats(player, cyborg)
+            if result["result"] == "win":
+                gain_xp(player, cyborg["xp"])
+                player["hospital_scavenger_killed"] = True
+                add_item(player, "alien_implant", 1)
+                print("You defeated the alien cyborg scavenger.")
+                return
+            else:
+                exit()
+
+        else:
+            print("Invalid choice.")
 
 def hospital_metamorph_encounter(player):
     while True:
@@ -1048,9 +1086,121 @@ def wasteland_3(player):
         else:
             print("Invalid choice.")
 def wastland_stranger_encounter(player):
-    print("not donne yet")
-    #to do
+    
+    print(
+        "As you walk away from the camp, a silhouette appears on the horizon.\n"
+        "A tall figure. Long coat.\n"
+        "An absurdly perfect cowboy hat.\n"
+        "It’s coming straight toward you."
+    )
+
+    while True:
+        if not player.get("met_wasteland_stranger_near_farm", False):
+            print("1) Walk toward the stranger")
+            print("2) Shoot first")
+            print("3) Go back")
+            print("I) Open inventory")
+            print("S) Save game")
+            print("L) Load game")
+
+            choice = get_choice()
+
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                print(
+                    "You step forward.\n"
+                    "The stranger freezes.\n\n"
+                    "His hand moves to his gun.\n"
+                    "\"HOW DO I KNOW YOU’RE NOT ONE OF THEM?\""
+                )
+                player["met_wasteland_stranger_near_farm"] = True
+                wasteland_stranger_encounter_dialoge(player)
+                return
+
+            elif choice == "2":
+                player["met_wasteland_stranger_near_farm"] = True
+
+                if skill_check(player, "luck", 20):
+                    print(
+                        "You fire first.\n"
+                        "The shot echoes across the wasteland.\n"
+                        "The stranger got hit right in the chest."
+                    )
+                    cowboy = {
+                        "health": 6,
+                        "hit_chance": 80,
+                        "damage": 4,
+                        "xp": 10
+                    }
+                else:
+                    print(
+                        "Your shot goes wide.\n"
+                        "The stranger smiles.\n"
+                        "Then he draws."
+                    )
+                    cowboy = {
+                        "health": 16,
+                        "hit_chance": 80,
+                        "damage": 4,
+                        "xp": 10
+                    }
+
+                won = fight_enemy(player, cowboy)
+
+                if won:
+                    print(
+                        "The gunfight ends.\n"
+                        "The wasteland grows quiet again.\n\n"
+                        "You take the cowboy hat.\n"
+                        "Inside his coat, you find a note."
+                    )
+                    print("note:\n"
+                        "There are two kinds.\n"
+                        "I’m sure of it now.\n\n"
+                        "The small ones mimic shapes.\n"
+                        "Animals. Objects. Trash.\n\n"
+                        "The tall ones mimic *us*."
+                    )
+
+                    player["inventory"].extend(["revolver_ammo"] * 6)
+                    player["inventory"].append("cowboy_hat")
+                    player["inventory"].append("grovetown_note_1")
+
+                    old_farm_house(player)
+                    return
+                else:
+                    print("You barely escape with your life.")
+                    wasteland_3(player)
+                    return
+
+            elif choice == "3":
+                return
+
+            else:
+                print("Invalid choice.")
+
+        else:
+            print(
+                "You turn away from the meeting place.\n"
+                "The mountains loom ahead.\n"
+                "Whatever that was… it’s behind you now."
+            )
+            old_farm_house(player)
+            return
+
+def old_farm_house(player):
+def wastland_stranger_encounter_dialoge(player):
 
 def wasteland_4(player):
     print("not donne yet")
     # to do
+def montain_tunel(player):
+    print("you arrive at the foot of a massive montain you find a locked tunel door")
+    if("montain_tunel_key") in "inventory":
+        print("you use the key and move forward")
+    else:
+        print("the doors are locked, you need a key")
+        grove_town(player)
+        return

@@ -4,12 +4,18 @@ player = {
     "health": 10,
     "max_health": 15,
     "base_health": 15,
-    "inventory": [],
+    "inventory": {},
     "weapon": "rusty_knife",
 
     "level": 1,
     "experience": 0,
-
+    "equipment": {
+        "head": None,
+        "body": None,
+        "hand": None,
+        "boot": None,
+        "implant": None
+    },
     "skills": {
         "stealth": 1,
         "perception": 1,
@@ -17,7 +23,8 @@ player = {
         "lockpicking": 1,
         "intelligence": 1,
         "stamina": 1,
-        "luck": 1
+        "luck": 1,
+        "charisma": 1
     },
 
     # story flags
@@ -47,6 +54,7 @@ player = {
     "has_opened_hospital_back_door": False,
     "passed_wastland_3_skill_check": False, #still thinking to use or not
     "looted_the_bedroll": False,
+    "met_wasteland_stranger_near_farm": False,
 }
 
 
