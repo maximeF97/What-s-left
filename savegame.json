@@ -5,18 +5,16 @@
     "inventory": {
         "rusty_knife": 1,
         "old_key": 1,
-        "coin": 6,
+        "coin": 3,
         "wasteland_2_note": 1,
-        "revolver": 1,
-        "revolver_ammo": 7,
-        "police_station_key": 1,
         "hospital_safe_key": 1,
-        "medkit": 1,
-        "grovetown_note_2": 1
+        "revolver": 1,
+        "revolver_ammo": 3,
+        "police_station_key": 1
     },
     "weapon": "rusty_knife",
-    "level": 3,
-    "experience": 30,
+    "level": 4,
+    "experience": 0,
     "equipment": {
         "head": null,
         "body": null,
@@ -27,22 +25,22 @@
     "skills": {
         "stealth": 1,
         "perception": 1,
-        "scavenging": 2,
+        "scavenging": 3,
         "lockpicking": 1,
-        "intelligence": 2,
+        "intelligence": 1,
         "stamina": 1,
         "luck": 1,
         "charisma": 1
     },
-    "has_seen_alien": true,
+    "has_seen_alien": false,
     "bunker_items_taken": true,
     "bunker_door_unlocked": true,
     "wasteland_2_body_looted": true,
     "has_seen_police_station_alien": true,
     "has_freed_police_station_prisoner": true,
     "has_taken_police_station_evidence_items": false,
-    "has_unlocked_police_station_evidence_room": true,
-    "burned_houses_looted": true,
+    "has_unlocked_police_station_evidence_room": false,
+    "burned_houses_looted": false,
     "has_opened_hospital_safe": false,
     "has_oppened_hospital_lock": false,
     "has_killed_cactus": false,
@@ -60,5 +58,7 @@
     "has_opened_hospital_back_door": false,
     "passed_wastland_3_skill_check": false,
     "looted_the_bedroll": false,
-    "met_wasteland_stranger_near_farm": false
+    "met_wasteland_stranger_near_farm": false,
+    "has_spoken_to_stranger_near_farm": false,
+    "wasteland_stranger_near_farm_alive": false
 }

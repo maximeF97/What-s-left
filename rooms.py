@@ -4,6 +4,8 @@ from Player import skill_check
 from combat import combats
 import random
 from inventory import use_item, add_item,remove_item
+from enemis import get_enemy
+
 def old_bunker(player):
     while True:
         print(
@@ -70,66 +72,111 @@ def fight_enemy(player, enemy):
 
 def wasteland(player):
     while True:
-        print("your took you first steps into the wasteland")
-        print("everithing is desolate and quiet... when suddenly you hear a shivering noise behind you.")
-        
+        print("You take your first steps into the wasteland.")
+        print("Everything is desolate and quiet... when suddenly you hear a shivering noise behind you.")
+
         if not player.get("has_seen_alien", False):
-            print("an small alien creature stands in the distance, looking at you with curious eyes.")
-            
-        
-    
-        print("what do you want to do?")
-        
-        print("1) approach the alien with your rusty knife")
-        print("2) keep your distance and observe")
-        print("3) run away")
+            print("A small alien creature stands in the distance, watching you with curious eyes.")
+
+        print("\nWhat do you want to do?")
+        print("1) Approach the alien with your rusty knife  [Stealth / Luck]")
+        print("2) Keep your distance and observe            [Perception]")
+        print("3) Run away                                  [Stamina / Luck]")
         print("I) Open inventory")
 
         choice = get_choice()
 
-            
+        # Global inputs (I/S/L etc.)
         if handle_global_input(choice, player):
             continue
-        
+
         if choice == "1":
-            if "rusty_knife" not in player["inventory"]:
+            # Must have a weapon
+            if "rusty_knife" not in player["inventory"] and player.get("weapon") != "rusty_knife":
                 print("You have nothing to fight with.")
                 return
 
-            alien = {
-                "health": 6,
-                "hit_chance": 60,
-                "xp": 10
-            }
+            alien = {"health": 6, "hit_chance": 60, "xp": 10}
+
+            
+            try:
+                # If your systems.skill_check signature differs, adapt this call accordingly
+                if skill_check(player, "stealth", 25):
+                    print("You move silently. The alien doesn’t notice until it's too late — you strike first!")
+                    alien["health"] = max(1, alien["health"] - 2)  
+                else:
+                    print("You step forward, but the alien spots you. No advantage.")
+            except Exception:
+                # Fallback if skill_check isn't available here
+                pass
 
             outcome = fight_enemy(player, alien)
 
             if outcome == "win":
-                print("You defeated the alien and find somme coins.\n"
-                      "you continue forward")
-                add_item(player,"coin",3)
+                # Reward and progression
+                print("You defeated the alien and find some coins.")
+                # A little luck can improve the haul
+                extra = 0
+                try:
+                    if skill_check(player, "luck", difficulty=40):
+                        extra = random.randint(1, 3)
+                except Exception:
+                    # fallback using raw luck value
+                    extra = 1 if player.get("skills", {}).get("luck", 1) >= 3 and random.random() < 0.5 else 0
+
+                add_item(player, "coin", 3 + extra)
+                gain_xp(player, alien["xp"])
                 player["has_seen_alien"] = True
+                print("You continue forward...")
                 wasteland_2(player)
+                return
+
             elif outcome == "run":
                 print("You escaped.")
                 old_bunker(player)
                 return
 
-
         elif choice == "2":
-            print("you kept your distance and observed the alien, it seemed harmless and eventually walked away.")
-            print("you survived for now...")
+            # Perception check to learn more or avoid a fight
+            try:
+                if skill_check(player, "perception", 20):
+                    print("You keep your distance and observe carefully. The creature seems harmless and eventually wanders away.")
+                    print("it feel like it was studying you before leaving")
+                else:
+                    print("You watch from afar, but miss subtle details. The creature eventually leaves.")
+            except Exception:
+                print("You keep your distance and observe. The creature seems harmless and eventually walks away.")
+
+            print("You survived for now...")
+            player["has_seen_alien"] = True
             wasteland_2(player)
             return
+
         elif choice == "3":
-            print("you ran away from the alien, tripping over a rock and injuring yourself, losing 1 health point.")
-            player["health"] -= 1
-            print(f"your health is now {player['health']}")
-            print("you survived for now...")
+            # Stamina/luck can help you get away cleanly
+            clean_escape = False
+            try:
+                # Slightly easier check — running is a simpler task
+                if skill_check(player, "stamina", difficulty=40) or skill_check(player, "luck", difficulty=35):
+                    clean_escape = True
+            except Exception:
+                
+                stam = player.get("skills", {}).get("stamina", 1)
+                luck = player.get("skills", {}).get("luck", 1)
+                clean_escape = (stam + luck + random.randint(0, 3)) >= 5
+
+            if clean_escape:
+                print("You run — fast and low. You get away without a scratch.")
+            else:
+                print("You run away, but trip over a broken slab and injure yourself, losing 1 health.")
+                player["health"] = max(0, player["health"] - 1)
+                print(f"Your health is now {player['health']}")
+
+            print("You survived for now...")
             return
+
         else:
             print("Invalid choice")
-
 def wasteland_2(player):
     print("you move forward and see a body on the ground what do you do")
     while True:
@@ -1086,6 +1133,7 @@ def wasteland_3(player):
         else:
             print("Invalid choice.")
 def wastland_stranger_encounter(player):
+
     
     print(
         "As you walk away from the camp, a silhouette appears on the horizon.\n"
@@ -1116,12 +1164,12 @@ def wastland_stranger_encounter(player):
                     "\"HOW DO I KNOW YOU’RE NOT ONE OF THEM?\""
                 )
                 player["met_wasteland_stranger_near_farm"] = True
-                wasteland_stranger_encounter_dialoge(player)
+                wasteland_stranger_encounter_dialogue(player)
                 return
 
             elif choice == "2":
                 player["met_wasteland_stranger_near_farm"] = True
-
+                player["wasteland_stranger_near_farm_alive:"] = True
                 if skill_check(player, "luck", 20):
                     print(
                         "You fire first.\n"
@@ -1176,7 +1224,21 @@ def wastland_stranger_encounter(player):
                     return
 
             elif choice == "3":
-                wasteland_3(player)
+                
+                print(
+                    "You take a step back.\n"
+                    "Then another.\n\n"
+                    "The stranger doesn’t chase.\n\n"
+                    "*BANG*\n\n"
+                    "Pain explodes in your back.\n"
+                    "You collapse into the dust.\n\n"
+                    "Somewhere behind you, a voice mutters:\n"
+                    "\"Cowards don’t live long in this part.\"\n\n"
+                    "Your vision fades.\n"
+                    "GAME OVER."
+                )
+                exit()
+
 
             else:
                 print("Invalid choice.")
@@ -1191,9 +1253,177 @@ def wastland_stranger_encounter(player):
             return
 
 def old_farm_house(player):
-    pass
-def wastland_stranger_encounter_dialoge(player):
-    pass
+    print(
+        "You arrive at an old farmhouse.\n"
+        "A chilling noise echoes from inside."
+    )
+
+    while True:
+        print("\nWhat do you do?")
+        print("1) Enter the house")
+        print("2) Go back")
+
+        if "map_to_base" in player.get("inventory", {}):
+            print("3) Go behind the house to the mountain base marked on the map")
+
+        print("I) Open inventory")
+        print("S) Save game")
+        print("L) Load game")
+
+        choice = get_choice()
+
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            if not player.get("visited_old_farm_house"):
+                print("The wind pushes the door slightly open… then slams it shut.\n"
+                      "you take a deep breath and")
+                player["visited_old_farm_house"] = True
+
+            print("You step inside the farmhouse...")
+            farm_house_inside(player)
+            return
+
+        elif choice == "2":
+            return
+
+        elif choice == "3" and "map_to_base" in player.get("inventory", {}):
+            survivor_montain_base(player)
+            return
+
+        else:
+            print("Invalid choice.")
+def farm_house_inside(player):
+        
+        
+
+def wasteland_stranger_encounter_dialogue(player):
+    print(
+        "You stare down the stranger.\n"
+        "Gun in hand, both of you trying to see humanity in the other's eyes."
+    )
+
+    while True:
+        if player.get("met_wasteland_stranger_near_farm", False):
+            print("The stranger has spoken before. His grip tightens on the gun.")
+
+        print("\nWhat do you do?")
+        print("1) Try to calm things down")
+        print("2) Look for details that might prove he is an alien")
+        print("3) Say all you really want is his hat (attack)")
+        print("4) Go back")
+        print("I) Open inventory")
+
+        choice = get_choice()
+
+        if handle_global_input(choice, player):
+            continue
+
+        # ---- OPTION 1 : CHARISMA ----
+        if choice == "1":
+            if skill_check(player, "charisma", 25):
+                gain_xp(player, 10)
+
+                print(
+                    "After a long pause and many compliments about his hat, the stranger relaxes.\n"
+                    "He tells you to turn back, nothing ahead but an old farmhouse full of mutated creatures.\n"
+                    "Before leaving, he hands you a folded note.\n"
+                    "“Keep your eyes on the horizon,” he says."
+                )
+
+                add_item(player, "grovetown_note_1", 1)
+
+                print(
+                    "\nNOTE:\n"
+                    "There are two kinds.\n"
+                    "I’m sure of it now.\n\n"
+                    "The small ones mimic shapes.\n"
+                    "Animals. Objects. Trash.\n\n"
+                    "The tall ones mimic *us*."
+                )
+
+                player["met_wasteland_stranger_near_farm"] = True
+                player["wasteland_stranger_near_farm_alive"] = True
+                return
+
+            else:
+                print(
+                    "Your words fail.\n"
+                    "The stranger’s eyes narrow.\n"
+                    "His finger tightens on the trigger."
+                )
+
+                player["met_wasteland_stranger_near_farm"] = True
+                player["wasteland_stranger_near_farm_alive"] = True
+
+                cowboy = get_enemy("wasteland_cowboy")
+                won = fight_enemy(player, cowboy)
+
+                if won:
+                    loot_cowboy(player)
+                return
+
+        # ---- OPTION 2 : PERCEPTION ----
+        elif choice == "2":
+            if skill_check(player, "perception", 22):
+                gain_xp(player, 10)
+                print(
+                    "You study him closely.\n"
+                    "Nothing stands out.\n"
+                    "If he’s something else… he hides it well."
+                )
+            else:
+                print(
+                    "You try to see beneath the layers of dust and clothing.\n"
+                    "You can’t tell what he is.\n"
+                    "And that’s the worst part."
+                )
+            return
+
+        # ---- OPTION 3 : ATTACK ----
+        elif choice == "3":
+            print("The fight for the hat begins.")
+
+            player["met_wasteland_stranger_near_farm"] = True
+            player["wasteland_stranger_near_farm_alive"] = True
+
+            cowboy = get_enemy("wasteland_cowboy")
+            won = fight_enemy(player, cowboy)
+
+            if won:
+                loot_cowboy(player)
+            return
+
+        # ---- OPTION 4 : LEAVE ----
+        elif choice == "4":
+            return
+
+        else:
+            print("Invalid choice.")
+def loot_cowboy(player):
+    print(
+        "The gunfight ends.\n"
+        "The wasteland grows quiet again.\n\n"
+        "You take the cowboy hat.\n"
+        "Inside his coat, you find a note."
+    )
+
+    print(
+        "\nNOTE:\n"
+        "There are two kinds.\n"
+        "I’m sure of it now.\n\n"
+        "The small ones mimic shapes.\n"
+        "Animals. Objects. Trash.\n\n"
+        "The tall ones mimic *us*."
+    )
+
+    add_item(player, "revolver_ammo", 6)
+    add_item(player, "cowboy_hat", 1)
+    add_item(player, "grovetown_note_1", 1)
+
+
+
 
 def wasteland_4(player):
     print("not donne yet")

@@ -58,6 +58,52 @@ player = {
 }
 
 
+def apply_setup_to_player(player_dict: dict, setup: dict) -> dict:
+    """
+    Apply the dict returned by choose_name_and_stats() to the module-level player dict.
+    setup: {'name': str, 'stats': {...}} where stats include:
+      stealth, perception, scavenging, lockpicking, intelligence, stamina, luck, charisma, health, max_health
+    This function updates player_dict in-place and also returns it.
+    """
+    if not isinstance(player_dict, dict):
+        raise TypeError("player_dict must be a dict")
+
+    name = setup.get("name", "Player")
+    stats = setup.get("stats", {}) or {}
+
+    # Update skills (safe coercion, keep defaults if missing)
+    for skill in ("stealth", "perception", "scavenging", "lockpicking",
+                  "intelligence", "stamina", "luck", "charisma"):
+        player_dict.setdefault("skills", {})
+        player_dict["skills"][skill] = _coerce_int(stats.get(skill, player_dict["skills"].get(skill, 1)), 1)
+
+    # Update health derived from stamina if provided, otherwise use provided health
+    stamina = player_dict["skills"].get("stamina", 1)
+    computed_max = 15 + stamina * 10
+    # If the setup provided explicit health/max_health use them, otherwise compute from stamina
+    provided_max = stats.get("max_health")
+    provided_health = stats.get("health")
+    if provided_max is not None:
+        player_dict["max_health"] = _coerce_int(provided_max, computed_max)
+    else:
+        player_dict["max_health"] = computed_max
+
+    if provided_health is not None:
+        player_dict["health"] = _coerce_int(provided_health, player_dict["max_health"])
+    else:
+        player_dict["health"] = player_dict["max_health"]
+
+    # Keep base_health in sync (optional)
+    player_dict["base_health"] = player_dict.get("base_health", 15)
+    # store player name
+    player_dict["name"] = name
+    player_dict["player_name"] = name
+
+    # mark that player was created via setup
+    player_dict["created_via_setup"] = True
+
+    return player_dict
+
 
 
     

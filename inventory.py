@@ -73,6 +73,21 @@ def add_item(player, item, amount=1):
     inventory[item] = inventory.get(item, 0) + amount
     print(f"You received {amount} x {item.replace('_', ' ')}.")
 
+def extra_loot(player, item, amount=1):
+    inventory = player.get("inventory", {})
+    scavenging = player.get("skills", {}).get("scavenging", 0)
+
+    if scavenging >= 5:
+        inventory[item] = inventory.get(item, 0) + amount
+        print(
+            print(
+    f"scavenging Bonus!\n"
+    f"You search deeper than most would dare.\n"
+    f"Hidden beneath the filth, you find {amount} x "
+    f"{item.replace('_', ' ')}."
+)
+
+        )
 
 
 def remove_item(player, item, amount=1):
@@ -148,15 +163,16 @@ def use_item(player):
     elif item == "coin":
         print("A odly shape coin it looks like it made with scrap metal")
 
-    elif item == "wastland_field_note":
+    
+   
+#______________NOTES__________________________________________________
+    elif item == "wastland_field_note": #exemple of multy note
         if player["has_seen_small_metamorph"]:
             print("They’re not random. They’re sent ahead.")
         elif player["has_seen_humanoid_metamorph"]:
             print("The small ones obey the tall ones.")
         else:
-            print("Something is watching the roads.")
-   
-#______________NOTES__________________________________________________
+            print("Something is watching the roads.")   
     elif item == "wasteland_note_small_1": # to use
         print(
     "Saw one near the ruins.\n"
@@ -215,6 +231,9 @@ def use_item(player):
     "Weapons."
     )
     #_________KEYS_________
+    elif item == "old_key":
+        print("a worn-out key, it looks old")
+    
     elif item == "hospital_safe_key":
         print("a gelatinous key, it look alive")
     

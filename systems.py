@@ -1,6 +1,7 @@
 import random 
 from save_system import save_game, load_game
 from equipment import EQUIPMENT
+
 def level_up(player):
     player["level"] += 1
     player["experience"] = 0
@@ -69,6 +70,8 @@ def xp_needed(level):
 
 
 def get_choice():
+    #return ui.wait_for_input()
+
     choice = input("> ").lower()
     return choice
 
