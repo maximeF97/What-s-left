@@ -18,5 +18,21 @@ EQUIPMENT = {
             "A broken suit stitched from unknown materials.\n"
             "Smells faintly of antiseptic and ozone."
         )
+    },
+    "tactical_gloves": {
+        "slot": "hand",
+        "bonuses": {
+            "lockpicking": 2,
+            "scavenging": 1
+        },
+        "description": "Gloves designed for precision work and durability."
+    },
+    "weary_boots": {
+        "slot": "feet",
+        "bonuses": {
+            "stamina": 1,
+            "luck": 1
+        },
+        "description": "Worn boots that have seen better days but still offer some protection and comfort."
     }
 }

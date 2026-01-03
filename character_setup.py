@@ -120,7 +120,7 @@ def allocate_points() -> dict:
             final[stat] = base + allocations.get(stat, 0)
 
         # Compute health from stamina
-        final["max_health"] = 5 + final.get("stamina", 0) * 10
+        final["max_health"] = 5 + final.get("stamina", 0) * 5
         final["health"] = final["max_health"]
 
         # Show final results with descriptions

@@ -10,10 +10,25 @@ ENEMIES = {
     "small_alien": {
         "name": "Small Alien",
         "health": 6,
+        "description": (
+            "A small, dark insectoid alien.\n"
+            "It has sharp claws and a chitinous exoskeleton.\n"
+            "Its multifaceted eyes glint with intelligence."
+        ),
         "hit_chance": 60,
         "xp": 10
     },
-
+    "small_metamorph": {
+        "name": "Small Metamorph",
+        "description": (
+            "A small, shape-shifting creature.\n"
+            "Its form constantly shifts and changes.\n"
+            "It moves with eerie grace and unpredictability."
+        ),
+        "health": 8,
+        "hit_chance": 65,
+        "xp": 20
+},
     "alien_metamorph": {
         "name": "Alien Metamorph",
         "health": 10,
@@ -34,7 +49,7 @@ ENEMIES = {
         "hit_chance": 80,
         "xp": 100
     },
-   "altered_bat": {
+   "hell_genetically_altered_bat": {
     "name": "Altered Bat",
     "description": (
     "A genetically altered bat.\n"
@@ -42,9 +57,10 @@ ENEMIES = {
     "Too many eyes blink out of sync.\n"
     "It screams with a voice that isn’t its own."
     ),
-    "health": 6,
-    "hit_chance": 50,
-    "xp": 40
+    "health": 25,
+    "hit_chance": 66,
+    "dammage": 6,
+    "xp": 200
 }
 
 }

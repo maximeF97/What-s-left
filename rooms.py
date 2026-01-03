@@ -1,7 +1,7 @@
 from unittest import result
-from systems import gain_xp, handle_global_input, get_choice
+from systems import gain_xp, handle_global_input, get_choice, randomized_bonus_loot
 from Player import skill_check
-from combat import combats
+from combat import combats, get_current_weapon, player_attack
 import random
 from inventory import use_item, add_item,remove_item
 from enemis import get_enemy
@@ -56,22 +56,45 @@ def new_func():
     return choice
 
 def fight_enemy(player, enemy):
-    result = combats(player, enemy)
+    """
+    Handles the result of combats(player, enemy).
+    Supports two return shapes:
+      - dict: {"result": "win"|"run"|"lose", "xp": <int>}
+      - str:  "win"|"run"|"lose"  (no xp)
+    """
+    outcome = combats(player, enemy)
 
-    if result["result"] == "win":
-        gain_xp(player, result["xp"])
+    # Normalize outcome to (result, xp)
+    if isinstance(outcome, dict):
+        result = outcome.get("result")
+        xp = int(outcome.get("xp", 0)) if outcome.get("xp") is not None else 0
+    else:
+        result = outcome
+        xp = 0
+
+    if result == "win":
+        # Ensure gain_xp accepts (player, xp)
+        gain_xp(player, xp)
         return "win"
 
-    if result["result"] == "run":
+    if result == "run":
         return "run"
 
-    if result["result"] == "lose":
+    if result == "lose":
         print("Game over.")
-        exit()
+        # Prefer sys.exit over bare exit
+        import sys
+        sys.exit(0)
 
+    # Unexpected result value
+    raise ValueError(f"Unexpected combat outcome: {outcome!r}")
 
 def wasteland(player):
     while True:
+        if player.get("has_seen_alien", False):
+            print("You are back in the desolate wasteland.you feel a bit safer now that you know what to expect.")
+            wasteland_2(player) 
+            return
         print("You take your first steps into the wasteland.")
         print("Everything is desolate and quiet... when suddenly you hear a shivering noise behind you.")
 
@@ -198,6 +221,8 @@ def wasteland_2(player):
                 print(" you inspect the body and find a note and a few coins")
                 add_item(player,"coin", 3)
                 add_item(player,"wasteland_2_note", 1)
+                randomized_bonus_loot(player, {"medkit": (1,2), "healing_salve": (1,3), "bobby_pins": (2,5)})
+                
                 print(
                     "They’re everywhere.\n"
                     "I don’t know when it started.\n\n"
@@ -241,7 +266,7 @@ def wasteland_cross_road(player):
             return
         elif choice == "2":
             print("you follow the sign to the hospital")
-            hospital(player)
+            hospital_road(player)
             return
         elif choice == "3":
             print("you walk straight ahead into the wasteland")
@@ -386,7 +411,9 @@ def evidence_room(player):
     add_item(player,"revolver_ammo", 4)
     add_item(player,"medkit",1)
     add_item(player,"grovetown_note_2",1)
-    print(
+    randomized_bonus_loot(player, {"revolver_ammo": (1,2), "healing_salve": (1,3), "coin": (2,5)})
+    remove_item(player,"police_station_key", 1)
+    print("the note reads:\n\n"
         "The humanoids don’t hunt like animals.\n"
         "They set traps.\n"
         "They wait.\n\n"
@@ -402,9 +429,124 @@ def burned_houses(player):
         player["health"] += 3
         print(f"your health is now {player['health']}")
         player["burned_houses_looted"] = True
+        if skill_check(player, "scavenging", 30):
+            gain_xp(player, 10)
+            print("you find a note under the rubble")
+            add_item(player,"wasteland_note_small_1", 1)
+            print("Saw one near the ruins.\n"
+                    "Small. Fast. Curious.\n\n"
+                    "It didn’t attack.\n"
+                    "Just watched.\n"
+                    "Like an animal.\n\n")
+
     else:
         print("nothing else of interest here")
     
+def hospital_road(player):
+    print("You've been walking for a while and started to feel watched.")
+
+    player.setdefault("has_pass_hospital_road_count", 0)
+    player.setdefault("medkit_encounter_done", False)
+
+    while True:
+        player["has_pass_hospital_road_count"] += 1
+
+        if (
+            player["has_pass_hospital_road_count"] >= 3
+            and not player["medkit_encounter_done"]
+        ):
+            medkit_encounter(player)
+            player["medkit_encounter_done"] = True
+
+        print("1) keep walking to the hospital")
+        print("2) look around")
+        print("3) go back to the crossroad")
+        print("I) Open inventory")
+
+        choice = get_choice()
+
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            print("you arrive at the hospital")
+            hospital(player)
+            return
+
+        elif choice == "2":
+            if skill_check(player, "perception", 30):
+                gain_xp(player, 10)
+                player["has_seen_hospital_road_alien"] = True
+                print(
+                    "you see something staring at you from afar\n"
+                    "it quickly vanishes behind some ruins"
+                )
+            else:
+                print("you look around but see nothing unusual")
+
+        elif choice == "3":
+            wasteland_cross_road(player)
+            return
+
+        else:
+            print("Invalid choice")
+
+def medkit_encounter(player):
+    print("You see a medkit lying on the ground.")
+
+    if player.get("has_seen_hospital_road_alien", False):
+        print("You recall seeing a strange figure watching you earlier.")
+
+    while True:
+        print("1) Pick up the medkit")
+        print("2) Shoot it")
+        print("3) Leave it")
+
+        choice = get_choice()
+
+        if choice == "1":
+            print("As you reach for it, a tentacle lashes out!")
+            alien = get_enemy("small_metamorph")
+            result = fight_enemy(player, alien)
+
+        elif choice == "2":
+            weapon_name, weapon = get_current_weapon(player)
+
+            if not weapon or weapon["type"] != "ranged":
+                print("You have no ranged weapon.")
+                continue
+
+            
+
+            print("You shoot the medkit. Dark blood sprays everywhere!")
+            alien = get_enemy("small_metamorph")
+            alien["health"] -= 2
+            result = fight_enemy(player, alien)
+
+        elif choice == "3":
+            print("You leave it behind. Some things aren't worth the risk.")
+            return
+
+        else:
+            print("Invalid choice.")
+            continue
+
+        # --- Combat resolution ---
+        if result["result"] == "win":
+            gain_xp(player, result["xp"])
+            print("You defeated the creature and find some coins.")
+            add_item(player, "coin", 5)
+
+            if skill_check(player, "luck", 30):
+                print("Luck is on your side — you find extra coins.")
+                add_item(player, "coin", 3)
+
+            return
+
+        elif result["result"] == "lose":
+            exit()
+
+
 
 def hospital(player):
     print("you arrived at the hospital, the building is mostly intact but the front door is locked.")
@@ -455,7 +597,7 @@ def hospital(player):
 
         elif choice == "4":
             print("you go back to the crossroad")
-            wasteland_cross_road(player)
+            hospital_road(player)
             return
         else:
             print("Invalid choice")
@@ -492,20 +634,27 @@ def hospital_side_entrance(player):
 
         # 🔫 Shoot cactus
         elif choice == "2":
-            if "revolver" not in player["inventory"]:
-                print("You don't have a revolver.")
+            weapon_name, weapon = get_current_weapon(player)
+
+            if not weapon or weapon["type"] != "ranged":
+                print("You have no ranged weapon.")
                 continue
+            
 
             if player.get("has_killed_cactus", False):
                 print("The cactus is already dead. Truly dead.")
                 continue
+            print("You take aim at the cactus...")
 
-            if not remove_item(player, "revolver_ammo", 1):
-                print("Click! You're out of ammo.")
-                continue
+            cactus = {
+                "name": "innocent cactus",
+                "health": 1
+            }
 
+            player_attack(player, cactus)  
+                    
             print(
-                "You fire a shot.\n"
+                
                 "The cactus explodes into splinters.\n\n"
                 "…It was just a plant."
             )
@@ -610,7 +759,7 @@ def hospital_inside(player):
             print("Invalid choice")
 def scavenger_room(player):
     while True:
-        if player.get("hospital_scavenger_killed", False):
+        if not player.get("hospital_scavenger_killed", False):
             print("You enter the room again. The scavenger lies motionless. Whatever it was, it's dead.")
             return
 
@@ -920,6 +1069,7 @@ def hospital_first_floor(player):
         print("2)Go to the room and the right")
         print("3)Inspect the flower pot")
         print("4)Inspect the trash can")
+        print("5)Go back downstairs")
         print("I)Open inventory")
         choice = get_choice()   
         if handle_global_input(choice, player):
@@ -933,17 +1083,23 @@ def hospital_first_floor(player):
         elif choice == "3":
             Hospital_flower_pot(player)
         elif choice == "4" :
-            if player.get("hospital_trash_pot_check", False):
+            if not player.get("hospital_trash_pot_check", False):
                 print("You search through the trash and find some coins.")
                 add_item(player, "coin",3)
                 player["hospital_trash_pot_check"] = True
+            else:
+                print("The trash can is empty.")
+        elif choice == "5":
+            print("you go back downstairs")
+            hospital_inside(player)
+            return
         else:
             print("Invalid choice")
                           
 def Hospital_flower_pot(player):
 
     while True:
-        if player.get("hospital_flower_pot_checked", False):
+        if not player.get("hospital_flower_pot_checked", False):
             if skill_check(player, "perception", 30):
                 print("Something feels off about a neat little flower pot in the middle of an alien-infested hospital.")
                 print("3) Shoot the flower!")
@@ -1004,7 +1160,8 @@ def Hospital_first_floor_left_room(player):
             print("1) Read first message")
             print("2) Read second message")
             print("3) Unlock the desk safe")
-            print("4) Go back")
+            print("4) Read third message")
+            print("5) Go back")
             print("I) Open inventory")
 
             choice = get_choice()
@@ -1038,14 +1195,25 @@ def Hospital_first_floor_left_room(player):
                     player["has_taken_hospital_pc_safe"] = True
                 else:
                     print("The safe is empty.")
-
             elif choice == "4":
+                print(
+                    "From: Dr John Fry\n"
+                    "To: Millie\n"
+                    "03/01/2000\n\n"
+                    "Millie, I don't know how much longer I can hold out. "
+                    "The creatures are everywhere now. They change shape, "
+                    "mimicking humans. I barely escaped an attack today. "
+                    "If you get this, stay away from the hospital."
+                )
+            elif choice == "5":
                 return
             else:
                 print("Invalid choice")
 def Hospital_first_floor_right_room(player):
     while True:
-        print("You enter the room on the right.\n"
+        print("You enter the room on the right.\n")
+        if not player.get("Hospital_first_floor_right_room_note_taken", False):
+            print(
             "There is a note lying on the floor.")
         print("1)read the note")
         print("2)Go back")
@@ -1252,10 +1420,11 @@ def wastland_stranger_encounter(player):
             old_farm_house(player)
             return
 
+
 def old_farm_house(player):
     print(
         "You arrive at an old farmhouse.\n"
-        "A chilling noise echoes from inside."
+        "A cold metallic echo carries from inside, like the house is breathing."
     )
 
     while True:
@@ -1264,7 +1433,7 @@ def old_farm_house(player):
         print("2) Go back")
 
         if "map_to_base" in player.get("inventory", {}):
-            print("3) Go behind the house to the mountain base marked on the map")
+            print("3) Follow the map behind the house toward the mountain base")
 
         print("I) Open inventory")
         print("S) Save game")
@@ -1277,8 +1446,8 @@ def old_farm_house(player):
 
         if choice == "1":
             if not player.get("visited_old_farm_house"):
-                print("The wind pushes the door slightly open… then slams it shut.\n"
-                      "you take a deep breath and")
+                print("The wind nudges the door open… then slams it.\n"
+                      "You steady your breath and push forward.")
                 player["visited_old_farm_house"] = True
 
             print("You step inside the farmhouse...")
@@ -1289,15 +1458,422 @@ def old_farm_house(player):
             return
 
         elif choice == "3" and "map_to_base" in player.get("inventory", {}):
-            survivor_montain_base(player)
+            # Make sure this function exists; the name looks like a typo.
+            try:
+                survivor_montain_base(player)  # or survivor_mountain_base(player)
+            except NameError:
+                print("The path to the mountain base is blocked — you’ll need to find another route.")
             return
 
         else:
             print("Invalid choice.")
-def farm_house_inside(player):
-        
-        
 
+def farm_house_inside(player):
+    print("You enter the old farmhouse. A dark living room yawns ahead; furniture slumps under a skin of dust.")
+    if skill_check(player, "perception", 30):
+        print("A low growl filters down from upstairs.Better be careful.")
+    while True:
+        print("\n1) Go upstairs")
+        print("2) Go to the kitchen")
+        print("3) Go to the living room")
+        print("4) Go back outside")
+        print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            print("You climb. The hallway is a black throat leading to the attic.")
+            farm_house_upstairs(player)
+        elif choice == "2":
+            print("You step into the kitchen. Old appliances sit in silence.")
+            farm_house_kitchen(player)
+        elif choice == "3":
+            if not player.get("farm_house_living_room_unlocked", False):
+                print("You reach a locked door. Through the glass, a shotgun waits on the mantle.")
+                if skill_check(player, "lockpicking", 40):
+                    print("You tease the tumblers. The lock yields. The living room welcomes you with dust.")
+                    player["farm_house_living_room_unlocked"] = True
+                    farm_house_living_room(player)
+                    return
+                if player.get("inventory", {}).get("old_farm_house_living_room_key", 0) > 0:
+                    print("You use the living room key. The door opens with a tired click.")
+                    player["farm_house_living_room_unlocked"] = True
+                    # Remove one key from inventory safely
+                    remove_item(player, "old_farm_house_living_room_key", 1)
+                    farm_house_living_room(player)
+                    return
+                print("The door is stubborn — it will not open.")
+            else:
+                print("You enter the living room.")
+                farm_house_living_room(player)
+        elif choice == "4":
+            print("You step back out into the yard.")
+            return
+        else:
+            print("Invalid choice")
+
+def farm_house_living_room(player):
+    while True:
+        print("The living room is dark, the air thick with dust and a faint smell of metal.")
+        print("1) Examine the room")
+        print("2) Go back to the kitchen")
+        print("3) Go back outside")
+        print("I) Open inventory")
+        print("S) Save game")
+        print("L) Load game")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if not player.get("farm_house_living_room_searched", False):
+                print("You lift the shotgun from the mantle. Underneath: shells and a pair of tactical gloves.")
+                add_item(player, "shotgun", 1)
+                add_item(player, "shotgun_shells", 5)  
+                add_item(player, "tactical_gloves", 1)
+                add_item(player, "third_hospital_safe_key", 1)
+                player["farm_house_living_room_searched"] = True
+            else:
+                print("Whatever mattered here has already been taken.")
+        elif choice == "2":
+            print("You return to the kitchen.")
+            return
+        elif choice == "3":
+            print("You step back outside.")
+            return
+        else:
+            print("Invalid choice")
+
+def farm_house_upstairs(player):
+    while True:
+        print("Upstairs lies mostly in ruins. A dried corpse rests against the wall. Stairs vanish into the attic.")
+        print("1) Examine the corpse")
+        print("2) Go to the attic")
+        print("3) Go back downstairs")
+        print("I) Open inventory")
+        print("S) Save game")
+        print("L) Load game")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if not player.get("farm_house_upstairs_corpse_searched", False):
+                print("You search the corpse a massive claw mark rest on his chest \n"
+                       "and find some coins and a folded note.")
+                add_item(player, "coin", 10)
+                add_item(player, "farmer_note", 1)
+                print("\nThe note reads:\n")
+                print(
+                    "A small, bat‑shaped thing started haunting the farm.\n"
+                    "It perches on the barn roof and watches. It doesn’t blink.\n\n"
+                    "It’s growing. Every night, taller—now nearly twice my size,\n"
+                    "bones shifting like a bad thought. The moon shines through its wings,\n"
+                    "but the shadows bend the wrong way.\n\n"
+                    "It isn’t aggressive, not yet. But it looks at me like it’s practicing.\n\n"
+                    "Tonight I dropped the metal sheets. The noise made it scream without sound—\n"
+                    "and the attic answered. It folded itself through the rafters like smoke.\n\n"
+                    "For three nights, something moves above my room, counting the floorboards,\n"
+                    "learning the house by heart.\n\n"
+                    "I have to get rid of it before the farm forgets it ever belonged to me."
+                )
+                # If you have a helper like randomized_bonus_loot, you can use it; otherwise add items directly:
+                add_item(player, "revolver_ammo", random.randint(1, 2))
+                add_item(player, "shotgun_shells", random.randint(1, 2))
+                add_item(player, "healing_salve", 1)
+                player["farm_house_upstairs_corpse_searched"] = True
+            else:
+                print("The poor soul has nothing else of value.")
+        elif choice == "2":
+            print("You climb toward the attic. The air grows thin.")
+            farm_house_attic(player)
+        elif choice == "3":
+            print("You go back downstairs to the living room.")
+            return
+        else:
+            print("Invalid choice")
+
+def farm_house_attic(player):
+    def build_beast(hp_bonus=0):
+      
+        if callable(get_enemy):
+            try:
+                beast = get_enemy("hell_genetically_altered_bat")
+            except Exception:
+                beast = {"name": "hell_genetically_altered_bat", "health": 18, "hit_chance": 70, "xp": 100}
+        else:
+            beast = {"name": "hell_genetically_altered_bat", "health": 18, "hit_chance": 70, "xp": 100}
+        beast["health"] = max(1, int(beast.get("health", 18)) + int(hp_bonus))
+        beast.setdefault("hit_chance", 70)
+        beast.setdefault("xp", 100)
+        return beast
+
+    def resolve_outcome(outcome, beast):
+        """
+        Normalize combats outcome and apply side effects (xp, flags).
+        Returns True if room flow should continue, False to return downstairs/end.
+        """
+        if isinstance(outcome, dict):
+            result = outcome.get("result")
+            xp = int(outcome.get("xp", 0) or 0)
+        else:
+            result = outcome
+            xp = 0
+
+        if result == "win":
+            player["beast_in_farm_house_defeated"] = True
+            if xp > 0:
+                gain_xp(player, xp)
+            attic_beast_loot(player)
+            # After winning, show the post-beast attic and exit
+            print("The attic is finally quiet. The dust finally settles.")
+            attic_after_beast_defeated(player)
+            return False
+        elif result == "run":
+            print("You flee back down the ladder.")
+            return False
+        elif result == "lose":
+            print("You have been defeated.")
+            import sys
+            sys.exit(0)
+        else:
+            # Unexpected result: continue loop safely
+            print(f"Unexpected combat outcome: {outcome!r}")
+            return True
+
+    while True:
+        print("You enter the attic. You see shadows dancing among the beams and a legion of eyes watching you.")
+
+        # If the beast was woken earlier and not defeated yet, it attacks immediately with a challenge bump
+        if player.get("beast_in_farm_house_woken_up", False) and not player.get("beast_in_farm_house_defeated", False):
+            print("The beast is awake.\nIts anger shakes the rafters. It unfolds and charges!")
+            beast = build_beast(hp_bonus=10)
+            outcome = combats(player, beast)
+            if not resolve_outcome(outcome, beast):
+                return  # win/run/lose handled
+
+        # If not woken and not defeated, present options
+        if not player.get("beast_in_farm_house_defeated", False) and not player.get("beast_in_farm_house_woken_up", False):
+            print("\n1) Prepare to fight the beast")
+            print("2) Try to sneak attack the beast")
+            print("3) Go back downstairs")
+            print("I) Open inventory")
+
+            choice = get_choice().strip().lower()
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                player["beast_in_farm_house_woken_up"] = True
+                print("You brace yourself for the beast's attack!")
+                beast = build_beast()
+                outcome = combats(player, beast)
+                if not resolve_outcome(outcome, beast):
+                    return
+
+            elif choice == "2":
+                print("You try to become the dark. The beast sees you with too many eyes.")
+                try:
+                    # Use a stealth check; success gives you a damage edge
+                    if skill_check(player, "stealth", 50):
+                        print("You catch it off guard and draw blood before it screams.")
+                        beast = build_beast()
+                        beast["health"] = max(1, beast["health"] - 5)
+                    else:
+                        print("You fail to disappear; its many eyes lock onto you.")
+                        beast = build_beast()
+                except Exception:
+                    # Fallback if skill_check errors
+                    beast = build_beast()
+
+                outcome = combats(player, beast)
+                if not resolve_outcome(outcome, beast):
+                    return
+
+            elif choice == "3":
+                print("You back away, the attic swallowing your footprints.")
+                return
+            else:
+                print("Invalid choice")
+                continue
+
+        # Already defeated: show post-beast state and exit
+        elif player.get("beast_in_farm_house_defeated", False):
+            print("The attic is finally quiet. The dust finally settles.")
+            attic_after_beast_defeated(player)
+            return
+
+        # Any other state: go to post-beast flow as a safe fallback
+        else:
+            attic_after_beast_defeated(player)
+            return
+
+def attic_beast_loot(player):
+    gain_xp(player, 100)
+    print("You deliver the final blow. A scream threads the beams and then comes apart.")
+    player["beast_in_farm_house_defeated"] = True
+    add_item(player, "sharp_wing_claw", 1)
+    attic_after_beast_defeated(player)
+    return
+
+def attic_after_beast_defeated(player):
+    while True:
+        print("The bat-thing lies still, but its many eyes feel like stains.")
+        print("1) Search the attic")
+        print("2) Go back downstairs")
+        print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if not player.get("farm_house_attic_searched", False):
+                print("You search the attic and find shells, a medkit, a key\n" 
+                      "and some weary boots on the feet of one of the many corpses.")
+                add_item(player, "shotgun_shells", 3)
+                add_item(player, "medkit", 1)
+                add_item(player, "weary_boots", 1)
+                add_item(player, "old_farm_house_living_room_key", 1)
+                player["farm_house_attic_searched"] = True
+            else:
+                print("Nothing else whispers to you here.")
+        elif choice == "2":
+            print("You go back downstairs.")
+            return
+        else:
+            print("Invalid choice")
+
+def farm_house_kitchen(player):
+    while True:
+        print("The kitchen smells like old metal and cold dust.")
+        print("1) Search the fridge")
+        print("2) Search the oven")
+        print("3) Examine the counter")
+        print("4) Go back to the living room")
+        print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if not player.get("farm_house_fridge_searched", False):
+                print("You search the fridge and find canned food and a strange fruit with creeping veins.")
+                add_item(player, "canned_food", 2)
+                add_item(player, "weird_fruit", 1)
+                player["farm_house_fridge_searched"] = True
+            else:
+                print("The fridge is empty.")
+        elif choice == "2":
+            if not player.get("farm_house_oven_searched", False):
+                print("You search the oven and find revolver rounds and shotgun shells.")
+                add_item(player, "revolver_ammo", 2)
+                add_item(player, "shotgun_shells", 2)
+                if skill_check(player, "scavenging", 30):
+                    print("Behind the oven’s back, a taped box, someone didn’t want this found.")
+                    add_item(player, "coin", 15)
+                player["farm_house_oven_searched"] = True
+            else:
+                print("The oven is empty.")
+        elif choice == "3":
+            if not player.get("farm_house_counter_searched", False):
+                print("Two identical toasters sit side by side. One of them feels wrong.")
+                toaster_check(player)
+                return
+            else:
+                print("Nothing else to do here.")
+        elif choice == "4":
+            return
+        else:
+            print("Invalid choice")
+
+def toaster_check(player):
+    if skill_check(player, "perception", 25):
+        print("On the right toaster: a faint smell of decay emanates.")
+    print("1) Inspect the toaster on the right")
+    print("2) Inspect the toaster on the left")
+    print("3) Ignore it and go back")
+    print("I) Open inventory")
+    choice = get_choice()
+    if handle_global_input(choice, player):
+        return
+    if choice == "1":
+        right_toaster(player)
+    elif choice == "2":
+        left_toaster(player)
+    elif choice == "3":
+        return
+    else:
+        print("Invalid choice")
+
+def right_toaster(player):
+    print("You inspect the toaster on the right.")
+
+    if player.get("toaster_metamorph_dead", False):
+        print("The toaster is split open. Whatever nested inside is dead.")
+        return
+
+    while True:
+        print("1) Stab the toaster")
+        print("2) Shoot the toaster")
+        print("3) Go back")
+        print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            print("You plunge your knife in. Something bleeds.")
+            # Use an inline enemy if get_enemy/fight_enemy aren’t available:
+            alien = {"name": "small_metamorph", "health": 6, "hit_chance": 60, "xp": 50}
+            combats(player, alien)
+            if player["health"] > 0 and alien["health"] <= 0:
+                player["toaster_metamorph_dead"] = True
+                gain_xp(player, 50)
+                add_item(player, "healing_salve", 1)
+                return
+            else:
+                print("You collapse. The house swallows the scream.")
+                return
+
+        elif choice == "2":
+            # Basic ranged check: do you have any gun and its ammo?
+            possible_guns = [
+                ("revolver", "revolver_ammo"),
+                ("shotgun", "shotgun_shells"),
+                ("alien_laser_rifle", "alien_energy_cell"),
+            ]
+            have_ranged = False
+            for gun, ammo in possible_guns:
+                if player.get("inventory", {}).get(gun, 0) and player.get("inventory", {}).get(ammo, 0):
+                    have_ranged = True
+                    break
+
+            if not have_ranged:
+                print("You have no loaded ranged weapon.")
+                continue
+
+            print("You fire. The toaster EXPLODES. Dark matter paints the walls.")
+            if not player.get("beast_in_farm_house_defeated", False):
+                print("A blood-chilling scream answers from the attic. Something woke up.")
+                player["beast_in_farm_house_woken_up"] = True
+
+            alien = {"name": "small_metamorph", "health": 6, "hit_chance": 60, "xp": 50}
+            combats(player, alien)
+            if player["health"] > 0 and alien["health"] <= 0:
+                player["toaster_metamorph_dead"] = True
+                gain_xp(player, 50)
+                add_item(player, "healing_salve", 1)
+                return
+            else:
+                print("You collapse. The house swallows the scream.")
+                return
+
+        elif choice == "3":
+            return
+
+        else:
+            print("Invalid choice")
+def left_toaster(player):
+    print("You inspect the toaster on the left. It looks normal.")
+    print("After a moment, you decide to leave it alone.")  
+    return
 def wasteland_stranger_encounter_dialogue(player):
     print(
         "You stare down the stranger.\n"
@@ -1345,6 +1921,7 @@ def wasteland_stranger_encounter_dialogue(player):
 
                 player["met_wasteland_stranger_near_farm"] = True
                 player["wasteland_stranger_near_farm_alive"] = True
+                old_farm_house(player)
                 return
 
             else:
@@ -1393,6 +1970,7 @@ def wasteland_stranger_encounter_dialogue(player):
 
             if won:
                 loot_cowboy(player)
+                old_farm_house(player)
             return
 
         # ---- OPTION 4 : LEAVE ----

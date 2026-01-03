@@ -55,9 +55,29 @@ player = {
     "passed_wastland_3_skill_check": False, #still thinking to use or not
     "looted_the_bedroll": False,
     "met_wasteland_stranger_near_farm": False,
+    "has_pass_hospital_road_count": 0,
+    "has_seen_hospital_road_alien": False,
+    "farm_house_living_room_unlocked": False,
+    "farm_house_fridge_searched": False,
+    "farm_house_oven_searched": False,
+    "farm_house_counter_searched": False,
+    "toaster_metamorph_dead": False,
+    "beast_in_farm_house_defeated": False,
+    "beast_in_farm_house_woken_up": False,
+    "farm_house_upstairs_corpse_searched" : False,
+    "farm_house_attic_searched": False,
+    
+    "farm_house_leaving_room_searched": False,
 }
 
-
+def _coerce_int(value, default):
+    """
+    Safely convert value to int; if conversion fails, return default.
+    """
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return int(default)
 def apply_setup_to_player(player_dict: dict, setup: dict) -> dict:
     """
     Apply the dict returned by choose_name_and_stats() to the module-level player dict.
