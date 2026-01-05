@@ -3,7 +3,7 @@ from systems import gain_xp, handle_global_input, get_choice, randomized_bonus_l
 from Player import skill_check
 from combat import combats, get_current_weapon, player_attack
 import random
-from inventory import use_item, add_item,remove_item
+from inventory import use_item, add_item,remove_item,ITEMS
 from enemis import get_enemy
 from text_effect import slow_print_char, suspense_print,slow_print_word
 
@@ -1492,7 +1492,8 @@ def survivor_montain_base(player):
 def survivor_mountain_base_inside(player):
     """
     Mountain base interior.
-    The base feels safe at first… but something is wrong.
+    It feels safer than the outside.
+    That doesn’t mean it feels safe.
     """
     player["scene"] = "MountainBaseInside"
 
@@ -1503,43 +1504,48 @@ def survivor_mountain_base_inside(player):
     if count == 3:
         suspense_print(
             "You step into the mountain base.\n"
-            "The gates close behind you with a heavy metallic thud.\n\n"
-            "Someone is watching you.\n\n"
-            "John — the prisoner you saved — stands near the wall.\n"
-            "He raises a hand slowly, as if unsure whether you are really there.\n\n"
-            "\"Hey…\" he says. \"I was hoping you'd come back.\""
+            "The heavy gates grind shut behind you.\n\n"
+            "For a moment, no one speaks.\n\n"
+            "Then you see John — the prisoner you saved.\n"
+            "He stands against the stone wall, thinner than before.\n"
+            "His eyes lock onto yours.\n\n"
+            "He raises a hand slowly.\n\n"
+            "\"I was hoping it was really you,\" he says.\n"
+            "\"I wasn’t sure anymore.\""
         )
         john_prisoner_dialogue(player)
         return
 
-    # --- 7th visit: Survivor incident ---
-    if count == 7:
+    # --- 7th visit: survivor incident ---
+    if count >= 7 and not player.get("has_completed_leader_quest", False):
         suspense_print(
-            "As you enter the base, shouting echoes through the tunnels.\n\n"
-            "Two survivors stand in a narrow corridor, guns raised.\n"
-            "Their hands are shaking.\n\n"
-            "\"He changed,\" one of them screams. \"I SAW HIS EYES.\"\n"
-            "\"You're lying,\" the other begs. \"Please—\"\n\n"
-            "A gunshot cracks through the base.\n\n"
-            "The body hits the ground.\n"
-            "Red blood spills across the concrete floor.\n\n"
-            "No alien.\n"
+            "Shouting echoes through the tunnels as you enter.\n\n"
+            "Two survivors face each other in a narrow corridor.\n"
+            "Both are armed.\n"
+            "Both are shaking.\n\n"
+            "\"He changed,\" one screams. \"I SAW HIS EYES.\"\n"
+            "\"You're wrong,\" the other pleads. \"Please—\"\n\n"
+            "The gunshot is deafening.\n\n"
+            "The body collapses.\n"
+            "Blood spreads across the concrete.\n\n"
+            "Nothing transforms.\n"
+            "Nothing reveals itself.\n\n"
             "Just a dead man.\n\n"
-            "The base falls silent.\n"
-            "Everyone looks at you."
+            "The base goes silent.\n"
+            "The leader slowly turns to look at you."
         )
         leader_second_quest(player)
         return
 
-    # --- Default base description ---
+    # --- Default description ---
     suspense_print(
         "You enter the mountain base.\n\n"
-        "The air is cold. Too cold.\n"
-        "Voices echo strangely through the tunnels, distorted by the stone.\n\n"
-        "Survivors move with purpose, but no one lingers.\n"
-        "Some avert their eyes as you pass.\n\n"
-        "This place is safe.\n"
-        "…That’s what they keep telling themselves."
+        "The air is cold and stale.\n"
+        "The stone walls swallow sound, twisting every voice.\n\n"
+        "Survivors move quickly, avoiding eye contact.\n"
+        "No one stays still for long.\n\n"
+        "This place is safer than the outside.\n"
+        "That doesn’t mean it feels safe."
     )
 
     while True:
@@ -1547,7 +1553,7 @@ def survivor_mountain_base_inside(player):
         suspense_print("1) Speak to the leader")
         suspense_print("2) Walk through the base")
         suspense_print("3) Visit the merchant")
-        suspense_print("4) Leave and return to the farmhouse")
+        suspense_print("4) Leave the base")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -1567,7 +1573,7 @@ def survivor_mountain_base_inside(player):
                     "You approach the leader.\n"
                     "She smiles warmly.\n\n"
                     "\"Thank you for retrieving the radio device,\" she says.\n"
-                    "\"With this, we can finally contact other survivor groups.\"\n\n"
+                    "\"With this we have a chance to stop the metamorph infiltration.\"\n\n"
                     "\"You’ve done a great service for all of us.\""
                 )
                 continue
@@ -1628,7 +1634,7 @@ def survivor_mountain_base_inside(player):
             suspense_print("Invalid choice.")
 def survivor_base_merchant(player):
     while True:
-        suspense_print("\ntell me what you need, stranger?")
+        suspense_print("\nThe merchant watches you carefully.")
         suspense_print("1) Buy items")
         suspense_print("2) Sell items")
         suspense_print("3) Leave")
@@ -1638,168 +1644,65 @@ def survivor_base_merchant(player):
         if handle_global_input(choice, player):
             continue
 
-        if choice == "1":
-            suspense_print(
-                "The merchant shows you his wares:\n"
-                "1) Shotgun shells - 5 coins each\n"
-                "2) Medkit - 15 coins each\n"
-                "3) Healing salve - 10 coins each\n"
-                "4) Shielded gloves - 50 coins each\n"
-                "5) Magnum - 100 coins each\n"
-                "6) magnum ammo - 20 coins each\n"
-                "7) Leave"
-            )
-            item_choice = get_choice()
-            if item_choice == "1":
-                if remove_item(player, "coin", 5):
-                    add_item(player, "shotgun_shells", 1)
-                    suspense_print("You bought shotgun shells.")
-                else:
-                    suspense_print("Not enough coins.")
-            elif item_choice == "2":
-                if remove_item(player, "coin", 15):
-                    add_item(player, "medkit", 1)
-                    suspense_print("You bought a medkit.")
-                else:
-                    suspense_print("Not enough coins.")
-            elif item_choice == "3":
-                if remove_item(player, "coin", 10):
-                    add_item(player, "healing_salve", 1)
-                    suspense_print("You bought healing salve.")
-                else:
-                    suspense_print("Not enough coins.")
-            elif item_choice == "4":
-                if remove_item(player, "coin", 50):
-                    add_item(player, "shielded_gloves", 1)
-                    suspense_print("You bought shielded gloves.")
-                else:
-                    suspense_print("Not enough coins.")
-            elif item_choice == "5":
-                if remove_item(player, "coin", 150):
-                    add_item(player, "magnum", 1)
-                    suspense_print("You bought a magnum.")
-                else:
-                    suspense_print("Not enough coins.")
-            elif item_choice == "6":
-                if remove_item(player, "coin", 20):
-                    add_item(player, "magnum_ammo", 1)
-                    suspense_print("You bought magnum ammo.")
-                else:
-                    suspense_print("Not enough coins.")  
-            elif item_choice == "7":
+        # --- SELL ---
+        if choice == "2":
+            sellable = [
+                item for item in player["inventory"]
+                if item in ITEMS and ITEMS[item].get("sell")
+            ]
+
+            if not sellable:
+                suspense_print("You have nothing worth trading.")
                 continue
 
-        elif choice == "2":
-            suspense_print(
-                "What would you like to sell?\n"
-                "1) revolver_ammo - 1 coin\n"
-                "2) shotgun_shells - 2 coins\n"
-                "3) magnum_ammo - 3 coins\n" 
-                "4) rifle_ammo - 5 coins\n"
-                "4) alien_energy_cell - 6 coins\n"
-                "5) alien_scientist_suit - 20 coins\n"
-                "6) cowboy_hat - 15 coins\n"
-                "7) tactical_gloves - 10 coins\n"
-                "8) shielded_jacket - 20 coins\n"
-                "9) weary_boots - 10 coins\n"
-                "10) medkit - 5 coins\n"
-                "11) healing_salve - 3 coins\n"
-                "12) Leave"    
-            )
+            suspense_print("\nWhat will you sell?")
+            for i, item in enumerate(sellable, start=1):
+                value = ITEMS[item]["sell"]
+                name = ITEMS[item]["name"]
+                suspense_print(f"{i}) {name} - {value} coins")
+
+            suspense_print(f"{len(sellable)+1}) Leave")
+
             sell_choice = get_choice()
-            if sell_choice == "1":
-                if remove_item(player, "revolver_ammo", 1):
-                    add_item(player, "coin", 1)
-                    suspense_print("You sold revolver ammo.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "2":
-                if remove_item(player, "shotgun_shells", 1):
-                    add_item(player, "coin", 2)
-                    suspense_print("You sold shotgun shells.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "3":
-                if remove_item(player, "magnum_ammo", 1):
-                    add_item(player, "coin", 3)
-                    suspense_print("You sold magnum ammo.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "4":  
-                if remove_item(player, "rifle_ammo", 1):
-                    add_item(player, "coin", 5)
-                    suspense_print("You sold rifle ammo.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "5":  
-                if remove_item(player, "alien_energy_cell", 1):
-                    add_item(player, "coin", 6)
-                    suspense_print("You sold alien energy cell.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "6":  
-                if remove_item(player, "alien_scientist_suit", 1):
-                    add_item(player, "coin", 20)
-                    suspense_print("You sold alien scientist suit.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "7":  
-                if remove_item(player, "cowboy_hat", 1):
-                    add_item(player, "coin", 15)
-                    suspense_print("You sold cowboy hat.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "8":  
-                if remove_item(player, "tactical_gloves", 1):
-                    add_item(player, "coin", 10)
-                    suspense_print("You sold tactical gloves.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "9":  
-                if remove_item(player, "shielded_jacket", 1):
-                    add_item(player, "coin", 20)
-                    suspense_print("You sold shielded jacket.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "10":  
-                if remove_item(player, "medkit", 1):
-                    add_item(player, "coin", 5)
-                    suspense_print("You sold medkit.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "11":  
-                if remove_item(player, "healing_salve", 1):
-                    add_item(player, "coin", 3)
-                    suspense_print("You sold healing salve.")
-                else:
-                    suspense_print("You don't have that item.")
-            elif sell_choice == "12":  
-                continue
-        elif choice == "3":
-            suspense_print("You leave the merchant.")
-            return
-        else:
-            suspense_print("Invalid choice.")
+
+            if sell_choice.isdigit():
+                idx = int(sell_choice) - 1
+                if 0 <= idx < len(sellable):
+                    item = sellable[idx]
+                    if remove_item(player, item, 1):
+                        add_item(player, "coin", ITEMS[item]["sell"])
+                        suspense_print(f"You sell the {ITEMS[item]['name']}.")
+            continue
+
 def john_prisoner_dialogue(player):
     suspense_print(
-        "John approaches you cautiously.\n"
-        "\"I owe you my life,\" he says. \"Thank you.\"\n\n"
-        "\"But… something’s wrong here.\"\n"
-        "\"People are changing.\"\n"
-        "\"I saw it happen to one of the guards.\"\n\n"
-        "\"Please, be careful.\""
-        "Ho and take this for saving me. i snached it from the alien scientist lab before they took me away.\""
+        "John keeps his voice low.\n\n"
+        "\"Thank you… for getting me out,\" he says.\n"
+        "\"But listen to me carefully.\"\n\n"
+        "\"People here aren’t the same as when I arrived.\"\n"
+        "\"They watch each other.\"\n"
+        "\"They listen at doors.\"\n\n"
+        "\"I saw one of the guards change.\"\n"
+        "\"Or maybe I just *thought* I did.\"\n\n"
+        "He presses something cold into your hand.\n"
+        "\"Take this. If things go bad… you’ll need it.\""
     )
+
     add_item(player, "third_hospital_safe_key", 1)
-    suspense_print("John gives you a key labeled 'Hospital Safe 3'.")
+    suspense_print("You received: Hospital Safe Key III.")
+
     return             
 
 def leader_quest(player):
     suspense_print(
-        "The leader looks at you with a mix of hope and desperation.\n"
-        "\"We need someone to reatreive a hight frequence radio device from our old outpost,\" she explains.\n"
-        "\"It's risky, but you're the only one who seems capable. Will you help us?\""
+        "The leader studies you in silence.\n\n"
+        "\"We lost an outpost,\" she finally says.\n"
+        "\"No warning. No survivors we could trust.\"\n\n"
+        "\"There was a high-frequency radio device there.\"\n"
+        "\"We believe it interferes with metamorph behavior.\"\n\n"
+        "\"If we don’t recover it… this place won’t last.\""
     )
+
     while True:
         suspense_print("1) Accept the quest")
         suspense_print("2) Decline")
@@ -1833,7 +1736,46 @@ def leader_quest(player):
             suspense_print("Invalid choice.")
 
 def leader_second_quest(player):
-    #thjufr
+    suspense_print(
+        "The leader’s voice is quiet.\n\n"
+        "\"This wasn’t the first incident,\" she admits.\n"
+        "\"We tried activating the radio device… but it needs power.\"\n\n"
+        "\"An alien energy cell.\"\n\n"
+        "\"The only known source is beyond the hospital.\n"
+        "In the old military research base.\"\n\n"
+        "She hesitates.\n\n"
+        "\"No one we sent there came back the same.\""
+    )
+    while True:
+        suspense_print("1) Accept the quest")
+        suspense_print("2) Decline")
+        suspense_print("3) Ask for more information")
+        suspense_print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "You agree to help the leader.\n"
+                "\"Thank you,\" she says. \"Be careful out there.\""
+            )
+            player["has_accepted_leader_quest"] = True
+            return
+        elif choice == "2":
+            suspense_print(
+                "You decline the quest.\n"
+                "\"I understand,\" the leader says. \"But we could really use your help.\""
+            )
+            return
+        elif choice == "3":
+            suspense_print(
+                "The leader explains that the alien energy cell is a rare power source used by the aliens.\n"
+                "it can be found in the old military research base located near the hospital.\n"
+                "she warns you that the base is heavily infested with metamorphs and other alien creatures.\n"
+                "only a few have ever returned from there."
+            )
+        else:
+            suspense_print("Invalid choice.")
     pass
 def farm_house_inside(player):
     suspense_print("You enter the old farmhouse. A dark living room yawns ahead; furniture slumps under a skin of dust.")

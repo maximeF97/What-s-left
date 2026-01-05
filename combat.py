@@ -112,6 +112,14 @@ def player_attack(player: Dict, enemy: Dict) -> bool:
     print(f"You hit with your {weapon_name.replace('_', ' ')} for {dmg} damage!")
     return True
 
+def heal_player(player, amount):
+    before = player["health"]
+    player["health"] = min(player["health"] + amount, player["max_health"])
+    healed = player["health"] - before
+    if healed > 0:
+        print(f"You recover {healed} health.")
+    else:
+        print("You are already at full health.")
 
 def apply_stamina_damage_reduction(player, damage):
     """Reduce incoming damage based on stamina (capped at 50%), plus flat equipment damage_reduction."""

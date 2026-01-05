@@ -6,6 +6,7 @@ player = {
     "base_health": 15,
     "inventory": {},
     "weapon": "rusty_knife",
+    
 
     "level": 1,
     "experience": 0,
@@ -70,7 +71,10 @@ player = {
     "farm_house_leaving_room_searched": False,
     "leader_radio_quest_accepted": False,
     "leader_radio_quest_completed": False,
+    "has_completed_leader_quest": False,
 }
+player.setdefault("weird_fruit_eaten", 0)
+player.setdefault("status_effects", {})
 
 def _coerce_int(value, default):
     """

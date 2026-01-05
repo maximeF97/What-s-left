@@ -1,9 +1,15 @@
 from equipment import EQUIPMENT
 
-# Provide local get_choice so inventory does not import systems at import-time.
+# -----------------------------
+# Input helper (local, safe)
+# -----------------------------
 def get_choice():
     return input("> ").lower()
 
+
+# -----------------------------
+# INVENTORY UI
+# -----------------------------
 def open_inventory(player):
     while True:
         print("\n--- Inventory ---")
@@ -23,38 +29,35 @@ def open_inventory(player):
                 print(f"{i}) {item.replace('_', ' ')} x{qty}")
 
         print("\nOPTIONS:")
-        print("  [number] Inspect / Equip item")
+        print("  [number] Inspect item")
         print("  U) Unequip item")
         print("  X) Use item")
         print("  B) Back")
 
-        choice = get_choice().lower()
+        choice = get_choice()
 
         if choice == "b":
             return
-
-        if choice == "u":
+        elif choice == "u":
             unequip_menu(player)
-            continue
-
-        if choice == "x":
+        elif choice == "x":
             use_item(player)
-            continue
-
-        items = list(player["inventory"].keys())
-        if choice.isdigit():
+        elif choice.isdigit():
             index = int(choice) - 1
+            items = list(player["inventory"].keys())
             if 0 <= index < len(items):
-                item = items[index]
-                # Lazy import to avoid circular dependency
                 try:
                     from systems import inspect_item
-                    inspect_item(player, item)
+                    inspect_item(player, items[index])
                 except ImportError:
-                    print("Unable to inspect item right now (module not fully loaded).")
-            else:
-                print("Invalid item.")
+                    print("Unable to inspect item right now.")
+        else:
+            print("Invalid choice.")
 
+
+# -----------------------------
+# EQUIPMENT
+# -----------------------------
 def unequip_menu(player):
     print("\nUNEQUIP WHICH SLOT?")
     slots = list(player["equipment"].keys())
@@ -65,8 +68,7 @@ def unequip_menu(player):
         print(f"{i}) {slot.capitalize()} — {name}")
 
     print("B) Back")
-
-    choice = get_choice().lower()
+    choice = get_choice()
 
     if choice == "b":
         return
@@ -74,30 +76,126 @@ def unequip_menu(player):
     if choice.isdigit():
         index = int(choice) - 1
         if 0 <= index < len(slots):
-            # Lazy import to avoid circular dependency
             try:
                 from systems import unequip_item
                 unequip_item(player, slots[index])
             except ImportError:
-                print("Unable to unequip right now (module not fully loaded).")
+                print("Unable to unequip right now.")
 
+
+# -----------------------------
+# INVENTORY HELPERS
+# -----------------------------
 def add_item(player, item, amount=1):
-    inventory = player["inventory"]
-    inventory[item] = inventory.get(item, 0) + amount
+    player["inventory"][item] = player["inventory"].get(item, 0) + amount
     print(f"Added {amount} x {item.replace('_', ' ')}")
 
+
 def remove_item(player, item, amount=1):
-    inventory = player["inventory"]
-    if inventory.get(item, 0) < amount:
+    if player["inventory"].get(item, 0) < amount:
         return False
-    inventory[item] -= amount
-    if inventory[item] <= 0:
-        del inventory[item]
+    player["inventory"][item] -= amount
+    if player["inventory"][item] <= 0:
+        del player["inventory"][item]
     return True
+
 
 def has_item(player, item, amount=1):
     return player["inventory"].get(item, 0) >= amount
 
+
+# -----------------------------
+# NOTES
+# -----------------------------
+def read_note(player, note_id):
+    notes = {
+        "wastland_field_note": (
+            "Something is watching the roads.\n"
+        ),
+
+        "wasteland_note_small_1": (
+            "Saw one near the ruins.\n"
+            "Small. Fast. Curious.\n\n"
+            "It didn’t attack.\n"
+            "Just watched.\n"
+            "Like an animal.\n"
+        ),
+
+        "wasteland_2_note": (
+            "They’re everywhere.\n"
+            "I don’t know when it started.\n\n"
+            "They don’t always look alien.\n"
+            "Sometimes they look… familiar.\n\n"
+            "If you’re reading this,\n"
+            "don’t trust what you see.\n"
+            "Don’t sleep."
+        ),
+
+        "wasteland_note_small_2": (
+            "The little ones aren’t soldiers.\n"
+            "They scatter when shot.\n"
+            "Unlike the big one they can breathe our air.\n\n"
+            "I think they’re wildlife.\n"
+            "Or pets.\n\n"
+            "God help us if they grow."
+        ),
+
+        "farmer_note": (
+            "A small, bat-shaped thing started haunting the farm.\n"
+            "It perches on the barn roof and watches. It doesn’t blink.\n\n"
+            "It’s growing. Every night, taller—now nearly twice my size,\n"
+            "bones shifting like a bad thought. The moon shines through its wings,\n"
+            "but the shadows bend the wrong way.\n\n"
+            "It isn’t aggressive, not yet. But it looks at me like it’s practicing.\n\n"
+            "Tonight I dropped the metal sheets. The noise made it scream without sound—\n"
+            "and the attic answered. It folded itself through the rafters like smoke.\n\n"
+            "For three nights, something moves above my room, counting the floorboards,\n"
+            "learning the house by heart.\n\n"
+            "I have to get rid of it before the farm forgets it ever belonged to me."
+        ),
+
+        "grovetown_note_1": (
+            "There are two kinds.\n"
+            "I’m sure of it now.\n\n"
+            "The small ones mimic shapes.\n"
+            "Animals. Objects. Trash.\n\n"
+            "The tall ones mimic *us*."
+        ),
+
+        "grovetown_note_2": (
+            "The humanoids don’t hunt like animals.\n"
+            "They set traps.\n"
+            "They wait.\n\n"
+            "One of them watched me eat.\n"
+            "Like it was studying how."
+        ),
+
+        "hospital_terminal_log_1": (
+            "Atmospheric mismatch confirmed.\n"
+            "Humanoid entities show respiratory distress\n"
+            "in unaltered Earth air.\n\n"
+            "They avoid long exposure.\n"
+            "They *need* the terraformed zones."
+        ),
+
+        "hospital_note_doctor": (
+            "They’re intelligent.\n"
+            "More than we thought.\n\n"
+            "But they choke here.\n"
+            "That’s why they send the small ones first.\n\n"
+            "Scouts.\n"
+            "Pets.\n"
+            "Weapons."
+        ),
+    }
+
+    print(notes.get(note_id, "The note is unreadable."))
+
+
+
+# -----------------------------
+# USE ITEM (CLEAN VERSION)
+# -----------------------------
 def use_item(player):
     if not player["inventory"]:
         print("You have nothing to use.")
@@ -109,8 +207,7 @@ def use_item(player):
     for i, item in enumerate(items, 1):
         print(f"{i}) {item.replace('_', ' ')} x{player['inventory'][item]}")
 
-    choice = input("> ").strip().lower()
-
+    choice = get_choice()
     if not choice.isdigit():
         print("Invalid choice.")
         return
@@ -120,149 +217,174 @@ def use_item(player):
         print("Invalid item.")
         return
 
-    item = items[index]
-    # Health items
-    if item == "medkit":
-        player["health"] = min(player["health"] + 5, player["max_health"])
-        remove_item(player, item, 1)
-        print("You used a medkit and recovered 5 health.")
-        print(f"Health: {player['health']}")
-    elif item == "healing_salve":
-        player["health"] = min(player["health"] + 3, player["max_health"])
-        remove_item(player, item, 1)
-        print("You use a healing salve and recover 3 health")
-        print(f"Health: {player['health']}")
-    elif item == "canned_food":
-        player["health"] = min(player["health"] + 2, player["max_health"])
-        remove_item(player, item, 1)
-        print("You eat the canned food and recover 2 health")
-        print(f"Health: {player['health']}")
-    elif item == "weird_fruit":
-        player["health"] = min(player["health"] + 4, player["max_health"])
-        player["max_health"] += 1
-        remove_item(player, item, 1)
-        print("You eat the weird fruit. You recover 4 health and your max health increases by 1.")
-        print(f"Health: {player['health']}")
-#______________ITEMS DESCRIPTION____________________________________
-    elif item == "bobby_pins":
-        print("A pin perfect for lockpicking")
-    elif item == "alien_implant":
-        print("A weird-looking implant, maybe of some use.")
-    elif item == "map_to_base":
-        print(
-            "The map says: from the crossroad near Grovetown, go straight into the wasteland "
-            "until you find an old farmhouse. "
-            "The entry is hidden behind the farm at the bottom of the mountain."
-        )
-    elif item == "radio_device":
-        print("A makeshift radio device, look more like a weird contraption.")
-    elif item == "coin":
-        print("An oddly shaped coin, looks like it's made with scrap metal")
-#____________AMMO__________________
-    elif item == "revolver_ammo":
-        print("Ammunition for a revolver")
-    elif item == "rifle_ammo":
-        print("Ammunition for a rifle")
-    elif item == "shotgun_shells":
-        print("Ammunition for a shotgun")
-    elif item == "alien_energy_cell":
-        print("A strange energy cell, it hums with power.")
+    item_id = items[index]
+    data = ITEMS.get(item_id)
 
-#______________NOTES__________________________________________________
-    elif item == "wastland_field_note":
-        if player.get("has_seen_small_metamorph"):
-            print("They’re not random. They’re sent ahead.")
-        elif player.get("has_seen_humanoid_metamorph"):
-            print("The small ones obey the tall ones.")
-        else:
-            print("Something is watching the roads.")
-    elif item == "wasteland_note_small_1":
-        print(
-            "Saw one near the ruins.\n"
-            "Small. Fast. Curious.\n\n"
-            "It didn’t attack.\n"
-            "Just watched.\n"
-            "Like an animal.\n\n"
-        )
-    elif item == "wasteland_2_note":
-        print(
-            "They’re everywhere.\n"
-            "I don’t know when it started.\n\n"
-            "They don’t always look alien.\n"
-            "Sometimes they look… familiar.\n\n"
-            "If you’re reading this,\n"
-            "don’t trust what you see.\n"
-            "Don’t sleep."
-        )
-    elif item == "wasteland_note_small_2":
-        print(
-            "The little ones aren’t soldiers.\n"
-            "They scatter when shot.\n"
-            "Unlike the big one they can breathe our air.\n\n"
-            "I think they’re wildlife.\n"
-            "Or pets.\n\n"
-            "God help us if they grow."
-        )
-    elif item == "farmer_note":
-        print(
-            "A small, bat‑shaped thing started haunting the farm.\n"
-            "It perches on the barn roof and watches. It doesn’t blink.\n\n"
-            "It’s growing. Every night, taller—now nearly twice my size,\n"
-            "bones shifting like a bad thought. The moon shines through its wings,\n"
-            "but the shadows bend the wrong way.\n\n"
-            "It isn’t aggressive, not yet. But it looks at me like it’s practicing.\n\n"
-            "Tonight I dropped the metal sheets. The noise made it scream without sound—\n"
-            "and the attic answered. It folded itself through the rafters like smoke.\n\n"
-            "For three nights, something moves above my room, counting the floorboards,\n"
-            "learning the house by heart.\n\n"
-            "I have to get rid of it before the farm forgets it ever belonged to me."
-        )
-    elif item == "grovetown_note_1":
-        print(
-            "There are two kinds.\n"
-            "I’m sure of it now.\n\n"
-            "The small ones mimic shapes.\n"
-            "Animals. Objects. Trash.\n\n"
-            "The tall ones mimic *us*."
-        )
-    elif item == "grovetown_note_2":
-        print(
-            "The humanoids don’t hunt like animals.\n"
-            "They set traps.\n"
-            "They wait.\n\n"
-            "One of them watched me eat.\n"
-            "Like it was studying how."
-        )
-    elif item == "hospital_terminal_log_1":
-        print(
-            "Atmospheric mismatch confirmed.\n"
-            "Humanoid entities show respiratory distress\n"
-            "in unaltered Earth air.\n\n"
-            "They avoid long exposure.\n"
-            "They *need* the terraformed zones."
-        )
-    elif item == "hospital_note_doctor":
-        print(
-            "They’re intelligent.\n"
-            "More than we thought.\n\n"
-            "But they choke here.\n"
-            "That’s why they send the small ones first.\n\n"
-            "Scouts.\n"
-            "Pets.\n"
-            "Weapons."
-        )
-    #_________KEYS_________
-    elif item == "old_key":
-        print("A worn-out key, it looks old")
-    elif item == "hospital_safe_key":
-        print("A gelatinous key, it looks alive")
-    elif item == "second_hospital_safe_key":
-        print("A pulsing metallic key with strange engravings")
-    elif item == "third_hospital_safe_key":
-        print("A leaking key that seems to pulse faintly")
-    elif item == "police_station_key":
-        print("A key to the police station")
-    elif item == "old_farm_house_leaving_room_key":
-        print("A rusty key for the living room door of the old farmhouse")
-    else:
-        print(f"You can’t use {item} right now.")
+    if not data:
+        print("You don’t understand how to use this.")
+        return
+
+    item_type = data.get("type", "misc")
+
+    # -------- CONSUMABLE --------
+    if item_type == "consumable":
+        heal = data.get("heal", 0)
+        max_bonus = data.get("max_health_bonus", 0)
+
+        if heal:
+            player["health"] = min(
+                player["health"] + heal,
+                player["max_health"]
+            )
+
+        if max_bonus:
+            player["max_health"] += max_bonus
+
+        remove_item(player, item_id, 1)
+
+        print(f"You use the {data['name']}.")
+        if heal:
+            print(f"+{heal} health")
+        if max_bonus:
+            print("You feel changed.")
+
+        print(f"Health: {player['health']}/{player['max_health']}")
+        return
+
+    # -------- NOTE --------
+    if item_type == "note":
+        read_note(player, item_id)
+        return
+
+    # -------- AMMO --------
+    if item_type == "ammo":
+        print("You can’t use ammo directly.")
+        return
+
+    # -------- TOOL / MISC --------
+    print(data.get("description", "Nothing happens."))
+
+
+# -----------------------------
+# ITEM DATABASE
+# -----------------------------
+ITEMS = {
+    # CONSUMABLES
+    "medkit": {
+        "name": "Medkit",
+        "type": "consumable",
+        "heal": 5,
+        "sell": 1,
+        "buy": 5,
+    },
+    "healing_salve": {
+        "name": "Healing Salve",
+        "type": "consumable",
+        "heal": 3,
+        "sell": 1,
+        "buy": 3,
+    },
+    "canned_food": {
+        "name": "Canned Food",
+        "type": "consumable",
+        "heal": 2,
+        "sell": 1,
+        "buy": 2,
+    },
+    "weird_fruit": {
+        "name": "Weird Fruit",
+        "type": "consumable",
+        "heal": 4,
+        "max_health_bonus": 1,
+        "sell": 2,
+        "buy": 6,
+    },
+
+    # TOOLS
+    "bobby_pins": {
+        "name": "Bobby Pins",
+        "type": "tool",
+        "description": "Perfect for lockpicking.",
+        "sell": 1,
+        "buy": 2,
+    },
+    "radio_device": {
+        "name": "Radio Device",
+        "type": "tool",
+        "description": "A strange, unstable radio device.",
+    },
+
+    # AMMO
+    "revolver_ammo": {
+        "name": "Revolver Ammo",
+        "type": "ammo",
+        "sell": 1,
+        "buy": 3,
+    },
+    "rifle_ammo": {
+        "name": "Rifle Ammo",
+        "type": "ammo",
+        "sell": 1,
+        "buy": 3,
+    },
+    "shotgun_shells": {
+        "name": "Shotgun Shells",
+        "type": "ammo",
+        "sell": 1,
+        "buy": 4,
+    },
+    "alien_energy_cell": {
+        "name": "Alien Energy Cell",
+        "type": "ammo",
+        "sell": 5,
+        "buy": 15,
+    },
+
+    # NOTES
+    "farmer_note": {
+        "name": "Farmer's Note",
+        "type": "note",
+    },
+    "grovetown_note_1": {
+        "name": "Grovetown Note",
+        "type": "note",
+    },
+        # NOTES
+    "wastland_field_note": {
+        "name": "Wasteland Field Note",
+        "type": "note",
+    },
+    "wasteland_note_small_1": {
+        "name": "Wasteland Note (Small I)",
+        "type": "note",
+    },
+    "wasteland_2_note": {
+        "name": "Wasteland Note II",
+        "type": "note",
+    },
+    "wasteland_note_small_2": {
+        "name": "Wasteland Note (Small II)",
+        "type": "note",
+    },
+    "farmer_note": {
+        "name": "Farmer's Note",
+        "type": "note",
+    },
+    "grovetown_note_1": {
+        "name": "Grovetown Note I",
+        "type": "note",
+    },
+    "grovetown_note_2": {
+        "name": "Grovetown Note II",
+        "type": "note",
+    },
+    "hospital_terminal_log_1": {
+        "name": "Hospital Terminal Log",
+        "type": "note",
+    },
+    "hospital_note_doctor": {
+        "name": "Doctor's Note",
+        "type": "note",
+    },
+
+}
