@@ -66,8 +66,10 @@ player = {
     "beast_in_farm_house_woken_up": False,
     "farm_house_upstairs_corpse_searched" : False,
     "farm_house_attic_searched": False,
-    
+    "has_visited_mountain_base_count": 0,
     "farm_house_leaving_room_searched": False,
+    "leader_radio_quest_accepted": False,
+    "leader_radio_quest_completed": False,
 }
 
 def _coerce_int(value, default):

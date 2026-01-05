@@ -113,8 +113,12 @@ def main():
                 print("No player data to save. Start or load a game first.")
                 continue
             # Ensure we persist scene so we can resume to the correct place
-            player.setdefault("scene", "OldBunker")
-            save_game(player)
+            if player.get("has_visited_mountain_base_count", 0) >= 1:
+                player.setdefault("scene", "mountain_base")
+                save_game(player)
+            else:
+                player.setdefault("scene", "OldBunker")
+                save_game(player)
 
         else:
             print("Invalid choice")

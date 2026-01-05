@@ -154,7 +154,8 @@ def use_item(player):
             "until you find an old farmhouse. "
             "The entry is hidden behind the farm at the bottom of the mountain."
         )
-
+    elif item == "radio_device":
+        print("A makeshift radio device, look more like a weird contraption.")
     elif item == "coin":
         print("An oddly shaped coin, looks like it's made with scrap metal")
 #____________AMMO__________________

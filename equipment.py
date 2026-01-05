@@ -19,6 +19,15 @@ EQUIPMENT = {
             "Smells faintly of antiseptic and ozone."
         )
     },
+    "shielded_jacket": {
+        "slot": "body",
+        "bonuses": {
+            "damage_reduction": 4,
+            "stamina": 3,   
+            "charisma": 1,
+        },
+        "description": "A jacket reinforced with makeshift shielding, offering enhanced protection."
+    },
     "tactical_gloves": {
         "slot": "hand",
         "bonuses": {
