@@ -187,6 +187,19 @@ def read_note(player, note_id):
             "Pets.\n"
             "Weapons."
         ),
+        "abandoned_outpost_journal": (
+            "Another shooting happened.\n"
+                    "A mother shot her son. Said his eyes moved wrong.\n\n"
+                    "Nobody trusts anyone anymore.\n"
+                    "Thomas is building a device to interfere with their morphing.\n"
+                    "I hope it works.""
+        ),
+        "abandoned_outpost_left_body_note": (
+            "thomas still havent find a way to get the the complex under the outpost\n"
+            "he say there is someting important down there\n"
+            "i just hope he is right and we can get out of this hell"   
+            "apparently it was an old secret military base before the blast"
+        ),
     }
 
     print(notes.get(note_id, "The note is unreadable."))
@@ -308,12 +321,7 @@ ITEMS = {
         "sell": 1,
         "buy": 2,
     },
-    "radio_device": {
-        "name": "Radio Device",
-        "type": "tool",
-        "description": "A strange, unstable radio device.",
-    },
-
+    
     # AMMO
     "revolver_ammo": {
         "name": "Revolver Ammo",
@@ -349,7 +357,7 @@ ITEMS = {
         "name": "Grovetown Note",
         "type": "note",
     },
-        # NOTES
+        
     "wastland_field_note": {
         "name": "Wasteland Field Note",
         "type": "note",
@@ -386,5 +394,22 @@ ITEMS = {
         "name": "Doctor's Note",
         "type": "note",
     },
-
-}
+    "abandoned_outpost_journal": {
+        "name": "Abandoned Outpost Journal",
+        "type": "note",
+    },
+    "abandoned_outpost_left_body_note": {
+        "name": "Left Body Note",
+        "type": "note",
+    },
+    #_____Quest Items_____
+    "radio_device": {
+        "name": "Radio Device",
+        "type": "quest_item",
+        "description": "A strange, unstable radio device.",
+    },
+    "energy_core": {
+        "name": "Energy Core",
+        "type": "quest_item",
+        "description": "A near limitless power source used in military technology.",
+    },

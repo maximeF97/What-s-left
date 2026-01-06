@@ -14,6 +14,7 @@ WEAPONS: Dict[str, Dict] = {
     "alien_laser_rifle": {"min_damage": 7, "max_damage": 12, "hit_chance": 90, "uses_ammo": True, "ammo_type": "alien_energy_cell"},
     "shotgun": {"min_damage": 6, "max_damage": 8, "hit_chance": 75, "uses_ammo": True, "ammo_type": "shotgun_shells"},
     "magnum": {"min_damage": 8, "max_damage": 12, "hit_chance": 80, "uses_ammo": True, "ammo_type": "magnum_ammo"},
+    "rifle": {"min_damage": 5, "max_damage": 10, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
 }   
 
 

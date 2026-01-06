@@ -106,20 +106,40 @@ def ensure_equipment_struct(player: Dict) -> None:
 
 def _aggregate_equipment_bonuses(player: Dict) -> None:
     """
-    Aggregate bonuses from all equipped items into player['equipment_bonuses'].
+    Aggregate bonuses and flags from all equipped items.
     """
     ensure_equipment_struct(player)
+
     bonuses: Dict[str, int] = {}
-    for slot, item in player["equipment"].items():
-        if not item:
+    flags: Dict[str, bool] = {}
+
+    for slot, item_id in player["equipment"].items():
+        if not item_id:
             continue
-        info = EQUIPMENT.get(item)
+
+        info = EQUIPMENT.get(item_id)
         if not info:
             continue
+
+        # Stat bonuses
         for key, val in info.get("bonuses", {}).items():
             bonuses[key] = bonuses.get(key, 0) + int(val)
+
+        # Flags (boolean effects)
+        for flag, value in info.get("flags", {}).items():
+            flags[flag] = bool(value)
+
+    # Replace aggregated data
     player["equipment_bonuses"] = bonuses
 
+    # Clear previous equipment flags
+    for flag in list(player.keys()):
+        if flag.startswith("equip_"):
+            del player[flag]
+
+    # Apply new flags (namespaced = safer)
+    for flag, value in flags.items():
+        player[f"equip_{flag}"] = value
 
 def equip_item(player: Dict, item: str) -> bool:
     """
@@ -247,11 +267,13 @@ def handle_weird_fruit(player):
         print("Something inside you stirs… and the world feels quieter.")
         print("Alien creatures hesitate when they look at you.")
         player["status_effects"]["alien_marked"] = True
-
+        player["can_breathe_in_alien_environments"] = True
+        player["has_eaten_10_fruits"] = True
     # ☠️ Too many fruits → body rejection
     if count >= 12 and random.random() < 0.1:
-        print("Pain erupts inside you.")
-        take_damage(player, 5)
+        print("Pain erupts inside you."
+              "tentacles erupt from your skin, writhing wildly before retracting back.")
+        take_damage(player, 25)
 
 def get_perception(player):
     base = player.get("perception", 0)

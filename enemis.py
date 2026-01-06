@@ -61,6 +61,12 @@ ENEMIES = {
     "hit_chance": 66,
     "dammage": 6,
     "xp": 200
-}
-
+},
+  "humain": {
+        "name": "Humain",
+        "health": 12, 
+        "hit_chance": 75,
+        "damage": 4,
+        "xp": 50
+    },  
 }

@@ -56,6 +56,7 @@ player = {
     "passed_wastland_3_skill_check": False, #still thinking to use or not
     "looted_the_bedroll": False,
     "met_wasteland_stranger_near_farm": False,
+    "wasteland_stranger_near_farm_alive": False,#to use later
     "has_pass_hospital_road_count": 0,
     "has_seen_hospital_road_alien": False,
     "farm_house_living_room_unlocked": False,
@@ -72,7 +73,28 @@ player = {
     "leader_radio_quest_accepted": False,
     "leader_radio_quest_completed": False,
     "has_completed_leader_quest": False,
+    "has_left_the_bunker": False,  
+    "has_accepted_leader_quest": False,
+    "has_accepted_leader_second_quest": False,
+    "abandoned_outpost_tent_searched": False,
+    "abandoned_outpost_device_examined": False,
+    "abandoned_outpost_left_body_searched": False,
+    "abandoned_outpost_right_body_searched": False,
+    "abandoned_outpost_center_body_searched": False,
+    "abandoned_outpost_right_body_seen_moving": False,
+    "thomas_encountered": False,
+    "thomas_killed": False,
+    "thomas_seemed_human": False,
+    "thomas_allied": False,
+    "can_accept_thomas_quest": False,
+    "found_invisible_alien": False,
+    "wasteland_4_count": 0,
+    "invisible_alien_ally": False,# whether the invisible alien is allied with the player to use later"
+    "can_breathe_in_alien_environments": False,
+    "has_eaten_10_fruits": False,
+    "thomas_quest_accepted": False,
 }
+
 player.setdefault("weird_fruit_eaten", 0)
 player.setdefault("status_effects", {})
 

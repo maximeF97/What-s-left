@@ -43,5 +43,19 @@ EQUIPMENT = {
             "luck": 1
         },
         "description": "Worn boots that have seen better days but still offer some protection and comfort."
-    }
+    },
+    "respirator": {
+       "slot": "head",
+    "bonuses": {
+        "stamina": 2,
+        "perception": 1
+    },
+    "flags": {
+        "can_breathe_in_alien_environments": True
+    },
+    "description": (
+        "A respirator that filters out harmful airborne particles, "
+        "improving endurance and awareness."
+    )
+}
 }
