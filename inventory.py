@@ -192,7 +192,7 @@ def read_note(player, note_id):
                     "A mother shot her son. Said his eyes moved wrong.\n\n"
                     "Nobody trusts anyone anymore.\n"
                     "Thomas is building a device to interfere with their morphing.\n"
-                    "I hope it works.""
+                    "I hope it works."
         ),
         "abandoned_outpost_left_body_note": (
             "thomas still havent find a way to get the the complex under the outpost\n"
@@ -413,3 +413,4 @@ ITEMS = {
         "type": "quest_item",
         "description": "A near limitless power source used in military technology.",
     },
+}

@@ -14,7 +14,7 @@ player = {
         "head": None,
         "body": None,
         "hand": None,
-        "boot": None,
+        "Feet" : None,
         "implant": None
     },
     "skills": {
@@ -93,6 +93,10 @@ player = {
     "can_breathe_in_alien_environments": False,
     "has_eaten_10_fruits": False,
     "thomas_quest_accepted": False,
+    "bastion_entrance_visited": False,
+    "bastion_entrance_count": 0,
+    "bastion_scout_quest_accepted": False,
+    "has_rescued_bastion_scout": False,
 }
 
 player.setdefault("weird_fruit_eaten", 0)

@@ -210,6 +210,9 @@ def wasteland(player):
         else:
             suspense_print("Invalid choice")
 def wasteland_2(player):
+    if player.get("wasteland_2_body_looted", False):
+        suspense_print("You are back in the wasteland, where you found the body.")
+        
     suspense_print("you move forward and see a body on the ground what do you do")
     while True:
         suspense_print("1) inspect the body")
@@ -1305,15 +1308,16 @@ def wasteland_3(player):
 def wastland_stranger_encounter(player):
 
     
-    suspense_print(
-        "As you walk away from the camp, a silhouette appears on the horizon.\n"
-        "A tall figure. Long coat.\n"
-        "An absurdly perfect cowboy hat.\n"
-        "It’s coming straight toward you."
-    )
+    
 
     while True:
         if not player.get("met_wasteland_stranger_near_farm", False):
+            suspense_print(
+            "As you walk away from the camp, a silhouette appears on the horizon.\n"
+            "A tall figure. Long coat.\n"
+            "An absurdly perfect cowboy hat.\n"
+            "It’s coming straight toward you."
+    )
             suspense_print("1) Walk toward the stranger")
             suspense_print("2) Shoot first")
             suspense_print("3) Go back")
@@ -1421,6 +1425,7 @@ def wastland_stranger_encounter(player):
             )
             old_farm_house(player)
             return
+
 def old_farm_house(player):
     suspense_print(
         "You arrive at an old farmhouse.\n"
@@ -1915,6 +1920,7 @@ def farm_house_inside(player):
                 farm_house_living_room(player)
         elif choice == "4":
             suspense_print("You step back out into the yard.")
+            old_farm_house(player)
             return
         else:
             suspense_print("Invalid choice")
@@ -1923,8 +1929,8 @@ def farm_house_living_room(player):
     while True:
         suspense_print("The living room is dark, the air thick with dust and a faint smell of metal.")
         suspense_print("1) Examine the room")
-        suspense_print("2) Go back to the kitchen")
-        suspense_print("3) Go back outside")
+        suspense_print("2) Go back ")
+        suspense_print("3) Go back ")
         suspense_print("I) Open inventory")
         suspense_print("S) Save game")
         suspense_print("L) Load game")
@@ -1944,7 +1950,7 @@ def farm_house_living_room(player):
             suspense_print("You return to the kitchen.")
             return
         elif choice == "3":
-            suspense_print("You step back outside.")
+            suspense_print("You step back.")
             return
         else:
             suspense_print("Invalid choice")
@@ -2142,6 +2148,7 @@ def attic_after_beast_defeated(player):
                 suspense_print("Nothing else whispers to you here.")
         elif choice == "2":
             suspense_print("You go back downstairs.")
+            farm_house_inside(player)
             return
         else:
             suspense_print("Invalid choice")
@@ -2152,7 +2159,7 @@ def farm_house_kitchen(player):
         suspense_print("1) Search the fridge")
         suspense_print("2) Search the oven")
         suspense_print("3) Examine the counter")
-        suspense_print("4) Go back to the living room")
+        suspense_print("4) Go back")
         suspense_print("I) Open inventory")
         choice = get_choice()
         if handle_global_input(choice, player):
@@ -2184,6 +2191,7 @@ def farm_house_kitchen(player):
             else:
                 suspense_print("Nothing else to do here.")
         elif choice == "4":
+            farm_house_inside(player)
             return
         else:
             suspense_print("Invalid choice")
@@ -2948,7 +2956,7 @@ def underground_complex_entrance(player):
 
         else:
             suspense_print("Invalid choice.")
-    
+    #___check___zone
 def underground_complex_inside(player):
     suspense_print(
         "You step into the underground complex.\n"
@@ -2957,8 +2965,143 @@ def underground_complex_inside(player):
         "The air is thick with the scent of oil and metal.\n"
         "You feel a strange energy pulsing through the place."
     )
+
     while True:
+        suspense_print("1) Advance through the corridors")
+        suspense_print("2) Carefully check the corridors")
+        suspense_print("3) Go back")
+        suspense_print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            _handle_corridor_advance(player)
+            return
+
+        elif choice == "2":
+            _handle_corridor_check(player)
+
+        elif choice == "3":
+            underground_complex_entrance(player)
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+
+def _handle_corridor_advance(player):
+    if player.get("has_seen_blinking_red_light", False):
+        corridors_with_blinking_red_light(player)
+        return
+
+    suspense_print(
+        "You advance through the corridors when suddenly an alarm blares!\n"
+        "Two automated turrets emerge from the walls, locking onto you!"
+    )
+
+    enemies = [get_enemy("turret"), get_enemy("turret")]
+    won = fight_enemy(player, *enemies)
+
+    if won:
+        suspense_print("The turrets collapse into heaps of twisted metal.")
+        gain_xp(player, 100)
+        add_item(player, "rifle_ammo", 10)
+        randomized_bonus_loot(
+            player,
+            {"coin": (20, 30), "alien_power_cell": (1, 2)}
+        )
+        underground_complex_main_hall(player)
+    else:
+        suspense_print("Everything goes dark.")
+        exit(0)
+
+def _handle_corridor_check(player):
+    if skill_check(player, "perception", 30):
+        suspense_print(
+            "Your eyes catch a faint blinking red light hidden in the wall."
+        )
+        player["has_seen_blinking_red_light"] = True
+
+    elif skill_check(player, "intelligence", 50):
+        suspense_print(
+            "You recognize the layout—this corridor hides an automated defense system."
+        )
+        player["has_seen_blinking_red_light"] = True
+
+    else:
+        suspense_print("You find nothing unusual.")
+
+def corridors_with_blinking_red_light(player):
+    suspense_print(
+        "You focus on the blinking red light.\n"
+        "It’s part of a concealed turret system.\n"
+        "A damaged control panel hums beside it."
+    )
+
+    while True:
+        suspense_print("1) Shoot the control panel")
+        suspense_print("2) Throw something to bait the turrets")
+        suspense_print("3) Go back")
+        suspense_print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            suspense_print(
+                "You fire at the control panel.\n"
+                "Sparks erupt as the turret system shuts down."
+            )
+            gain_xp(player, 50)
+            add_item(player, "rifle_ammo", 10)
+            randomized_bonus_loot(
+                player,
+                {"coin": (20, 30), "alien_power_cell": (1, 2)}
+            )
+            underground_complex_main_hall(player)
+            return
+
+        elif choice == "2":
+            suspense_print(
+                "You toss debris down the corridor.\n"
+                "A turret emerges—targeting the noise."
+            )
+
+            won = fight_enemy(player, get_enemy("turret"))
+            if won:
+                suspense_print("The turret crashes to the ground, lifeless.")
+                add_item(player, "rifle_ammo", 10)
+                randomized_bonus_loot(
+                    player,
+                    {"coin": (20, 30), "alien_power_cell": (1, 2)}
+                )
+                underground_complex_main_hall(player)
+                return
+            else:
+                suspense_print("Everything goes dark.")
+                exit(0)
+
+        elif choice == "3":
+            underground_complex_inside(player)
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+
+def underground_complex_main_hall(player):
+    suspense_print("you arived in a big hall,before you stand two rusted bots the look inactive"
+                   "you also see a stairs going up,some going down,you also see a room going to the right ")
+    
+
+#___check___zone
 def wasteland_4(player):
+    if player.get(("wasteland_4_count"), 0) >= 5:   
+        suspense_print(
+            "You feel a strange familiarity with this part of the wasteland.\n"
+            "It's as if you've been here many times before."
+        )
     player["wasteland_4_count"] = player.get("wasteland_4_count", 0) + 1
 
     if (
@@ -3158,4 +3301,210 @@ def way_toward_bastion_after_beast(player):
     )
     bastion_entrance(player)
 def bastion_entrance(player):
-    suspense_print("not done yet")
+
+    if player.get("has_rescued_bastion_scout", False) and not player.get("bastion_badge_awarded", False):
+        suspense_print(
+            "The guards recognize you immediately.\n"
+            "\"Welcome back,\" one says.\n"
+            "\"The scout made it through thanks to you.\""
+        )
+
+        suspense_print(
+            "The guard hands you a small metal badge.\n"
+            "\"This grants you limited access beneath Bastion.\""
+        )
+
+        add_item(player, "bastion_access_badge", 1)
+        gain_xp(player, 150)
+        player["bastion_badge_awarded"] = True
+
+        suspense_print(
+            "\"Follow us,\" the guard says.\n"
+            "You are escorted beneath the massive walls."
+        )
+
+        bastion_inside(player)
+        return
+    # Track visits
+    player["bastion_entrance_count"] = player.get("bastion_entrance_count", 0) + 1
+
+    # --- Authorized entry ---
+    if "bastion_access_badge" in player.get("inventory", {}):
+        suspense_print(
+            "The guards scan your badge.\n"
+            "A green light flashes.\n\n"
+            "\"Access granted,\" one of them says.\n"
+            "The massive gates open fully.\n\n"
+            "You are allowed into Bastion."
+        )
+        bastion_inside(player)
+        return
+
+    # --- Repeat visit → job offer ---
+    if player.get("bastion_entrance_visited", False) and player["bastion_entrance_count"] >= 5:
+        suspense_print(
+            "As you approach the gates again, a guard recognizes you.\n"
+            "\"Still alive?\"\n"
+            "\"If you want real work, talk to us.\""
+        )
+        Bastion_inside_job_offer(player)
+        return
+
+    # --- First visit ---
+    if not player.get("bastion_entrance_visited", False):
+        suspense_print(
+            "As you approach the gates of Bastion, a guard steps forward.\n"
+            "“Halt! State your business.”"
+        )
+
+        while True:
+            suspense_print("1) Explain you're here to join Bastion")
+            suspense_print("2) Ask where you are")
+            suspense_print("3) Go back")
+            suspense_print("I) Open inventory")
+
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                suspense_print(
+                    "“We can’t let just anyone in,” the guard says.\n"
+                    "“Only military personnel are allowed.”\n\n"
+                    "“For a fee… we can escort you through.”"
+                )
+
+                while True:
+                    suspense_print("1) Pay 50 coins")
+                    suspense_print("2) Refuse and go back")
+
+                    sub_choice = get_choice()
+                    if handle_global_input(sub_choice, player):
+                        continue
+
+                    if sub_choice == "1":
+                        if player.get("inventory", {}).get("coin", 0) >= 50:
+                            remove_item(player, "coin", 50)
+                            suspense_print(
+                                "The guard nods.\n\n"
+                                "You are escorted through a narrow corridor beneath Bastion’s walls.\n"
+                                "The city itself remains sealed off above you.\n"
+                                "Armed guards watch your every step."
+                            )
+                            player["bastion_entrance_visited"] = True
+                            alien_land_1(player)
+                            return
+                        else:
+                            suspense_print("You don’t have enough coins.")
+                    elif sub_choice == "2":
+                        wasteland_4(player)
+                        return
+                    else:
+                        suspense_print("Invalid choice.")
+
+            elif choice == "2":
+                suspense_print(
+                    "“This is Bastion,” the guard says.\n"
+                    "“The last stronghold before alien territory.”\n"
+                    "“And you’re not cleared to enter it.”"
+                )
+
+            elif choice == "3":
+                wasteland_4(player)
+                return
+
+            else:
+                suspense_print("Invalid choice.")
+
+    # --- Returning without badge ---
+    suspense_print(
+        "The guards recognize you.\n"
+        "You are escorted through the same narrow corridor beneath the walls.\n"
+        "Bastion remains closed to you."
+    )
+    alien_land_1(player)
+    return
+def Bastion_inside_job_offer(player):
+    # Prevent re-offering the same quest
+    if player.get("bastion_scout_quest_accepted", False):
+        suspense_print(
+            "The guards are already waiting for news about the missing scout.\n"
+            "\"Find him,\" the leader says. \"Dead or alive.\""
+        )
+        return
+
+    suspense_print(
+        "The leader of the guards approaches you.\n\n"
+        "\"You’ve been hanging around our walls long enough,\" he says.\n"
+        "\"Most of our men are tied up holding back alien advances.\"\n\n"
+        "\"One of our scouts went missing near the old factory east of Bastion.\"\n"
+        "\"Find him, and we’ll pay you 100 coins.\""
+    )
+
+    while True:
+        suspense_print("1) Accept the job")
+        suspense_print("2) Refuse and go back")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            suspense_print(
+                "The guard nods.\n\n"
+                "\"The scout was last seen near the old factory east of Bastion.\"\n"
+                "\"Be careful — the area is crawling with aliens.\"\n\n"
+                "You head toward the factory."
+            )
+
+            player["bastion_scout_quest_accepted"] = True
+            player["bastion_entrance_count"] = 0  # reset nag counter safely
+
+            old_factory_way(player)
+            return
+
+        elif choice == "2":
+            suspense_print(
+                "\"Suit yourself,\" the guard says.\n"
+                "\"But don’t expect the gates to open for free.\""
+            )
+            wasteland_4(player)
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+def bastion_inside(player):
+
+def old_factory_way(player):
+def alien_land_1(player):
+        suspense_print(
+            "You arrived in a strange land full of alien flora and fauna\n"
+            "the air is thick with spores and the sky is a sickly green color\n"
+            "in a way its bieutiful but also terrifying\n"
+            "you see a path leading deeper into the alien land\n"
+            )
+        while True: 
+            if player.get("can_breathe_in_alien_environments", False):
+                suspense_print("as you try to breathe the air full of spores you choke and cough violently")
+                player["health"] -= 10
+                if player["health"] <= 0:
+                    suspense_print("you have died from suffocation")
+                    exit(0)
+            suspense_print("1) go forward into alien land")
+            suspense_print("2) go back to bastion")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print(
+                    "you move forward into the alien land\n"
+                    "the flora and fauna are unlike anything you have ever seen before\n"
+                    "you see strange twisting plants with collorful leaves and flowers\n"
+                    "you also see strange alien creatures moving in the distance\n"
+                    "you feel a strange energy pulsing through the place"
+                )
+                alien_land_2(player)
+                return
+        # Continue with Bastion storyline or activities
+
+            
