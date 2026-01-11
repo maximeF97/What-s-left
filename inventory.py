@@ -413,4 +413,12 @@ ITEMS = {
         "type": "quest_item",
         "description": "A near limitless power source used in military technology.",
     },
+    #_____Skill_Bousters_____
+    #impliment later
+    "scavenging_notebook": {
+        "name": "Scavenging Notebook",
+        "type": "skill_booster",
+
+        "description": "A scavenger notebook filled with tips on scavenging.",
+    },
 }

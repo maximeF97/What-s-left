@@ -132,9 +132,16 @@ def apply_stamina_damage_reduction(player, damage):
 
 
 def take_damage(player: Dict, amount: int) -> None:
-    """Apply incoming damage to player, factoring stamina reduction."""
     final = apply_stamina_damage_reduction(player, amount)
+
+    # Equipment-based damage reduction
+    dr_pct = player.get("equipment_bonuses", {}).get("damage_reduction_pct", 0)
+    if dr_pct:
+        final = int(final * (1 - dr_pct / 100))
+
+    final = max(0, final)
     player["health"] = max(0, player["health"] - final)
+
     print(f"You take {final} damage.")
 
 

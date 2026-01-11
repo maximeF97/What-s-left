@@ -97,6 +97,16 @@ player = {
     "bastion_entrance_count": 0,
     "bastion_scout_quest_accepted": False,
     "has_rescued_bastion_scout": False,
+    "complited_bastion_scout_quest": False,
+    "bastion_full_clearance": False,
+    #based on bastion system
+    "became_bastion_scout": True,
+    "bastion_rank": 1,
+    "bastion_active_quest": "scout_outpost",
+    "bastion_completed_quests": set(),
+
+
+
 }
 
 player.setdefault("weird_fruit_eaten", 0)

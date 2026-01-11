@@ -50,12 +50,26 @@ def get_effective_skill(player: Dict, skill_name: str) -> int:
     bonus = player.get("equipment_bonuses", {}).get(skill_name, 0)
     return base + bonus
 
-def skill_check(player: Dict, skill_name: str, difficulty: int) -> bool:
-    skill_value = get_effective_skill(player, skill_name)
+def skill_check(
+    player: Dict,
+    skill_name: str,
+    difficulty: int,
+    visible: bool = True
+) -> bool:
+    skill = get_effective_skill(player, skill_name)
+    skill_value = skill * 2
     roll = random.randint(1, 20)
     level = player.get("level", 1)
+
     total = roll + skill_value + level
-    print(f"Skill check ({skill_name}): roll {roll} + skill {skill_value} + level {level} = {total} vs DC {difficulty}")
+
+    if visible:
+        print(
+            f"Skill check ({skill_name}): "
+            f"roll {roll} + skill {skill_value} + level {level} "
+            f"= {total} vs DC {difficulty}"
+        )
+
     return total >= difficulty
 
 
@@ -80,6 +94,13 @@ def apply_stamina_health_bonus(player: Dict) -> None:
     player["max_health"] = int(base * bonus_multiplier)
     if player.get("health", 0) > player["max_health"]:
         player["health"] = player["max_health"]
+
+def apply_max_health_bonus(player: Dict) -> None:
+    bonus = player.get("equipment_bonuses", {}).get("max_health", 0)
+    base_max = player.get("base_max_health", player["max_health"])
+
+    player["max_health"] = base_max + bonus
+    player["health"] = min(player["health"], player["max_health"])
 
 
 def apply_bonuses(player: Dict, bonuses: Dict[str, int]) -> None:
@@ -142,10 +163,6 @@ def _aggregate_equipment_bonuses(player: Dict) -> None:
         player[f"equip_{flag}"] = value
 
 def equip_item(player: Dict, item: str) -> bool:
-    """
-    Equip an item if it is equippable and present in the inventory.
-    Returns True on success.
-    """
     ensure_equipment_struct(player)
 
     info = EQUIPMENT.get(item)
@@ -153,30 +170,28 @@ def equip_item(player: Dict, item: str) -> bool:
         print(f"{item.replace('_', ' ').title()} cannot be equipped.")
         return False
 
-    # Check possession (inventory must be a dict of item -> quantity)
-    qty = player.get("inventory", {}).get(item, 0)
-    if qty <= 0:
+    if player.get("inventory", {}).get(item, 0) <= 0:
         print(f"You don't have {item.replace('_', ' ')}.")
         return False
 
     slot = info["slot"]
-    current = player["equipment"].get(slot)
+
+    # Equip primary slot
     player["equipment"][slot] = item
+
+    # Handle multi-slot occupation
+    if info.get("flags", {}).get("occupies_hands"):
+        player["equipment"]["hand"] = item
+    if info.get("flags", {}).get("occupies_feet"):
+        player["equipment"]["feet"] = item
 
     _aggregate_equipment_bonuses(player)
 
-    if current and current != item:
-        print(f"Equipped {item.replace('_', ' ')} in {slot} (replacing {current.replace('_', ' ')}).")
-    else:
-        print(f"Equipped {item.replace('_', ' ')} in {slot}.")
-
-    # Preview bonuses
-    bonuses = player.get("equipment_bonuses", {})
-    if bonuses:
-        preview = ", ".join(f"{k.replace('_', ' ')} +{v}" for k, v in bonuses.items())
-        print(f"Active equipment bonuses: {preview}")
+    print(f"Equipped {item.replace('_', ' ')} (body, hands, feet).")
     return True
 
+
+   
 
 def unequip_item(player: Dict, slot: str) -> bool:
     """
