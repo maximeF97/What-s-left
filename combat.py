@@ -108,7 +108,7 @@ def player_attack(player: Dict, enemy: Dict) -> bool:
         return True
 
     # Damage resolution
-    dmg = random.randint(weapon["min_damage"], weapon["max_damage"])
+    dmg = max(1, random.randint(weapon["min_damage"], weapon["max_damage"]))
     enemy["health"] = max(0, enemy["health"] - dmg)
     print(f"You hit with your {weapon_name.replace('_', ' ')} for {dmg} damage!")
     return True

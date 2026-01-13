@@ -459,13 +459,16 @@ def hospital_road(player):
 
     player.setdefault("has_pass_hospital_road_count", 0)
     player.setdefault("medkit_encounter_done", False)
-    if skill_check(player, "intelligence", 50, visible=False):
-        gain_xp(player, 10)
-        suspense_print("Your notice a faint chemical trail on the ground, possibly left by other survivors.\n"
-                     "you follow to trail to an hidden trapdoor leading underground")
-        hospital_road_secret_hideout(player)
+    if not player["found_hospital_road_hideout"]:
+        if skill_check(player, "intelligence", 50, visible=False):
+            gain_xp(player, 10)
+            suspense_print("Your notice a faint chemical trail on the ground, possibly left by other survivors.\n"
+                        "you follow to trail to an hidden trapdoor leading underground")
+            player["found_hospital_road_hideout"] = True
+            hospital_road_secret_hideout(player)
+            return
     while True:
-        player["has_pass_hospital_road_count"] += 1
+        
 
         if (
             player["has_pass_hospital_road_count"] >= 3
@@ -485,6 +488,7 @@ def hospital_road(player):
             continue
 
         if choice == "1":
+            player["has_pass_hospital_road_count"] += 1
             suspense_print("you arrive at the hospital")
             hospital(player)
             return
@@ -501,6 +505,7 @@ def hospital_road(player):
                 suspense_print("you look around but see nothing unusual")
 
         elif choice == "3":
+            player["has_pass_hospital_road_count"] += 1
             wasteland_cross_road(player)
             return
 
@@ -522,6 +527,7 @@ def hospital_road_secret_hideout(player):
         "If you find this,\n"
         "use them well."
     )
+    return
 def medkit_encounter(player):
     suspense_print("You see a medkit lying on the ground.")
 
@@ -3120,13 +3126,14 @@ def underground_complex_main_hall(player):
                    "you also see a stairs going up,some going down,you also see a room going to the right ")
     #finish later
 
-#___check___zone
+
 def wasteland_4(player):
     if player.get(("wasteland_4_count"), 0) >= 5:   
         suspense_print(
             "You feel a strange familiarity with this part of the wasteland.\n"
             "It's as if you've been here many times before."
         )
+
     player["wasteland_4_count"] = player.get("wasteland_4_count", 0) + 1
 
     if (
@@ -3317,15 +3324,98 @@ def way_toward_bastion(player):
         else:
             suspense_print("Invalid choice.")
 def way_toward_bastion_after_beast(player):
+    player["way_toward_bastion_after_beast_count"] = player.get("way_toward_bastion_after_beast_count", 0) + 1
+    if skill_check(player, "luck", 30, visible=False) and not player.get("way_toward_bastion_after_beast_luck_check_passed", False):
+        suspense_print(
+            "As you walk, you notice a glint in the dirt.\n"
+            "You bend down and find a small pouch of coins."
+        )
+        add_item(player, "coin", 25)
+        gain_xp(player, 20)
+        player["way_toward_bastion_after_beast_luck_check_passed"] = True
+    if player.get("way_toward_bastion_after_beast_count", 0) >= 3 and not player.get("wonded_woman_rescued", False):
+        suspense_print(
+            "as you walk you feel see a wonded woman sitting against a rock\n"
+            "she looks at you with hope in her eyes"
+            "\"please help me...\" she says\n"
+            "you approach her carefully"
+        )
+        wonded_woman_encounter(player)
+        return
+
     suspense_print(
         "With the threat gone, you continue toward the town.\n"
         "you arrived at the gates of Bastion.\n"
         "under a massive wall, guarded by armed sentries.\n"
         "You have arrived at Bastion."
     )
-    bastion_entrance(player)
-def bastion_entrance(player):
 
+    bastion_entrance(player)
+def wonded_woman_encounter(player):
+    if skill_check(player, "perception", 40, visible=False):
+        suspense_print(
+            "You notice something moving under her skin.\n"
+            "i dont thik she is one of us"
+        )
+    suspense_print("1) Help her")
+    suspense_print("2) Ignore her and continue to Bastion")
+    suspense_print("3) Shoot her")
+    while True:
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            suspense_print(
+                "you try to save her when suddenly she morphs into a alien creature\n"
+            )
+            alien_metamorph = get_enemy("alien_metamorph")
+            won = fight_enemy(player, alien_metamorph)
+            if won:
+                suspense_print("The creature collapses, its outline finally visible.")
+                add_item(player, "alien_energy_cell", 1)
+                randomized_bonus_loot(
+                    player,
+                    {"coin": (10, 20), "alien_power_cell": (1, 2)}
+                )
+                return
+            game_over(player)
+            return
+
+        elif choice == "2":
+            suspense_print("you ignore her and continue to bastion")
+            bastion_entrance(player)
+            return
+        elif choice == "3":
+            alien_metamorph = get_enemy("alien_metamorph")
+
+            if player_attack(player, alien_metamorph):
+                suspense_print("Your shot hits before it can react!")
+
+            suspense_print(
+                "You shoot her and she falls to the ground.\n"
+                "Her body twists and morphs into an alien creature that lunges at you!"
+            )
+
+            alien_metamorph["health"] = max(0, alien_metamorph["health"] - 6)
+
+            won = fight_enemy(player, alien_metamorph)
+            if won:
+                suspense_print("The creature collapses, its outline finally visible.")
+                add_item(player, "alien_energy_cell", 1)
+                randomized_bonus_loot(
+                    player,
+                    {"coin": (10, 20), "alien_power_cell": (1, 2)}
+                )
+                return
+
+            game_over(player)
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+            
+def bastion_entrance(player):
     if player.get("has_rescued_bastion_scout", False) and not player.get("bastion_badge_awarded", False):
         suspense_print(
             "The guards recognize you immediately.\n"
@@ -3566,6 +3656,10 @@ def bastion_inside(player):
                     # Implement underground Bastion levels here
         else:
             suspense_print("Invalid choice.")    
+def Bastion_main(player):
+    #todo
+    pass  
+
 def sergeant_dialogue(player):
     
     if not player.get("became_bastion_scout", False):
@@ -3574,7 +3668,6 @@ def sergeant_dialogue(player):
         sergeant_scout_outpost(player)
     else:
         sergeant_idle(player)
-
 def sergeant_recruitment(player):
     
     "\"Welcome to Bastion,\" the sergeant says.\n"
@@ -3631,24 +3724,94 @@ def sergeant_scout_outpost(player):
     player["scout_outpost_completed"] = False
     player["bastion_active_quest"] = "next_mission"
     player["bastion_rank"] += 1
-def engineer_dialogue(player):
-    #todo 
-    pass
-def Bastion_main(player):
-    #todo
-    pass    
 def sergeant_idle(player):
     suspense_print(
         "\"Keep your eyes open out there,\" the sergeant says.\n"
         "\"The aliens are always watching.\""
     )
-    
+  #chech
+def engineer_dialogue(player):
+    given = player.get("has_given_alien_tech_to_engineer", 0)
+
+    # --- Milestone dialogue ---
+    if given >= 10 and not player.get("engineer_reward_10_given", False):
+        suspense_print(
+            "\"Wow, you've brought a lot of alien tech,\" the engineer says.\n"
+            "\"With these parts, I was able to make major improvements to our equipment.\"\n"
+            "\"Thanks to you, Bastion is safer than ever.\"\n"
+            "\"Here — take this. You've earned it.\""
+        )
+        #add_item(player, "engineer_special_gear", 1) to make later
+        gain_xp(player, 150)
+        player["engineer_reward_10_given"] = True
+
+    elif given >= 5 and not player.get("engineer_reward_10_given", False):
+        suspense_print(
+            "\"Thanks for the alien tech,\" the engineer says.\n"
+            "\"Our defenses are already stronger because of you.\""
+        )
+        add_item(player,"coin", 100)
+        add_item(player,"shotgun_shells", 4)
+        add_item(player,"magnum_ammo",1)
+        gain_xp(player, 100)
+    elif given > 3:
+        suspense_print(
+            "\"Hey there,\" the engineer says.\n"
+            "\"That alien tech you brought earlier was real useful.\"\n"
+            "\"Bring me more if you find any out there.\""
+        )
+        gain_xp(player, 50)
+        add_item(player,"coin", 50)
+        add_item(player,"shotgun_shells", 3)
+
+    else:
+        suspense_print(
+            "\"Hey there,\" the engineer says.\n"
+            "\"If you head into alien territory, bring me any tech you find.\""
+        )
+
+    # --- Menu loop ---
+    while True:
+        suspense_print("1) Ask about the machinery")
+        suspense_print("2) Give alien tech parts")
+        suspense_print("3) Go back")
+        suspense_print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            suspense_print(
+                "\"Bastion's machinery is a blend of human and alien tech,\" the engineer explains.\n"
+                "\"It keeps this city alive.\""
+            )
+            return
+
+        elif choice == "2":
+            if player.get("inventory", {}).get("alien_tech_part", 0) > 0:
+                remove_item(player, "alien_tech_part", 1)
+                player["has_given_alien_tech_to_engineer"] = given + 1
+                suspense_print(
+                    "You hand over an alien tech part.\n"
+                    "\"Perfect. This will do nicely,\" the engineer says."
+                )
+            else:
+                suspense_print("You don't have any alien tech parts.")
+
+        elif choice == "3":
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+  
 def old_factory_way(player):
-    suspense_print(
-        "You make your way toward the old factory east of Bastion.\n"
-        "your path takes you through desolate highways and crumbling buildings\n"
-        "the air is thick with dust and distant distorded sounds"
-    )
+    if not player.get("has_found_secret_path_near_factory", False):
+        suspense_print(
+            "You make your way toward the old factory east of Bastion.\n"
+            "your path takes you through desolate highways and crumbling buildings\n"
+            "the air is thick with dust and distant distorded sounds"
+        )
     while True:
         suspense_print("1) Continue toward the factory")
         suspense_print("2) Look around")
@@ -3693,12 +3856,105 @@ def old_factory_way(player):
         elif choice == "3":
             bastion_entrance(player)
             return
+def near_old_factory_secret(player):
+    suspense_print("you arrived behind some ruin, you see 2 small dead alien on the floor and a dead body, it look like they killed each other")
+    while True:
+        suspense_print("1)inspect the dead alien")
+        suspense_print("2)inspect the dead body")
+        suspense_print("3)go back")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
 
-def alien_land_1(player):
+        if choice == "1":
+            suspense_print("you see many bullet wound, he had a good aim.")
+            continue
+        elif choice == "2":
+            if not player.get("has_looted_secret_stranger", False):
+                suspense_print("it seems to have bleed out from is injurie.\n"
+                               "under him you find somme ammo and coin")
+                add_item(player,"coins",70)
+                add_item(player,"revolver_ammo",5)
+                player["has_looted_secret_stranger"] = True
+                player["has_found_secret_path_near_factory"] = True
+                continue
+            else:
+                suspense_print("nothing else on him.")
+        elif choice == "3":
+            old_factory_way(player)
+            return
+def near_old_factory(player):
+    suspense_print("you see the old factory in the distance, youre not far\n"
+                   "you see faint tracks that go behind a large rock\n"
+                   "what do you do ?")
+    while True:
+        suspense_print("1) Move toward the factory")
+        suspense_print("2) Go inspect the camp")
+        suspense_print("3) Go back")
+        suspense_print("I) Open inventory")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            old_factory_entrance(player)
+            return
+        elif choice == "2":
+            hidden_camp(player)
+            return
+        elif choice == "3":
+            old_factory_way(player)
+            return
+        else:
+            ("invalid choice")
+def hidden_camp(player):
+    if not player.get("has_rescued_bastion_scout", False):
+        suspense_print("you see a scout camp overlooking the old factory\n"
+                    "you see tracks going down but none comming back")
+        while True:
+            suspense_print("1)Look in the tent")
+            suspense_print("2)Inspect the fire")
+            suspense_print("3)Go Back")
+            suspense_print("I) Open inventory")
+
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                if not player.get("looted_scout_tent",False):
+                    suspense_print("you find a note and a few ammo")
+                    add_item(player,"shotgun_shells",2)
+                    add_item(player,"scout_note",1)
+                    suspense_print("the note read\n\n"
+                                   "the factory was supose to be abandoned but i juste saw a alien in serious gear leaving\n"
+                                    "its been a few hours and he his back with somme bugs in a jar,weird"
+                                    "something big is happenig in here\n"
+                                    "i juste saw a ship land, they loaded many vats inside\n"
+                                    "i need to g...\n\n"
+                                    "it stop abruptly")
+                    player["looted_scout_tent"] = True
+                    return
+            elif choice == "2":
+                suspense_print("the fire is long cold you see faint alien steps on the floor, but no blood")
+                return
+            elif choice == "3":
+                near_old_factory(player)
+                return
+            else:
+                suspense_print("invalid choice")
+    else:
+        suspense_print("the scoot old camp nothing to do here")    
+
+
+
+
+def alien_land_1(player): # to finish
         suspense_print(
             "You arrived in a strange land full of alien flora and fauna\n"
             "the air is thick with spores and the sky is a sickly green color\n"
-            "in a way its bieutiful but also terrifying\n"
+            "in a way its beautiful but also terrifying\n"
             "you see a path leading deeper into the alien land\n"
             )
         while True: 
@@ -3721,8 +3977,13 @@ def alien_land_1(player):
                     "you also see strange alien creatures moving in the distance\n"
                     "you feel a strange energy pulsing through the place"
                 )
-                alien_land_2(player)
+                end_demo(player)
+                #alien_land_2(player) futur
                 return
+            
+def end_demo(player):
+    suspense_print("thank you for playing my demo i hope to see you in the reste of this adventure !!")
+    return
         # Continue with Bastion storyline or activities
 
             

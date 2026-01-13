@@ -1,5 +1,5 @@
 from equipment import EQUIPMENT
-
+import random
 # -----------------------------
 # Input helper (local, safe)
 # -----------------------------
@@ -103,6 +103,68 @@ def remove_item(player, item, amount=1):
 def has_item(player, item, amount=1):
     return player["inventory"].get(item, 0) >= amount
 
+def use_consumable(player: Dict, item_id: str) -> bool:
+    item = ITEMS.get(item_id)
+    if not item or item.get("type") != "consumable":
+        print("That item cannot be used.")
+        return False
+
+    if player.get("inventory", {}).get(item_id, 0) <= 0:
+        print("You don't have that item.")
+        return False
+
+    # Apply skill boosts
+    for skill, amount in item.get("skill_boost", {}).items():
+        player.setdefault("temporary_skill_boosts", {})
+        player["temporary_skill_boosts"][skill] = (
+            player["temporary_skill_boosts"].get(skill, 0) + amount
+        )
+
+    remove_item(player, item_id, 1)
+
+    print(f"You use {item['name']}. You feel more capable.")
+    return True
+
+from combat import take_damage,heal_player
+
+def handle_weird_fruit(player):
+    player.setdefault("weird_fruit_eaten", 0)
+    player.setdefault("status_effects", {})
+
+    player["weird_fruit_eaten"] += 1
+    count = player["weird_fruit_eaten"]
+
+    print("The fruit tastes wrong. Sweet… and metallic.")
+
+    # Early unease
+    if random.random() < 0.2:
+        print("For a moment… you swear it moves in your stomach.")
+
+    # 🍽️ Always heal a bit when eaten
+    heal_player(player, 4)
+    
+    # 🔍 3 fruits → perception bonus
+    if count == 3:
+        print("Your senses sharpen. Sounds feel closer. Shadows clearer.")
+        player["status_effects"]["perception_bonus"] = 1
+
+    # 🔍 Scaling perception (soft cap)
+    if count > 3:
+        player["status_effects"]["perception_bonus"] = min(3, 1 + count // 5)
+
+    # 👽 10 fruits → aliens stop attacking
+    if count == 7:
+        print("Something inside you stirs… and the world feels quieter.")
+        print("Alien creatures hesitate when they look at you.")
+        player["status_effects"]["alien_marked"] = True
+        player["can_breathe_in_alien_environments"] = True
+        player["has_eaten_10_fruits"] = True
+    # ☠️ Too many fruits → body rejection
+    if count >= 8 and random.random() < 0.1:
+        print("Pain erupts inside you."
+              "tentacles erupt from your skin, writhing wildly before retracting back.")
+        take_damage(player, 25)
+
 
 # -----------------------------
 # NOTES
@@ -200,6 +262,19 @@ def read_note(player, note_id):
             "i just hope he is right and we can get out of this hell"   
             "apparently it was an old secret military base before the blast"
         ),
+        "wasteland_note_small_2": ("Found this place while escaping.\n"
+        "Safe from the creatures above.\n\n"
+        "Left some supplies here.\n"
+        "Might come back later.\n\n"
+        "If you find this,\n"
+        "use them well."
+        ),
+        "scout_note":("the factory was supose to be abandoned but i juste saw a alien in serious gear leaving\n"
+                      "its been a few hours and he his back with somme bugs in a jar,weird"
+                      "something big is happenig in here\n"
+                      "i juste saw a ship land, they loaded many vats inside\n"
+                      "i need to g...\n\n"
+                      "it stop abruptly")
     }
 
     print(notes.get(note_id, "The note is unreadable."))
@@ -309,6 +384,7 @@ ITEMS = {
         "type": "consumable",
         "heal": 4,
         "max_health_bonus": 1,
+        "on_use": handle_weird_fruit,
         "sell": 2,
         "buy": 6,
     },
@@ -413,11 +489,14 @@ ITEMS = {
         "type": "quest_item",
         "description": "A near limitless power source used in military technology.",
     },
-    #_____Skill_Bousters_____
+    #_____Skill_Boosters_____
     #impliment later
     "scavenging_notebook": {
         "name": "Scavenging Notebook",
-        "type": "skill_booster",
+        "type": "consumable",
+        "skill_boost": {
+            "scavenging": 2
+        },
 
         "description": "A scavenger notebook filled with tips on scavenging.",
     },

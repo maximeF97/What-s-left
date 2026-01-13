@@ -47,8 +47,12 @@ def level_up(player: Dict) -> None:
 
 def get_effective_skill(player: Dict, skill_name: str) -> int:
     base = player.get("skills", {}).get(skill_name, 0)
-    bonus = player.get("equipment_bonuses", {}).get(skill_name, 0)
-    return base + bonus
+
+    equipment_bonus = player.get("equipment_bonuses", {}).get(skill_name, 0)
+    temp_bonus = player.get("temporary_skill_boosts", {}).get(skill_name, 0)
+
+    return base + equipment_bonus + temp_bonus
+
 
 def skill_check(
     player: Dict,
@@ -241,54 +245,6 @@ def inspect_item(player: Dict, item: str) -> None:
 
 def get_choice() -> str:
     return input("> ").strip().lower()
-from combat import take_damage,heal_player
-def eat_item(player, item_id):
-    if not remove_item(player, item_id, 1):
-        print("You don't have that item.")
-        return
-
-    if item_id == "weird_fruit":
-        handle_weird_fruit(player)
-    elif item_id == "medkit":
-        heal_player(player, 20)
-    # other food items here
-def handle_weird_fruit(player):
-    player.setdefault("weird_fruit_eaten", 0)
-    player.setdefault("status_effects", {})
-
-    player["weird_fruit_eaten"] += 1
-    count = player["weird_fruit_eaten"]
-
-    print("The fruit tastes wrong. Sweet… and metallic.")
-
-    # Early unease
-    if random.random() < 0.2:
-        print("For a moment… you swear it moves in your stomach.")
-
-    # 🍽️ Always heal a bit when eaten
-    heal_player(player, 4)
-
-    # 🔍 3 fruits → perception bonus
-    if count == 3:
-        print("Your senses sharpen. Sounds feel closer. Shadows clearer.")
-        player["status_effects"]["perception_bonus"] = 1
-
-    # 🔍 Scaling perception (soft cap)
-    if count > 3:
-        player["status_effects"]["perception_bonus"] = min(3, 1 + count // 5)
-
-    # 👽 10 fruits → aliens stop attacking
-    if count == 10:
-        print("Something inside you stirs… and the world feels quieter.")
-        print("Alien creatures hesitate when they look at you.")
-        player["status_effects"]["alien_marked"] = True
-        player["can_breathe_in_alien_environments"] = True
-        player["has_eaten_10_fruits"] = True
-    # ☠️ Too many fruits → body rejection
-    if count >= 12 and random.random() < 0.1:
-        print("Pain erupts inside you."
-              "tentacles erupt from your skin, writhing wildly before retracting back.")
-        take_damage(player, 25)
 
 def get_perception(player):
     base = player.get("perception", 0)
