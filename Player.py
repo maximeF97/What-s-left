@@ -106,6 +106,8 @@ player = {
     "engineer_reward_10_given": False,
     "has_found_secret_path_near_factory": False,
     "has_looted_secret_stranger": False,
+    "old_factory_entrance_skill_check_passed": False,
+    "old_factory_centipede_killed": False,
     #based on bastion system
     "became_bastion_scout": True,
     "bastion_rank": 1,

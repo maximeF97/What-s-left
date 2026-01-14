@@ -269,12 +269,11 @@ def read_note(player, note_id):
         "If you find this,\n"
         "use them well."
         ),
-        "scout_note":("the factory was supose to be abandoned but i juste saw a alien in serious gear leaving\n"
-                      "its been a few hours and he his back with somme bugs in a jar,weird"
-                      "something big is happenig in here\n"
-                      "i juste saw a ship land, they loaded many vats inside\n"
-                      "i need to g...\n\n"
-                      "it stop abruptly")
+        "scout_note":("The factory was supposed to be abandoned, but I just saw an alien\n"
+                        "in serious gear leaving. He came back with bugs in a jar...\n"
+                        "A ship landed. They loaded vats inside.\n"
+                        "Something big is happening.\n"
+                        "I need to g—"),
     }
 
     print(notes.get(note_id, "The note is unreadable."))
@@ -388,7 +387,13 @@ ITEMS = {
         "sell": 2,
         "buy": 6,
     },
-
+    "centipede_chitin": {
+        "name": "Centipede Chitin",
+        "type": "consumable",
+        "heal": 1,
+        "sell": 5,
+        "buy": 7,
+    },
     # TOOLS
     "bobby_pins": {
         "name": "Bobby Pins",

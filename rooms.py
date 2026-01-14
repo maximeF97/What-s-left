@@ -6,7 +6,7 @@ import random
 from inventory import use_item, add_item,remove_item,ITEMS
 from enemis import get_enemy
 from text_effect import slow_print_char, suspense_print,slow_print_word
-
+from save_system import start_game, load_game
 def old_bunker(player):
     while True:
         if player.get("has_left_the_bunker", False):
@@ -63,6 +63,52 @@ def old_bunker(player):
 def new_func():
     choice = input("> ")
     return choice
+def game_over():
+    suspense_print(
+        "\nYour body stops responding.\n"
+        "Pain fades first.\n"
+        "Then sound.\n"
+        "Then thought.\n\n"
+        "Somewhere in the dark,\n"
+        "something continues moving.\n\n"
+        "You are no longer part of it.\n\n"
+        "— GAME OVER —\n"
+    )
+
+    while True:
+        suspense_print("\nWhat do you do?")
+        suspense_print("1) Restart")
+        suspense_print("2) Load save")
+        suspense_print("3) Quit")
+
+        choice = input("> ").strip().lower()
+
+        if choice == "1":
+            suspense_print(
+                "\nTime fractures.\n"
+                "Memory collapses.\n"
+                "You wake up again...\n"
+            )
+            start_game()   # your entry point
+            return
+
+        elif choice == "2":
+            suspense_print(
+                "\nSearching for intact memory fragments...\n"
+            )
+            load_game()    # your loader
+            return
+
+        elif choice == "3":
+            suspense_print(
+                "\nThe signal cuts out.\n"
+                "Whatever happens next...\n"
+                "happens without you.\n"
+            )
+            exit(0)
+
+        else:
+            suspense_print("Invalid choice.")
 
 def fight_enemy(player, enemy):
     """
@@ -3736,38 +3782,48 @@ def engineer_dialogue(player):
     # --- Milestone dialogue ---
     if given >= 10 and not player.get("engineer_reward_10_given", False):
         suspense_print(
-            "\"Wow, you've brought a lot of alien tech,\" the engineer says.\n"
-            "\"With these parts, I was able to make major improvements to our equipment.\"\n"
-            "\"Thanks to you, Bastion is safer than ever.\"\n"
-            "\"Here — take this. You've earned it.\""
+            "The engineer looks up from a half-disassembled turret.\n"
+            "His eyes widen as he sees the pile of alien tech you brought.\n\n"
+            "\"By the rusted gears of Bastion…\"\n"
+            "\"With parts like these, I’ve reinforced the walls, upgraded the guns,\"\n"
+            "and patched weaknesses we didn’t even know we had.\"\n\n"
+            "He wipes grease from his hands and nods at you.\n"
+            "\"You’ve done more than most soldiers ever will.\"\n"
+            "\"I don’t have the special gear finished yet… but when I do, it’s yours.\""
         )
-        #add_item(player, "engineer_special_gear", 1) to make later
         gain_xp(player, 150)
         player["engineer_reward_10_given"] = True
 
-    elif given >= 5 and not player.get("engineer_reward_10_given", False):
+    elif given >= 5 and not player.get("engineer_reward_5_given", False):
         suspense_print(
-            "\"Thanks for the alien tech,\" the engineer says.\n"
-            "\"Our defenses are already stronger because of you.\""
+            "The engineer tightens a bolt as you approach.\n"
+            "\"Yeah… these parts are good. Real good.\"\n"
+            "\"I’ve already reinforced the outer turrets thanks to you.\"\n\n"
+            "He tosses you a small crate.\n"
+            "\"Take this. Keeps you alive out there — which means more tech for me.\""
         )
-        add_item(player,"coin", 100)
-        add_item(player,"shotgun_shells", 4)
-        add_item(player,"magnum_ammo",1)
+        add_item(player, "coin", 100)
+        add_item(player, "shotgun_shells", 4)
+        add_item(player, "magnum_ammo", 1)
         gain_xp(player, 100)
-    elif given > 3:
+        player["engineer_reward_5_given"] = True
+
+    elif given >= 3 and not player.get("engineer_reward_3_given", False):
         suspense_print(
-            "\"Hey there,\" the engineer says.\n"
-            "\"That alien tech you brought earlier was real useful.\"\n"
-            "\"Bring me more if you find any out there.\""
+            "The engineer grunts approvingly.\n"
+            "\"Not bad. These scraps already improved our power flow.\"\n"
+            "\"Bring me more and Bastion might actually survive this war.\""
         )
+        add_item(player, "coin", 50)
+        add_item(player, "shotgun_shells", 3)
         gain_xp(player, 50)
-        add_item(player,"coin", 50)
-        add_item(player,"shotgun_shells", 3)
+        player["engineer_reward_3_given"] = True
 
     else:
         suspense_print(
-            "\"Hey there,\" the engineer says.\n"
-            "\"If you head into alien territory, bring me any tech you find.\""
+            "The engineer barely looks up from his work.\n"
+            "\"Alien tech keeps this place standing.\"\n"
+            "\"If you find any out there — bring it to me.\""
         )
 
     # --- Menu loop ---
@@ -3783,35 +3839,51 @@ def engineer_dialogue(player):
 
         if choice == "1":
             suspense_print(
-                "\"Bastion's machinery is a blend of human and alien tech,\" the engineer explains.\n"
-                "\"It keeps this city alive.\""
+                "The engineer taps a humming console.\n"
+                "\"Half of this city shouldn’t even work anymore.\"\n"
+                "\"Human steel, alien cores… held together by luck and bad decisions.\"\n"
+                "\"But as long as it runs, Bastion stands.\""
             )
             return
 
         elif choice == "2":
-            if player.get("inventory", {}).get("alien_tech_part", 0) > 0:
+            inventory = player.get("inventory", {})
+            if inventory.get("alien_tech_part", 0) > 0:
                 remove_item(player, "alien_tech_part", 1)
-                player["has_given_alien_tech_to_engineer"] = given + 1
-                suspense_print(
-                    "You hand over an alien tech part.\n"
-                    "\"Perfect. This will do nicely,\" the engineer says."
+                player["has_given_alien_tech_to_engineer"] = (
+                    player.get("has_given_alien_tech_to_engineer", 0) + 1
                 )
+
+                suspense_print(
+                    "You hand over the alien tech.\n"
+                    "The engineer examines it closely, nodding.\n"
+                    "\"Yeah… this’ll keep a few more people alive.\""
+                )
+                return  # re-enter dialogue so milestone rewards can trigger
+
             else:
-                suspense_print("You don't have any alien tech parts.")
+                suspense_print(
+                    "The engineer shakes his head.\n"
+                    "\"No alien tech, no miracles.\""
+                )
 
         elif choice == "3":
             return
 
         else:
             suspense_print("Invalid choice.")
+
   
 def old_factory_way(player):
     if not player.get("has_found_secret_path_near_factory", False):
         suspense_print(
-            "You make your way toward the old factory east of Bastion.\n"
-            "your path takes you through desolate highways and crumbling buildings\n"
-            "the air is thick with dust and distant distorded sounds"
+            "You head east, toward the old factory.\n"
+            "The road is cracked and half-swallowed by ash.\n"
+            "Twisted streetlights hum faintly, still drawing power from somewhere.\n"
+            "Every sound echoes too long.\n"
+            "You feel like something is listening."
         )
+
     while True:
         suspense_print("1) Continue toward the factory")
         suspense_print("2) Look around")
@@ -3825,64 +3897,100 @@ def old_factory_way(player):
         if choice == "1":
             near_old_factory(player)
             return
+
         elif choice == "2":
-            if skill_check(player, "perception", 40, visible=False):
+            if (
+                not player.get("has_found_secret_path_near_factory", False)
+                and skill_check(player, "perception", 40, visible=False)
+            ):
                 suspense_print(
-                    "You notice fresh footprints leading behind some debris.\n"
-                    "They look like they belong to a human."
+                    "Something feels wrong.\n"
+                    "You notice disturbed dust — footprints.\n"
+                    "Human.\n"
+                    "They vanish behind a collapsed structure."
                 )
                 near_old_factory_secret(player)
+                return
+
             elif skill_check(player, "luck", 30, visible=False):
                 suspense_print(
-                    "You find a small stash hidden under some rubble.\n"
-                    "Inside are some coins and a healing salve."
-                    
+                    "You pry open a half-buried container.\n"
+                    "Whatever hid it didn’t come back for it."
                 )
                 add_item(player, "coin", 15)
                 add_item(player, "healing_salve", 1)
+
             elif skill_check(player, "scavenging", 50, visible=False):
                 suspense_print(
-                    "You find some useful parts scattered around.\n"
-                    "You gather them up for later use."
+                    "Among the debris, you recover usable parts.\n"
+                    "Scavenged. Not abandoned."
                 )
                 add_item(player, "shotgun_shells", 3)
                 randomized_bonus_loot(
                     player,
                     {"alien_power_cell": (1, 2), "revolver_ammo": (2, 4)}
                 )
+
             else:
-                suspense_print("You look around but find nothing of interest.")
-                    
+                suspense_print(
+                    "You scan the ruins.\n"
+                    "Nothing moves.\n"
+                    "That almost makes it worse."
+                )
+
         elif choice == "3":
             bastion_entrance(player)
             return
+        else:
+            suspense_print("Invalid choice.")
+
 def near_old_factory_secret(player):
-    suspense_print("you arrived behind some ruin, you see 2 small dead alien on the floor and a dead body, it look like they killed each other")
+    suspense_print(
+        "Behind the ruins, the air smells of burned flesh and oil.\n"
+        "Two small alien bodies lie twisted on the ground.\n"
+        "Nearby, a human corpse slumps against broken concrete.\n"
+        "They didn’t survive each other."
+    )
+
     while True:
-        suspense_print("1)inspect the dead alien")
-        suspense_print("2)inspect the dead body")
-        suspense_print("3)go back")
+        suspense_print("1) Inspect the alien bodies")
+        suspense_print("2) Inspect the human body")
+        suspense_print("3) Go back")
+
         choice = get_choice()
         if handle_global_input(choice, player):
             continue
 
         if choice == "1":
-            suspense_print("you see many bullet wound, he had a good aim.")
-            continue
+            suspense_print(
+                "The aliens are riddled with bullet holes.\n"
+                "Precise.\n"
+                "Whoever fought them knew where to aim."
+            )
+
         elif choice == "2":
             if not player.get("has_looted_secret_stranger", False):
-                suspense_print("it seems to have bleed out from is injurie.\n"
-                               "under him you find somme ammo and coin")
-                add_item(player,"coins",70)
-                add_item(player,"revolver_ammo",5)
+                suspense_print(
+                    "The man bled out slowly.\n"
+                    "His weapon lies empty beside him.\n"
+                    "Clutched in his hand — spent casings.\n"
+                    "He didn’t run."
+                )
+                add_item(player, "coin", 70)
+                add_item(player, "revolver_ammo", 5)
                 player["has_looted_secret_stranger"] = True
                 player["has_found_secret_path_near_factory"] = True
-                continue
             else:
-                suspense_print("nothing else on him.")
+                suspense_print(
+                    "There’s nothing left.\n"
+                    "Only the silence he died in."
+                )
+
         elif choice == "3":
             old_factory_way(player)
             return
+        else:
+            suspense_print("Invalid choice.")
 def near_old_factory(player):
     suspense_print("you see the old factory in the distance, youre not far\n"
                    "you see faint tracks that go behind a large rock\n"
@@ -3910,12 +4018,15 @@ def near_old_factory(player):
             ("invalid choice")
 def hidden_camp(player):
     if not player.get("has_rescued_bastion_scout", False):
-        suspense_print("you see a scout camp overlooking the old factory\n"
-                    "you see tracks going down but none comming back")
+        suspense_print(
+            "You see a scout camp overlooking the old factory.\n"
+            "Tracks go down — but none come back."
+        )
+
         while True:
-            suspense_print("1)Look in the tent")
-            suspense_print("2)Inspect the fire")
-            suspense_print("3)Go Back")
+            suspense_print("1) Look in the tent")
+            suspense_print("2) Inspect the fire")
+            suspense_print("3) Go back")
             suspense_print("I) Open inventory")
 
             choice = get_choice()
@@ -3923,29 +4034,159 @@ def hidden_camp(player):
                 continue
 
             if choice == "1":
-                if not player.get("looted_scout_tent",False):
-                    suspense_print("you find a note and a few ammo")
-                    add_item(player,"shotgun_shells",2)
-                    add_item(player,"scout_note",1)
-                    suspense_print("the note read\n\n"
-                                   "the factory was supose to be abandoned but i juste saw a alien in serious gear leaving\n"
-                                    "its been a few hours and he his back with somme bugs in a jar,weird"
-                                    "something big is happenig in here\n"
-                                    "i juste saw a ship land, they loaded many vats inside\n"
-                                    "i need to g...\n\n"
-                                    "it stop abruptly")
+                if not player.get("looted_scout_tent", False):
+                    suspense_print("You find a note and a few shells.")
+                    add_item(player, "shotgun_shells", 2)
+                    add_item(player, "scout_note", 1)
+
+                    suspense_print(
+                        "The note reads:\n\n"
+                        "The factory was supposed to be abandoned, but I just saw an alien\n"
+                        "in serious gear leaving. He came back with bugs in a jar...\n"
+                        "A ship landed. They loaded vats inside.\n"
+                        "Something big is happening.\n"
+                        "I need to g—"
+                    )
+
                     player["looted_scout_tent"] = True
-                    return
+                else:
+                    suspense_print("You already searched the tent.")
+
             elif choice == "2":
-                suspense_print("the fire is long cold you see faint alien steps on the floor, but no blood")
-                return
+                suspense_print(
+                    "The fire is long cold. You see alien footprints — but no blood."
+                )
+
             elif choice == "3":
+                return
+
+            else:
+                suspense_print("Invalid choice.")
+    else:
+        suspense_print("The scout camp is abandoned. Nothing left to do here.")
+def old_factory_entrance(player):
+    if not player.get("old_factory_centipede_killed", False):
+        suspense_print(
+            "The old factory looms ahead.\n"
+            "A monolith of rusted steel and cracked concrete,\n"
+            "its walls scarred by time and something far worse.\n\n"
+            "A massive sealed door blocks the entrance.\n"
+            "The ground around it is unnaturally still."
+        )
+
+        if (
+            skill_check(player, "perception", 40, visible=False)
+            and not player.get("old_factory_entrance_skill_check_passed", False)
+        ):
+            suspense_print(
+                "For just a moment…\n"
+                "the sand near the entrance shifts.\n"
+                "Something large moves beneath the surface."
+            )
+            player["old_factory_entrance_skill_check_passed"] = True
+
+        while True:
+            suspense_print("1) Approach the factory door")
+            suspense_print("2) Go back to the camp")
+            suspense_print("I) Open inventory")
+            if player.get("old_factory_entrance_skill_check_passed", False):
+                suspense_print("3) Investigate the disturbed sand")
+
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+
+            # --- Direct approach ---
+            if choice == "1":
+                suspense_print(
+                    "You step closer to the door.\n"
+                    "The metal beneath your feet vibrates.\n\n"
+                    "A wet hissing sound erupts from below —\n"
+                    "and the ground EXPLODES upward."
+                )
+
+                giant_centipede = get_enemy("giant_centipede")
+                won = fight_enemy(player, giant_centipede)
+
+                if won:
+                    suspense_print(
+                        "The centipede thrashes violently before collapsing.\n"
+                        "Its segmented body twitches long after it should be dead."
+                    )
+                    gain_xp(player, 100)
+                    add_item(player, "centipede_chitin", 2)
+                    player["old_factory_centipede_killed"] = True
+                    old_factory_inside(player)
+                    return
+
+                game_over()
+                return
+
+            # --- Retreat ---
+            elif choice == "2":
                 near_old_factory(player)
                 return
+
+            # --- Investigate movement ---
+            elif choice == "3" and player.get("old_factory_entrance_skill_check_passed", False):
+                suspense_print(
+                    "You move slowly, every step deliberate.\n"
+                    "The sand trembles faintly beneath your boots."
+                )
+
+                giant_centipede = get_enemy("giant_centipede")
+
+                if skill_check(player, "stealth", 40, visible=False):
+                    suspense_print(
+                        "Beneath the sand, you spot it.\n"
+                        "A massive centipede, coiled and dormant.\n"
+                        "Its chitin rises and falls with each breath.\n\n"
+                        "You strike before it can react."
+                    )
+                    giant_centipede["health"] -= 10
+                else:
+                    suspense_print(
+                        "The ground collapses beneath you.\n"
+                        "The centipede erupts from the sand, mandibles snapping."
+                    )
+
+                won = fight_enemy(player, giant_centipede)
+
+                if won:
+                    suspense_print(
+                        "The creature lets out a shrill, metallic screech\n"
+                        "before collapsing into the sand."
+                    )
+                    gain_xp(player, 100)
+                    add_item(player, "centipede_chitin", 2)
+                    player["old_factory_centipede_killed"] = True
+                    old_factory_inside(player)
+                    return
+
+                game_over()
+                return
+
             else:
-                suspense_print("invalid choice")
+                suspense_print("Invalid choice.")
+
     else:
-        suspense_print("the scoot old camp nothing to do here")    
+        suspense_print(
+            "The entrance lies silent.\n"
+            "Dark stains mark where the creature fell.\n"
+            "Nothing moves now… at least, not outside."
+        )
+        old_factory_inside(player)
+
+def old_factory_inside(player):
+    suspense_print(
+        "You enter the old factory.\n"
+        "The air is thick with dust and the scent of rust.\n"
+        "Dim light filters through cracked windows, casting eerie shadows.\n"
+        "You hear faint scuttling sounds deeper inside.\n"
+
+    )
+    
+    
 
 
 
@@ -3980,7 +4221,7 @@ def alien_land_1(player): # to finish
                 end_demo(player)
                 #alien_land_2(player) futur
                 return
-            
+          
 def end_demo(player):
     suspense_print("thank you for playing my demo i hope to see you in the reste of this adventure !!")
     return

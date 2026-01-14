@@ -62,6 +62,50 @@ ENEMIES = {
     "dammage": 6,
     "xp": 200
 },
+"giant_centipede": {
+    "name": "Giant Centipede",
+    "description": (
+    "A massive centipede .\n"
+    "Its many legs move in a hypnotic rhythm.\n"
+    "It emits a low, rumbling hiss as it approaches."
+    ),
+    "health": 15,
+    "hit_chance": 65,
+    "dammage": 6,
+    "xp": 200
+},
+"armorer_giant_centipede": {
+    "name": "Giant Centipede",
+    "description": (
+    "A massive centipede with armored plating.\n"
+    "Its many legs move in a hypnotic rhythm.\n"
+    "It emits a low, rumbling hiss as it approaches.\n"
+    "an alien chip is embedded in its head."),
+    "health": 30,
+    "hit_chance": 70,
+    "dammage": 8,
+    "xp": 250
+},
+"mutated_capibara": {
+    "name": "Mutated Capibara",
+    "description": (
+        "What was once a capibara now fills the space like a mistake in nature.\n"
+        "Its body is swollen and asymmetrical, fur sloughed away in wet patches.\n"
+        "Pale muscle and dark veins pulse beneath torn skin.\n\n"
+        "Its eyes do not blink — they glow, fixed on you with animal hunger\n"
+        "and something disturbingly aware.\n\n"
+        "The creature exhales in short, rasping bursts,\n"
+        "each breath accompanied by a faint clicking sound from within its chest.\n\n"
+        "It is the size of a bear.\n"
+        "It moves like it has already decided how you will die."
+    ),
+    "health": 40,
+    "hit_chance": 75,
+    "damage": 10,
+    "xp": 300
+},
+
+
   "humain": {
         "name": "Humain",
         "health": 12, 
