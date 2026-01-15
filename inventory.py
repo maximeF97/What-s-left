@@ -103,7 +103,7 @@ def remove_item(player, item, amount=1):
 def has_item(player, item, amount=1):
     return player["inventory"].get(item, 0) >= amount
 
-def use_consumable(player: Dict, item_id: str) -> bool:
+def use_consumable(player: dict, item_id: str) -> bool:
     item = ITEMS.get(item_id)
     if not item or item.get("type") != "consumable":
         print("That item cannot be used.")

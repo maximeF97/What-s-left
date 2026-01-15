@@ -18,3 +18,4 @@ to do
     use the cowboy is still alive somewhere
     bastion full clearance questline
     make a game over function
+        make a thomas fight

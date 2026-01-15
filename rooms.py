@@ -6,7 +6,7 @@ import random
 from inventory import use_item, add_item,remove_item,ITEMS
 from enemis import get_enemy
 from text_effect import slow_print_char, suspense_print,slow_print_word
-from save_system import start_game, load_game
+
 def old_bunker(player):
     while True:
         if player.get("has_left_the_bunker", False):
@@ -63,7 +63,9 @@ def old_bunker(player):
 def new_func():
     choice = input("> ")
     return choice
+from save_system import start_game, load_game
 def game_over():
+    
     suspense_print(
         "\nYour body stops responding.\n"
         "Pain fades first.\n"
@@ -136,10 +138,8 @@ def fight_enemy(player, enemy):
         return "run"
 
     if result == "lose":
-        suspense_print("Game over.")
-        # Prefer sys.exit over bare exit
-        import sys
-        sys.exit(0)
+        game_over()
+        return "lose"
 
     # Unexpected result value
     raise ValueError(f"Unexpected combat outcome: {outcome!r}")
@@ -2079,10 +2079,45 @@ def farm_house_upstairs(player):
             return
         else:
             suspense_print("Invalid choice")
+def update_bat_phase(beast):
+    """Mutate the bat based on remaining health."""
+    max_hp = beast.get("max_health", beast["health"])
+    current_hp = beast["health"]
+    hp_pct = current_hp / max_hp
+
+    # Phase 2: Frenzied
+    if hp_pct <= 0.6 and not beast.get("phase_2", False):
+        beast["phase_2"] = True
+        beast["damage"] += 2
+        beast["special_attack_chance"] = 0.25
+        beast["attack_messages"].extend([
+            "The bat howls in pain and attacks wildly!",
+            "Blood sprays as it dives again and again!"
+        ])
+        suspense_print(
+            "The bat screams — something breaks inside it.\n"
+            "Its movements become faster. Angrier."
+        )
+
+    # Phase 3: Death Spiral
+    if hp_pct <= 0.25 and not beast.get("phase_3", False):
+        beast["phase_3"] = True
+        beast["damage"] += 3
+        beast["special_attack_chance"] = 0.4
+        beast["special_attack_multiplier"] = 2.5
+        beast["attack_messages"].extend([
+            "The bat throws itself at you in a suicidal frenzy!",
+            "Its wings tear as it slams into you!"
+        ])
+        suspense_print(
+            "The creature should be dead.\n"
+            "It isn’t.\n"
+            "It comes anyway."
+        )
 
 def farm_house_attic(player):
     def build_beast(hp_bonus=0):
-      
+
         if callable(get_enemy):
             try:
                 beast = get_enemy("hell_genetically_altered_bat")
@@ -2090,10 +2125,18 @@ def farm_house_attic(player):
                 beast = {"name": "hell_genetically_altered_bat", "health": 18, "hit_chance": 70, "xp": 100}
         else:
             beast = {"name": "hell_genetically_altered_bat", "health": 18, "hit_chance": 70, "xp": 100}
-        beast["health"] = max(1, int(beast.get("health", 18)) + int(hp_bonus))
+
+        base_health = int(beast.get("health", 18))
+
+        beast["max_health"] = max(1, base_health + hp_bonus)
+        beast["health"] = beast["max_health"]
+
         beast.setdefault("hit_chance", 70)
         beast.setdefault("xp", 100)
+
+        update_bat_phase(beast)
         return beast
+
 
     def resolve_outcome(outcome, beast):
         """

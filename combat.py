@@ -1,6 +1,7 @@
 import random
 from typing import Dict, Optional, Tuple
 
+
 from inventory import remove_item, use_item
 from systems import skill_check, get_choice, gain_xp
 
@@ -148,13 +149,35 @@ def take_damage(player: Dict, amount: int) -> None:
 def enemy_attack(player: Dict, enemy: Dict) -> None:
     """Enemy attacks the player once."""
     enemy_hit = random.randint(1, 100) <= enemy.get("hit_chance", 60)
+
+    # --- Attack flavor text ---
     if enemy_hit:
-        base_damage = random.randint(1, 4)
+        from systems import suspense_print
+        # Special attack (optional)
+        if enemy.get("special_attack_chance") and random.random() < enemy["special_attack_chance"]:
+            messages = enemy.get("special_attack_messages")
+            if messages:
+                suspense_print(random.choice(messages))
+        else:
+            messages = enemy.get("attack_messages")
+            if messages:
+                suspense_print(random.choice(messages))
+            else:
+                suspense_print(f"The {enemy.get('name', 'creature')} attacks!")
+    else:
+        miss_msgs = enemy.get("miss_messages")
+        if miss_msgs:
+            suspense_print(random.choice(miss_msgs))
+        else:
+            suspense_print(f"The {enemy.get('name', 'creature')} misses.")
+
+    # --- Damage resolution ---
+    if enemy_hit:
+        base_damage = enemy.get("damage", random.randint(1, 4))
         final = apply_stamina_damage_reduction(player, base_damage)
         player["health"] = max(0, player["health"] - final)
-        print(f"The enemy hits you for {final} damage.")
-    else:
-        print("The enemy misses.")
+        suspense_print(f"You take {final} damage.")
+
 
 
 def _attempt_run(player: Dict) -> bool:

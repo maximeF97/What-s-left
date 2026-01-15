@@ -3,7 +3,7 @@ from typing import Dict
 
 from save_system import save_game, load_game
 from equipment import EQUIPMENT
-from inventory import open_inventory, add_item, remove_item
+
 
 # -----------------------------
 # Player progression and stats
@@ -256,7 +256,7 @@ def should_alien_attack(player, enemy):
             print("The alien tilts its head… then backs away.")
             return False
     return True
-
+from inventory import open_inventory, add_item, remove_item
 def handle_global_input(choice: str, player: Dict) -> bool:
     if choice == "i":
         # Ensure equipment exists before opening inventory
