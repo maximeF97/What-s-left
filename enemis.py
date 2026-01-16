@@ -120,7 +120,19 @@ ENEMIES = {
         "The raider stumbles and misses."
     ]
 },
-
+"thomas": {
+    "name": "Thomas the Outpost Survivor",
+    "health": 18,
+    "hit_chance": 80,
+    "damage": 6,
+    "xp": 150,
+    "attack_messages": [
+        "Thomas fires his rifle with shaky hands!"
+    ],
+    "miss_messages": [
+        "His hesitation costs him the shot."
+    ]
+},
 # ---------------- CREATURES ----------------
 
 "giant_centipede": {

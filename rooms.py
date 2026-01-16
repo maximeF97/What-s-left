@@ -8,64 +8,8 @@ from enemis import get_enemy
 from text_effect import slow_print_char, suspense_print,slow_print_word
 
 
-def old_bunker(player):
-    while True:
-        if player.get("old_bunker_first_visit", False):
-            suspense_print("You are back in the old bunker.\n"
-                        "you try to remember what happened here.\n"
-                        "but your mind is blank.")
-        elif player.get("has_left_the_bunker", False):
-            suspense_print("You are back in the old bunker,you feel tired but have to move on.")
-        suspense_print(
-            "You are in an old bunker. You see a dusty table with the items\n"
-            "of your fallen friend resting on it."
-        )
-        suspense_print("1) Inspect the table")
-        suspense_print("2) Open the door")
-        suspense_print("3) Go back")
-        suspense_print("I) Open inventory")
 
-        choice = get_choice()
-
-        if handle_global_input(choice, player):
-            continue
-
-        if choice == "1":
-            if not player.get("bunker_items_taken", False):
-                suspense_print("You find a rusty_knife and an old key.")
-                add_item(player, "rusty_knife", 1)
-                add_item(player, "old_key", 1)
-                player["bunker_items_taken"] = True
-                suspense_print("Items added to your inventory.")
-            else:
-                suspense_print("The table is empty.")
-
-        elif choice == "2":
-            if player.get("bunker_door_unlocked", False):
-                suspense_print("The door is already unlocked. You step outside into the wasteland.")
-                player["has_left_the_bunker"] = True
-                player["old_bunker_first_visit"] = True
-                wasteland(player)
-                return
-            elif "old_key" in player["inventory"]:
-                suspense_print(
-                    "You use the old key to unlock the door and step outside\n"
-                    "into the wasteland."
-                )
-                player["bunker_door_unlocked"] = True
-                player["has_left_the_bunker"] = True
-                remove_item(player, "old_key", 1)
-                wasteland(player)
-                return
-            else:
-                suspense_print("The door is locked. You need a key.")
-
-        elif choice == "3":
-            return
-
-        else:
-            suspense_print("Invalid choice.")
-
+#FUNCTIONS______________
 def new_func():
     choice = input("> ")
     return choice
@@ -159,7 +103,64 @@ def fight_multiple_enemies(player, enemies):
             return False
     return True
 
+#ROADS_______
+def old_bunker(player):
+    while True:
+        if player.get("old_bunker_first_visit", False):
+            suspense_print("You are back in the old bunker.\n"
+                        "you try to remember what happened here.\n"
+                        "but your mind is blank.")
+        elif player.get("has_left_the_bunker", False):
+            suspense_print("You are back in the old bunker,you feel tired but have to move on.")
+        suspense_print(
+            "You are in an old bunker. You see a dusty table with the items\n"
+            "of your fallen friend resting on it."
+        )
+        suspense_print("1) Inspect the table")
+        suspense_print("2) Open the door")
+        suspense_print("3) Go back")
+        suspense_print("I) Open inventory")
 
+        choice = get_choice()
+
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            if not player.get("bunker_items_taken", False):
+                suspense_print("You find a rusty_knife and an old key.")
+                add_item(player, "rusty_knife", 1)
+                add_item(player, "old_key", 1)
+                player["bunker_items_taken"] = True
+                suspense_print("Items added to your inventory.")
+            else:
+                suspense_print("The table is empty.")
+
+        elif choice == "2":
+            if player.get("bunker_door_unlocked", False):
+                suspense_print("The door is already unlocked. You step outside into the wasteland.")
+                player["has_left_the_bunker"] = True
+                player["old_bunker_first_visit"] = True
+                wasteland(player)
+                return
+            elif "old_key" in player["inventory"]:
+                suspense_print(
+                    "You use the old key to unlock the door and step outside\n"
+                    "into the wasteland."
+                )
+                player["bunker_door_unlocked"] = True
+                player["has_left_the_bunker"] = True
+                remove_item(player, "old_key", 1)
+                wasteland(player)
+                return
+            else:
+                suspense_print("The door is locked. You need a key.")
+
+        elif choice == "3":
+            return
+
+        else:
+            suspense_print("Invalid choice.")
 def wasteland(player):
     while True:
         if player.get("has_seen_alien", False):
@@ -512,7 +513,7 @@ def burned_houses(player):
     else:
         suspense_print("nothing else of interest here")
 
-
+#ROADS_________
 def hospital_road(player):
     suspense_print("You've been walking for a while and started to feel watched.")
 
@@ -1510,7 +1511,7 @@ def wastland_stranger_encounter(player):
             if player.get("wasteland_stranger_near_farm_alive", True):
                 suspense_print(
                     "you keep walking remembering the encounter with the stranger.\n"
-                    "The cowboy hat still on your head."
+                    "you can't forget that cowboy hat."
                 )
             else:
                 suspense_print(
@@ -1519,6 +1520,132 @@ def wastland_stranger_encounter(player):
                 )
             old_farm_house(player)
             return
+def wasteland_stranger_encounter_dialogue(player):
+    suspense_print(
+        "You stare down the stranger.\n"
+        "Gun in hand, both of you trying to see humanity in the other's eyes."
+    )
+
+    while True:
+        if player.get("met_wasteland_stranger_near_farm", False):
+            suspense_print("The stranger has spoken before. His grip tightens on the gun.")
+
+        suspense_print("\nWhat do you do?")
+        suspense_print("1) Try to calm things down")
+        suspense_print("2) Look for details that might prove he is an alien")
+        suspense_print("3) Say all you really want is his hat (attack)")
+        suspense_print("4) Go back")
+        suspense_print("I) Open inventory")
+
+        choice = get_choice()
+
+        if handle_global_input(choice, player):
+            continue
+
+        # ---- OPTION 1 : CHARISMA ----
+        if choice == "1":
+            if skill_check(player, "charisma", 25):
+                gain_xp(player, 10)
+
+                suspense_print(
+                    "After a long pause and many compliments about his hat, the stranger relaxes.\n"
+                    "He tells you to turn back, nothing ahead but an old farmhouse full of mutated creatures.\n"
+                    "Before leaving, he hands you a folded note.\n"
+                    "“Keep your eyes on the horizon,” he says."
+                )
+
+                add_item(player, "grovetown_note_1", 1)
+
+                suspense_print(
+                    "\nNOTE:\n"
+                    "There are two kinds.\n"
+                    "I’m sure of it now.\n\n"
+                    "The small ones mimic shapes.\n"
+                    "Animals. Objects. Trash.\n\n"
+                    "The tall ones mimic *us*."
+                )
+
+                player["met_wasteland_stranger_near_farm"] = True
+                player["wasteland_stranger_near_farm_alive"] = True
+                old_farm_house(player)
+                return
+
+            else:
+                suspense_print(
+                    "Your words fail.\n"
+                    "The stranger’s eyes narrow.\n"
+                    "His finger tightens on the trigger."
+                )
+
+                player["met_wasteland_stranger_near_farm"] = True
+                player["wasteland_stranger_near_farm_alive"] = True
+
+                cowboy = get_enemy("wasteland_cowboy")
+                won = fight_enemy(player, cowboy)
+
+                if won:
+                    loot_cowboy(player)
+                return
+
+        # ---- OPTION 2 : PERCEPTION ----
+        elif choice == "2":
+            if skill_check(player, "perception", 22):
+                gain_xp(player, 10)
+                suspense_print(
+                    "You study him closely.\n"
+                    "Nothing stands out.\n"
+                    "If he’s something else… he hides it well."
+                )
+            else:
+                suspense_print(
+                    "You try to read him.\n"
+                    "Your instincts whisper that something is wrong.\n"
+                    "But you can’t prove it."
+                )
+            return
+
+        # ---- OPTION 3 : ATTACK ----
+        elif choice == "3":
+            suspense_print("The fight for the hat begins.")
+
+            player["met_wasteland_stranger_near_farm"] = True
+            player["wasteland_stranger_near_farm_alive"] = True
+
+            cowboy = get_enemy("wasteland_cowboy")
+            won = fight_enemy(player, cowboy)
+
+            if won:
+                loot_cowboy(player)
+                old_farm_house(player)
+            return
+
+        # ---- OPTION 4 : LEAVE ----
+        elif choice == "4":
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+def loot_cowboy(player):
+    suspense_print(
+        "The gunfight ends.\n"
+        "The wasteland grows quiet again.\n\n"
+        "You take the cowboy hat.\n"
+        "Inside his coat, you find a note."
+    )
+
+    suspense_print(
+        "\nNOTE:\n"
+        "There are two kinds.\n"
+        "I’m sure of it now.\n\n"
+        "The small ones mimic shapes.\n"
+        "Animals. Objects. Trash.\n\n"
+        "The tall ones mimic *us*."
+    )
+
+    add_item(player, "revolver_ammo", 6)
+    add_item(player, "cowboy_hat", 1)
+    add_item(player, "grovetown_note_1", 1)
+
 
 #survivor_base
 def old_farm_house(player):
@@ -1568,6 +1695,10 @@ def old_farm_house(player):
         else:
             suspense_print("Invalid choice.")
 def survivor_montain_base(player):
+    if "survivor_base_access_card" in player.get("inventory", {}):
+        suspense_print("You use the access card to enter the base, you feel watched\")")
+        survivor_mountain_base_inside(player)
+        return
     suspense_print(
         "You follow the map behind the farmhouse.\n"
         "After a long trek, you arrive at a hidden mountain base.\n"
@@ -1614,7 +1745,7 @@ def survivor_mountain_base_inside(player):
     player["has_visited_mountain_base_count"] = count
 
     # --- 3rd visit: John ---
-    if count == 3:
+    if count == 3 and not player.get("has_met_john_prisoner", False):
         suspense_print(
             "You step into the mountain base.\n"
             "The heavy gates grind shut behind you.\n\n"
@@ -1630,7 +1761,7 @@ def survivor_mountain_base_inside(player):
         return
 
     # --- 7th visit: survivor incident ---
-    if count >= 7 and not player.get("has_completed_leader_quest", False):
+    if count >= 7 and  player.get("has_completed_leader_quest", False) and not player.get("has_accepted_leader_second_quest", False):
         suspense_print(
             "Shouting echoes through the tunnels as you enter.\n\n"
             "Two survivors face each other in a narrow corridor.\n"
@@ -1674,38 +1805,14 @@ def survivor_mountain_base_inside(player):
             continue
 
         if choice == "1":
-            if player.get("leader_radio_quest_accepted", False) and not player.get("has_completed_leader_quest", False):
-                suspense_print(
-                    "You approach the leader.\n"
-                    "She nods at you.\n\n"
-                    "\"Have you retrieved the radio device yet?\" she asks."
-                )
-                continue
-            if player.get("has_accepted_leader_second_quest", False) and not player.get("has_completed_leader_quest", False):
-                suspense_print(
-                    "You approach the leader.\n"
-                    "She looks at you with weary eyes.\n\n"
-                    "\"Have you brought the energy core?\" she asks."
-                )
-                continue
-
-
-            if player.get("has_completed_leader_quest", False):
-                suspense_print(
-                    "You approach the leader.\n"
-                    "She smiles warmly.\n\n"
-                    "\"Thank you for retrieving the radio device,\" she says.\n"
-                    "\"With this we have a chance to stop the metamorph infiltration.\"\n\n"
-                    "\"You’ve done a great service for all of us.\""
-                )
-                continue
+    # Check if player has the actual item FIRST
             if "radio_device" in player.get("inventory", {}):
                 suspense_print(
                     "You approach the leader.\n"
                     "She looks at you with hope in her eyes.\n\n"
                     "\"You have the radio device!\" she exclaims.\n"
                     "\"This will save us all!\"\n\n"
-                    "You hand over the radio device."
+                    "You hand over the radio device.\n"
                     "now we can stop metamorph transformation in our base.\""
                 )
                 player["has_completed_leader_quest"] = True
@@ -1716,7 +1823,7 @@ def survivor_mountain_base_inside(player):
                 add_item(player, "healing_salve", 2)
                 add_item(player, "shotgun_shells", 4)
                 continue
-            if "energy_core" in player.get("inventory", {}):
+            elif "energy_core" in player.get("inventory", {}):
                 suspense_print(
                     "You approach the leader.\n"
                     "She looks at you with weary eyes.\n\n"
@@ -1738,15 +1845,42 @@ def survivor_mountain_base_inside(player):
                 add_item(player, "rifle_ammo", 10)
                 add_item(player, "weird_fruit", 1)
                 continue
-            suspense_print(
-                "You approach the leader.\n"
-                "She studies you carefully before speaking.\n\n"
-                "\"I heard what you did for John,\" she says.\n"
-                "\"You're not like the others,\" she says quietly.\n"
-                "\"You've seen what’s out there… and what it does to people.\"\n\n"
-                "\"We may need your help.\""
-            )
-            leader_quest(player)
+            # NOW check quest flags
+            elif player.get("leader_radio_quest_accepted", False) and not player.get("has_completed_leader_quest", False):
+                suspense_print(
+                    "You approach the leader.\n"
+                    "She nods at you.\n\n"
+                    "\"Have you retrieved the radio device yet?\" she asks."
+                )
+                continue
+            elif player.get("has_accepted_leader_second_quest", False) and not player.get("has_completed_leader_second_quest", False):
+                suspense_print(
+                    "You approach the leader.\n"
+                    "She looks at you with weary eyes.\n\n"
+                    "\"Have you brought the energy core?\" she asks."
+                )
+                continue
+            elif player.get("has_completed_leader_quest", False):
+                suspense_print(
+                    "You approach the leader.\n"
+                    "She smiles warmly.\n\n"
+                    "\"Thank you for retrieving the radio device,\" she says.\n"
+                    "\"With this we have a chance to stop the metamorph infiltration.\"\n\n"
+                    "\"You've done a great service for all of us.\""
+                )
+                continue
+            # Default: offer first quest
+            else:
+                suspense_print(
+                    "You approach the leader.\n"
+                    "She studies you carefully before speaking.\n\n"
+                    "\"I heard what you did for John,\" she says.\n"
+                    "\"You're not like the others,\" she says quietly.\n"
+                    "\"You've seen what's out there… and what it does to people.\"\n\n"
+                    "\"We may need your help.\""
+                )
+                leader_quest(player)
+                continue
 
         elif choice == "2":
             if player.get("can_accept_thomas_quest", False):
@@ -1877,7 +2011,8 @@ def john_prisoner_dialogue(player):
 
     add_item(player, "third_hospital_safe_key", 1)
     suspense_print("You received: Hospital Safe Key III.")
-
+    player["has_met_john_prisoner"] = True
+    survivor_mountain_base_inside(player)
     return             
 def leader_quest(player):
     suspense_print(
@@ -1947,12 +2082,15 @@ def leader_second_quest(player):
                 "\"Thank you,\" she says. \"Be careful out there.\""
             )
             player["has_accepted_leader_second_quest"] = True
+            survivor_mountain_base_inside(player)
             return
         elif choice == "2":
             suspense_print(
                 "You decline the quest.\n"
                 "\"I understand,\" the leader says. \"But we could really use your help.\""
+
             )
+            survivor_mountain_base_inside(player)
             return
         elif choice == "3":
             suspense_print(
@@ -1961,7 +2099,7 @@ def leader_second_quest(player):
                 "she warns you that the base is heavily infested with metamorphs and other alien creatures.\n"
                 "only a few have ever returned from there."
             )
-            
+            continue
         else:
             suspense_print("Invalid choice.")
 def thomas_quest(player):   
@@ -2453,131 +2591,6 @@ def left_toaster(player):
     suspense_print("You inspect the toaster on the left. It looks normal.")
     suspense_print("After a moment, you decide to leave it alone.")  
     return
-def wasteland_stranger_encounter_dialogue(player):
-    suspense_print(
-        "You stare down the stranger.\n"
-        "Gun in hand, both of you trying to see humanity in the other's eyes."
-    )
-
-    while True:
-        if player.get("met_wasteland_stranger_near_farm", False):
-            suspense_print("The stranger has spoken before. His grip tightens on the gun.")
-
-        suspense_print("\nWhat do you do?")
-        suspense_print("1) Try to calm things down")
-        suspense_print("2) Look for details that might prove he is an alien")
-        suspense_print("3) Say all you really want is his hat (attack)")
-        suspense_print("4) Go back")
-        suspense_print("I) Open inventory")
-
-        choice = get_choice()
-
-        if handle_global_input(choice, player):
-            continue
-
-        # ---- OPTION 1 : CHARISMA ----
-        if choice == "1":
-            if skill_check(player, "charisma", 25):
-                gain_xp(player, 10)
-
-                suspense_print(
-                    "After a long pause and many compliments about his hat, the stranger relaxes.\n"
-                    "He tells you to turn back, nothing ahead but an old farmhouse full of mutated creatures.\n"
-                    "Before leaving, he hands you a folded note.\n"
-                    "“Keep your eyes on the horizon,” he says."
-                )
-
-                add_item(player, "grovetown_note_1", 1)
-
-                suspense_print(
-                    "\nNOTE:\n"
-                    "There are two kinds.\n"
-                    "I’m sure of it now.\n\n"
-                    "The small ones mimic shapes.\n"
-                    "Animals. Objects. Trash.\n\n"
-                    "The tall ones mimic *us*."
-                )
-
-                player["met_wasteland_stranger_near_farm"] = True
-                player["wasteland_stranger_near_farm_alive"] = True
-                old_farm_house(player)
-                return
-
-            else:
-                suspense_print(
-                    "Your words fail.\n"
-                    "The stranger’s eyes narrow.\n"
-                    "His finger tightens on the trigger."
-                )
-
-                player["met_wasteland_stranger_near_farm"] = True
-                player["wasteland_stranger_near_farm_alive"] = True
-
-                cowboy = get_enemy("wasteland_cowboy")
-                won = fight_enemy(player, cowboy)
-
-                if won:
-                    loot_cowboy(player)
-                return
-
-        # ---- OPTION 2 : PERCEPTION ----
-        elif choice == "2":
-            if skill_check(player, "perception", 22):
-                gain_xp(player, 10)
-                suspense_print(
-                    "You study him closely.\n"
-                    "Nothing stands out.\n"
-                    "If he’s something else… he hides it well."
-                )
-            else:
-                suspense_print(
-                    "You try to read him.\n"
-                    "Your instincts whisper that something is wrong.\n"
-                    "But you can’t prove it."
-                )
-            return
-
-        # ---- OPTION 3 : ATTACK ----
-        elif choice == "3":
-            suspense_print("The fight for the hat begins.")
-
-            player["met_wasteland_stranger_near_farm"] = True
-            player["wasteland_stranger_near_farm_alive"] = True
-
-            cowboy = get_enemy("wasteland_cowboy")
-            won = fight_enemy(player, cowboy)
-
-            if won:
-                loot_cowboy(player)
-                old_farm_house(player)
-            return
-
-        # ---- OPTION 4 : LEAVE ----
-        elif choice == "4":
-            return
-
-        else:
-            suspense_print("Invalid choice.")
-def loot_cowboy(player):
-    suspense_print(
-        "The gunfight ends.\n"
-        "The wasteland grows quiet again.\n\n"
-        "You take the cowboy hat.\n"
-        "Inside his coat, you find a note."
-    )
-
-    suspense_print(
-        "\nNOTE:\n"
-        "There are two kinds.\n"
-        "I’m sure of it now.\n\n"
-        "The small ones mimic shapes.\n"
-        "Animals. Objects. Trash.\n\n"
-        "The tall ones mimic *us*."
-    )
-
-    add_item(player, "revolver_ammo", 6)
-    add_item(player, "cowboy_hat", 1)
-    add_item(player, "grovetown_note_1", 1)
 
 #OLD SURVIVOR_BASE
 
@@ -2586,13 +2599,22 @@ def mountain_tunnel(player):
     
     # If door is already open, just enter
     if player.get("mountain_door_opened", False):
-        mountain_tunnel_inside(player)
+        suspense_print("the door is unlocked")
+        suspense_print("1) Go inside the tunnel")
+        suspense_print("2) Go to grove town")
+        choice = get_choice()
+        if choice == "1":
+            mountain_tunnel_inside(player)
+            return
+        else:
+            grove_town(player)
         return
     
     # Door is locked - check if player has key
     if player.get("inventory", {}).get("mountain_tunnel_key", 0) > 0:
         suspense_print("You use the mountain tunnel key. The lock clicks open.")
         player["mountain_door_opened"] = True
+        remove_item(player, "mountain_tunnel_key", 1)
         mountain_tunnel_inside(player)
         return
     
@@ -2677,7 +2699,7 @@ def thomas_encounter(player):
             )
             player["thomas_allied"] = True
             player["thomas_encountered"] = True  # Mark as completed
-            mountain_tunnel_inside(player)  # Stay in tunnel instead of going to grove_town
+            mountain_tunnel(player)  # Stay in tunnel instead of going to grove_town
             return
 
         # ---- PERCEPTION CHECK ----
@@ -2710,7 +2732,7 @@ def thomas_encounter(player):
         # ---- COMBAT ----
         elif choice == "3":
             suspense_print("The silence shatters. The fight begins.")
-            thomas = get_enemy("human")
+            thomas = get_enemy("thomas")
             won = fight_enemy(player, thomas)
 
             if won:
@@ -2781,7 +2803,7 @@ def abandoned_outpost(player):
                 )
                 add_item(player, "radio_device", 1)
                 player["abandoned_outpost_device_examined"] = True
-                return
+                continue
 
             # Case 2: trap + ambush
             if not player.get("abandoned_outpost_device_examined") and not player.get("abandoned_outpost_center_body_searched", False):
@@ -2840,6 +2862,7 @@ def abandoned_outpost(player):
         else:
             suspense_print("Invalid choice.")
 def body_search(player):
+    player["scene"] = "abandoned_outpost_body_search"
     if skill_check(player, "perception", 30) and not player.get("abandoned_outpost_right_body_seen_moving"):
         suspense_print("One of the bodies on the right twitches.")
         player["abandoned_outpost_right_body_seen_moving"] = True
@@ -2865,12 +2888,13 @@ def body_search(player):
             center_body_search(player)
 
         elif choice == "4":
+            abandoned_outpost(player)
             return
 
         else:
             suspense_print("Invalid choice.")    
 def left_body_search(player):
-    if not player.get("abandoned_outpost_left_body_searched", False):
+    if  player.get("abandoned_outpost_left_body_searched", False):
         suspense_print("You already searched this body.")
         body_search(player)
         return
