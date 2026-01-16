@@ -259,7 +259,7 @@ def read_note(player, note_id):
         "abandoned_outpost_left_body_note": (
             "thomas still havent find a way to get the the complex under the outpost\n"
             "he say there is someting important down there\n"
-            "i just hope he is right and we can get out of this hell"   
+            "i just hope he is right and we can get out of this hell\n"   
             "apparently it was an old secret military base before the blast"
         ),
         "wasteland_note_small_2": ("Found this place while escaping.\n"
@@ -428,6 +428,12 @@ ITEMS = {
         "sell": 5,
         "buy": 15,
     },
+    "magnum_ammo": {
+        "name": "Magnum Ammo",
+        "type": "ammo",
+        "sell": 2,
+        "buy": 5,
+    },
 
     # NOTES
     "farmer_note": {
@@ -504,5 +510,31 @@ ITEMS = {
         },
 
         "description": "A scavenger notebook filled with tips on scavenging.",
+    },
+    "lockpicking_guide": {
+        "name": "Lockpicking Guide",
+        "type": "consumable",
+        "skill_boost": {
+            "lockpicking": 2
+        },
+        "description": "A detailed guide on lockpicking techniques.",
+    },
+    "4_leaf_clover": {
+        "name": "4-Leaf Clover",
+        "type": "consumable",
+        "skill_boost": {
+            "luck": 2
+        },
+        "description": "A rare four-leaf clover said to bring good luck.\n"
+        "even luckier when plants dont grow in wasteland",
+    },
+    
+#weapon________
+    "magnum": {
+        "name": "Magnum",
+        "type": "weapon",
+        "description": "A powerful handgun known for its stopping power.",
+        "sell": 100,
+        "buy": 300,
     },
 }

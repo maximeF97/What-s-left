@@ -1,8 +1,8 @@
 import random
 from typing import Dict, Optional, Tuple
+from text_effect import suspense_print
 
-
-from inventory import remove_item, use_item
+from inventory import remove_item
 from systems import skill_check, get_choice, gain_xp
 
 WEAPONS: Dict[str, Dict] = {
@@ -152,7 +152,8 @@ def enemy_attack(player: Dict, enemy: Dict) -> None:
 
     # --- Attack flavor text ---
     if enemy_hit:
-        from systems import suspense_print
+        
+        
         # Special attack (optional)
         if enemy.get("special_attack_chance") and random.random() < enemy["special_attack_chance"]:
             messages = enemy.get("special_attack_messages")
@@ -234,6 +235,7 @@ def combats(player: Dict, enemy: Dict) -> Dict[str, int | str]:
         elif choice == "2":
             # Use an item (e.g., heal, buff, etc.)
             try:
+                from inventory import use_item
                 use_item(player)
             except Exception as e:
                 print(f"Item use failed: {e}")

@@ -4,8 +4,9 @@ return weird fruit bonus 2
 replace eat_item with use_item
 changefarmhous si the description change 
 cheek engenier dialog function 
-
-
+look at why everithing is sold for a coin in survivorbase
+make intro beter in survivor base with each questline
+work on wastland 2
 
 
 

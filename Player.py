@@ -6,7 +6,7 @@ player = {
     "base_health": 15,
     "inventory": {},
     "weapon": "rusty_knife",
-    
+    "scene": ("old_bunker"),
 
     "level": 1,
     "experience": 0,
@@ -29,6 +29,7 @@ player = {
     },
 
     # story flags
+    "old_bunker_first_visit": False,
     "has_seen_alien": False,
     "bunker_items_taken": False,
     "bunker_door_unlocked": False,
@@ -59,6 +60,7 @@ player = {
     "wasteland_stranger_near_farm_alive": False,#to use later
     "has_pass_hospital_road_count": 0,
     "has_seen_hospital_road_alien": False,
+
     "farm_house_living_room_unlocked": False,
     "farm_house_fridge_searched": False,
     "farm_house_oven_searched": False,
@@ -79,6 +81,7 @@ player = {
     "has_accepted_leader_second_quest": False,
     "abandoned_outpost_tent_searched": False,
     "abandoned_outpost_device_examined": False,
+    "mountain_door_opened": False,
     "abandoned_outpost_left_body_searched": False,
     "abandoned_outpost_right_body_searched": False,
     "abandoned_outpost_center_body_searched": False,

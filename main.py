@@ -33,6 +33,15 @@ def resume_game(player):
         return old_bunker(player)
     elif scene in ("wasteland",):
         return wasteland(player)
+    elif scene in ("MountainBaseInside", "survivor_mountain_base_inside"):    
+        from rooms import survivor_mountain_base_inside
+        return survivor_mountain_base_inside(player) 
+    elif scene in ("bastion_inside",):
+        from rooms import bastion_inside
+        return bastion_inside(player)    
+    elif scene in ("mountain_tunnel",):
+        from rooms import mountain_tunnel
+        return mountain_tunnel(player)
     # TODO: add more scene mappings here
     return old_bunker(player)
 

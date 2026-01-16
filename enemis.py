@@ -465,3 +465,4 @@ ENEMIES = {
         "It convulses violently, striking with unnatural strength!"
     ]
 }
+}

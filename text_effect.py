@@ -64,3 +64,4 @@ def suspense_print(text: str) -> None:
     Handy default for suspenseful narration: slower words with punctuation pauses.
     """
     slow_print_word(text, wps=6,punctuation_pause=True)
+    
