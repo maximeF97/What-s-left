@@ -395,7 +395,22 @@ ENEMIES = {
 },
 
 # ---------------- HORROR CYBORGS ----------------
-
+"cyborg_horror": {
+    "name": "Cyborg Horror",
+    "health": 28,
+    "hit_chance": 68,
+    "damage": 6,
+    "xp": 90,
+    "description": "A nightmarish fusion of flesh and machine, its form twisted and grotesque.\n"
+    "a twitching red light emanates from a implanted device.",
+    "attack_messages": ["The cyborg lunges with razor-sharp limbs!"],
+    "miss_messages": ["something inside him make it esitate and miss."],
+    "special_attack_chance": 0.2,
+    "special_attack_multiplier": 2.0,
+    "special_attack_messages": [
+        "The cyborg emits a horrifying screech as it attacks ferociously!"
+    ]
+},
 "weeping_cyborg": {
     "name": "Weeping Cyborg",
     "health": 30,
@@ -407,12 +422,12 @@ ENEMIES = {
         "The cyborg attacks through sobbing static!"
     ],
     "miss_messages": [
-        "Oil and tears splash as it stumbles."
+        "he hesitates and misses, humanity inside him still struggling."
     ],
     "special_attack_chance": 0.3,
     "special_attack_multiplier": 2.3,
     "special_attack_messages": [
-        "It screams — systems overloading — and tears into you!"
+        "It screams, systems overwrite, and tears into you!"
     ]
 },
 

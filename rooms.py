@@ -13,7 +13,7 @@ from text_effect import slow_print_char, suspense_print,slow_print_word
 def new_func():
     choice = input("> ")
     return choice
-from save_system import load_game
+from save_system import load_game, save_game
 def game_over():
     from main import start_game
     suspense_print(
@@ -112,13 +112,16 @@ def old_bunker(player):
                         "but your mind is blank.")
         elif player.get("has_left_the_bunker", False):
             suspense_print("You are back in the old bunker,you feel tired but have to move on.")
-        suspense_print(
+        else:
+            suspense_print(
             "You are in an old bunker. You see a dusty table with the items\n"
             "of your fallen friend resting on it."
         )
         suspense_print("1) Inspect the table")
         suspense_print("2) Open the door")
         suspense_print("3) Go back")
+        suspense_print("4) debug: skip to zone")
+        suspense_print("5) debug: get quest_item")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -158,9 +161,17 @@ def old_bunker(player):
 
         elif choice == "3":
             return
-
+        elif choice == "4":
+            suspense_print("Debug: Skipping to old_farmhouse.")
+            way_toward_bastion(player)
+            return
+        elif choice == "5":
+            suspense_print("Debug: Adding energy_core to inventory.")
+            add_item(player, "energy_core", 1)
         else:
             suspense_print("Invalid choice.")
+        
+
 def wasteland(player):
     while True:
         if player.get("has_seen_alien", False):
@@ -273,10 +284,31 @@ def wasteland(player):
         else:
             suspense_print("Invalid choice")
 def wasteland_2(player):
-    if player.get("wasteland_2_body_looted", False):
-        suspense_print("You passed near the body you found earlier,it seems unchanged.")
-        
-    suspense_print("you move forward and see a body on the ground what do you do")
+    # Increment counter at start
+    count = player.get("has_passed_wasteland_2_count", 0)
+    player["has_passed_wasteland_2_count"] = count + 1
+    
+    if player.get("wasteland_2_shroom_man_killed", False):
+        suspense_print("You pass by the area where you encountered the shroom man, but it's eerily quiet now.")
+    
+    if count >= 10 and not player.get("wasteland_2_shroom_man_killed", False):
+        shroom_man_encounter(player)
+        return
+    
+    # ... rest of function, but REMOVE the increment lines at choices 2 and 3
+    # Show progression messages based on visit count
+    if count == 1:
+        # First visit
+        suspense_print("you move forward and see a body on the ground what do you do")
+    elif count >= 1 and count <= 6:
+        if player.get("wasteland_2_body_looted", False):
+            suspense_print("You passed near the body you found earlier, it seems unchanged.")
+        else:
+            suspense_print("you move forward and see a body on the ground what do you do")
+    elif count >= 6 and count < 10:
+        suspense_print("weird growths start to develop on the body you found earlier, you feel uneasy")
+    
+    # Main interaction loop
     while True:
         suspense_print("1) inspect the body")
         suspense_print("2) move forward")
@@ -284,40 +316,85 @@ def wasteland_2(player):
         suspense_print("I) Open inventory")
         choice = get_choice()
 
-        
         if handle_global_input(choice, player):
             continue
+            
         if choice == "1":
             if not player.get("wasteland_2_body_looted", False):
                 if skill_check(player, "perception", 40):
                     suspense_print("\nYou notice claw marks around the body.")
-                    gain_xp(player,10)
+                    gain_xp(player, 10)
 
-                suspense_print(" you inspect the body and find a note and a few coins")
-                add_item(player,"coin", 3)
-                add_item(player,"wasteland_2_note", 1)
+                suspense_print("you inspect the body and find a note and a few coins")
+                add_item(player, "coin", 3)
+                add_item(player, "wasteland_2_note", 1)
                 randomized_bonus_loot(player, {"medkit": (1,2), "healing_salve": (1,3), "bobby_pins": (2,5)})
                 
                 suspense_print(
-                    "They’re everywhere.\n"
-                    "I don’t know when it started.\n\n"
-                    "They don’t always look alien.\n"
+                    "They're everywhere.\n"
+                    "I don't know when it started.\n\n"
+                    "They don't always look alien.\n"
                     "Sometimes they look… familiar.\n\n"
-                    "If you’re reading this,\n"
-                    "don’t trust what you see.\n"
-                    "Don’t sleep."
+                    "If you're reading this,\n"
+                    "don't trust what you see.\n"
+                    "Don't sleep."
                 )
                 player["wasteland_2_body_looted"] = True
             else:
                 suspense_print("you already took everything from him")
+                
         elif choice == "2":
+            
             wasteland_cross_road(player)
             return
+            
         elif choice == "3": 
+            
             wasteland(player)
             return
+            
         else:
-            suspense_print("incorect choice")
+            suspense_print("incorrect choice")
+def shroom_man_encounter(player):
+    suspense_print("As you pass by the body again, you see it standing up staring at the sky,it has strange mushroom like growths all over its body.")
+    while True:
+        suspense_print("1) approach the shroom man")
+        suspense_print("2) sneak passt it and move forward")
+        suspense_print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print("you approach the shroom man weapon in arms")
+            shroom_man = get_enemy("sporebound_slave")
+            result = fight_enemy(player, shroom_man)
+            if result == "win":
+                suspense_print("you defeated the shroom man")
+                gain_xp(player, 50)
+                player["wasteland_2_shroom_man_killed"] = True
+                return
+            else:
+                game_over()
+            return
+        elif choice == "2":
+            if skill_check(player, "stealth", 40):
+                suspense_print("you sneak past the shroom man unnoticed")
+                return
+            else:
+                suspense_print("as you ty to sneek behind him his head snaps around and sees you\n"
+                                "you have to fight him")
+                shroom_man = get_enemy("sporebound_slave")
+                result = fight_enemy(player, shroom_man)
+                if result == "win":
+                    suspense_print("you defeated the shroom man")
+                    gain_xp(player, 50)
+                    player["wasteland_2_shroom_man_killed"] = True
+                    return
+                else:
+                    game_over()
+                return
+        else:
+            suspense_print("invalid choice")  
 def wasteland_cross_road(player):
     suspense_print("you arrived at a a crossroad you see and old post with two signs.")
     while True:
@@ -515,11 +592,9 @@ def burned_houses(player):
 
 #ROADS_________
 def hospital_road(player):
+    count = player.get("has_pass_hospital_road_count", 0)
     suspense_print("You've been walking for a while and started to feel watched.")
-
-    player.setdefault("has_pass_hospital_road_count", 0)
-    player.setdefault("medkit_encounter_done", False)
-    if not player["found_hospital_road_hideout"]:
+    if not player.get("found_hospital_road_hideout", False):
         if skill_check(player, "intelligence", 50, visible=False):
             gain_xp(player, 10)
             suspense_print("Your notice a faint chemical trail on the ground, possibly left by other survivors.\n"
@@ -529,10 +604,9 @@ def hospital_road(player):
             return
     while True:
         
-
         if (
-            player["has_pass_hospital_road_count"] >= 3
-            and not player["medkit_encounter_done"]
+            count >= 3
+            and not player.get("medkit_encounter_done", False)
         ):
             medkit_encounter(player)
             player["medkit_encounter_done"] = True
@@ -548,8 +622,7 @@ def hospital_road(player):
             continue
 
         if choice == "1":
-            player["has_pass_hospital_road_count"] += 1
-            suspense_print("you arrive at the hospital")
+            count += 1
             hospital(player)
             return
 
@@ -565,7 +638,7 @@ def hospital_road(player):
                 suspense_print("you look around but see nothing unusual")
 
         elif choice == "3":
-            player["has_pass_hospital_road_count"] += 1
+            count += 1
             wasteland_cross_road(player)
             return
 
@@ -699,6 +772,11 @@ def hospital(player):
         else:
             suspense_print("Invalid choice")
 def hospital_side_entrance(player):
+    if player.get("has_deal_with_cactus", False):
+        suspense_print("You are back at the side entrance of the hospital. The cactus is no longer a threat.\n"
+                        "You step inside the hospital.")
+        hospital_inside(player)
+        return
     while True:
         suspense_print("1) Sneak past the cactus")
         suspense_print("2) Shoot the cactus with your revolver")
@@ -723,7 +801,9 @@ def hospital_side_entrance(player):
                 slow_print_word(
                     "Your heart races… but nothing happens.\n"
                     "It was just a cactus."
+
                 )
+            player["has_deal_with_cactus"] = True
 
             hospital_inside(player)
             return
@@ -755,7 +835,8 @@ def hospital_side_entrance(player):
                 "…It was just a plant."
             )
 
-            player["has_killed_cactus"] = True
+            
+            player["has_deal_with_cactus"] = True
             hospital_inside(player)
             return
 
@@ -778,8 +859,8 @@ def hospital_inside(player):
             suspense_print("You step inside the hospital and a hidden tentacle trips you!")
             player["health"] -= 2
             if player["health"] <= 0:
-                suspense_print("You collapse from your injuries...")
-                exit()
+                game_over()
+                return
 
             suspense_print(f"You lose 2 health points. Health: {player['health']}")
             fight_enemy(player, {"health": 10, "hit_chance": 75, "xp": 70})
@@ -799,18 +880,24 @@ def hospital_inside(player):
         if handle_global_input(choice, player):
             continue
         if choice == "1":
-            suspense_print("you go up to the first floor and see two doors.")
             hospital_first_floor(player)
         elif choice == "2":
             suspense_print("you search the room and find a safe with 3 keyholes.")
             if not player.get("has_opened_hospital_safe", False):
 
                 if "hospital_safe_key" in player["inventory"] and "second_hospital_safe_key" in player["inventory"] and "third_hospital_safe_key" in player["inventory"]:
-                    suspense_print("you use the hospital safe keys to open the safe and find some medical supplies,a alien laser rifle,and a alien energy cell.")
+                    suspense_print("you use the hospital safe keys to open the safe, you see a dark slimy interior, you put your hand in a damp muckus and find some medical supplies, an alien laser rifle, and an alien energy cell.")
                     add_item(player, "medkit",1)
                     add_item(player, "healing_salve",1)
                     add_item(player, "alien_laser_rifle",1)
                     add_item(player, "alien_energy_cell",1)
+                    if skill_check(player, "luck", 30):
+                        suspense_print("your luck pays off and you find a strange elixir.")
+                        add_item(player, "strange_elixir",1)
+                    add_item(player, "alien_energy_cell",2)
+                    remove_item(player, "hospital_safe_key", 1)
+                    remove_item(player, "second_hospital_safe_key", 1)
+                    remove_item(player, "third_hospital_safe_key", 1)
                     player["has_opened_hospital_safe"] = True
                     continue
                 else:
@@ -844,7 +931,8 @@ def hospital_inside(player):
                     suspense_print("The door is locked. You need a key.")
             else:
                 suspense_print("The back door is already open.")
-
+                wasteland_4(player)
+                return
         elif choice == "6":
             suspense_print("you go back to the hospital entrance")
             hospital(player)
@@ -853,7 +941,7 @@ def hospital_inside(player):
             suspense_print("Invalid choice")
 def scavenger_room(player):
     while True:
-        if not player.get("hospital_scavenger_killed", False):
+        if  player.get("hospital_scavenger_killed", False):
             suspense_print("You enter the room again. The scavenger lies motionless. Whatever it was, it's dead.")
             return
 
@@ -879,12 +967,7 @@ def scavenger_room(player):
         if choice == "1":
             slow_print_word("The scavenger suddenly reanimates  as a hostile alien cyborg!")
 
-            cyborg = {
-                "health": 11,
-                "hit_chance": 70,
-                "damage": 3,
-                "xp": 80
-            }
+            cyborg = get_enemy("cyborg_scavenger")
 
             result = combats(player, cyborg)
             if result["result"] == "win":
@@ -910,22 +993,14 @@ def scavenger_room(player):
                 suspense_print(
                     "You fire a precise shot. The scavenger awakens badly damaged and attacks!"
                 )
-                cyborg = {
-                    "health": 4,
-                    "hit_chance": 70,
-                    "damage": 3,
-                    "xp": 80
-                }
+                cyborg = get_enemy("cyborg_scavenger")
+                cyborg["health"] = cyborg["health"] // 2
             else:
                 suspense_print(
                     "You miss! The scavenger awakens fully and attacks!"
                 )
-                cyborg = {
-                    "health": 11,
-                    "hit_chance": 70,
-                    "damage": 3,
-                    "xp": 80
-                }
+                cyborg = get_enemy("cyborg_scavenger")
+                    
 
             result = combats(player, cyborg)
             if result["result"] == "win":
@@ -1334,7 +1409,7 @@ def Hospital_first_floor_right_room(player):
         else:
             suspense_print("Invalid choice")
 
-
+#road to old farm
 def wasteland_3(player):
     suspense_print(
         "You arrive at an empty camp. You see a fire still hot\n"
@@ -2065,6 +2140,7 @@ def leader_second_quest(player):
         "\"A energy core is required to run it.\"\n\n"
         "\"The only known source is beyond the hospital.\n"
         "In the old military research base.\"\n\n"
+        "pass the terraformed zone, in alien land..\" \n\n"
         "She hesitates.\n\n"
         "\"No one we sent there came back the same.\""
     )
@@ -2126,12 +2202,14 @@ def thomas_quest(player):
             )
             player["thomas_quest_accepted"] = True
             add_item(player, "mountain_base_secret_lab_key", 1)
+            survivor_mountain_base_inside(player)
             return
         elif choice == "2":
             suspense_print(
                 "You decline the quest.\n"
                 "\"I understand,\" Thomas says. \"But I could really use your help.\""
             )
+            survivor_mountain_base_inside(player)
             return
         elif choice == "3":
             suspense_print(
@@ -2143,6 +2221,7 @@ def thomas_quest(player):
                 "you can keep any useful weapons or items you find there.\n"
                 "i only need them disabled so i can finish my work."
             )
+            continue
             
         else:
             suspense_print("Invalid choice.")    
@@ -3336,7 +3415,7 @@ def underground_complex_main_hall(player):
  #
 
 #need to finish underground complex main hall
-
+#road to bastion
 def wasteland_4(player):
     if player.get(("wasteland_4_count"), 0) >= 5:   
         suspense_print(
@@ -3344,10 +3423,10 @@ def wasteland_4(player):
             "It's as if you've been here many times before."
         )
 
-    player["wasteland_4_count"] = player.get("wasteland_4_count", 0) + 1
+    count = player.get("wasteland_4_count", 0) + 1
 
     if (
-        player["wasteland_4_count"] > 1
+        count > 1
         and player.get("found_invisible_alien", False)
         and not player.get("invisible_alien_encountered", False)
     ):
@@ -3363,22 +3442,25 @@ def wasteland_4(player):
         "You're finally out of the hospital.\n"
         "You take a breath of fresh air.\n"
         "The air tastes of rust and sulfur.\n\n"
-        "A path leads toward a small town in the distance.\n"
+        "A path leads toward a steaming city in the distance.\n"
         "You start walking toward it."
     )
 
     while True:
-        suspense_print("1) Continue toward the town")
+        suspense_print("1) Continue toward the city")
         suspense_print("2) Look around")
         suspense_print("3) Go back to the hospital")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
         if handle_global_input(choice, player):
+
             continue
 
         if choice == "1":
+            count += 1
             way_toward_bastion(player)
+            
             return
 
         elif choice == "2":
@@ -3393,6 +3475,7 @@ def wasteland_4(player):
                 suspense_print("You scan the wasteland, but see nothing unusual.")
 
         elif choice == "3":
+            count += 1
             hospital_inside(player)
             return
 
@@ -3499,7 +3582,7 @@ def way_toward_bastion(player):
                 "There is still a man inside."
             )
 
-            cyborg = get_enemy("cyborg_scavenger")
+            cyborg = get_enemy("weeping_cyborg")
             won = fight_enemy(player, cyborg)
 
             if won:
@@ -3517,7 +3600,8 @@ def way_toward_bastion(player):
                 return
 
             suspense_print("Everything goes dark.")
-            exit(0)
+            game_over(player)
+            return
 
         elif choice == "2":
             suspense_print(
@@ -3525,9 +3609,35 @@ def way_toward_bastion(player):
                 "It gets closer.\n"
                 "Closer.\n\n"
                 "A sharp pain pierces your back.\n"
-                "Everything goes dark."
             )
-            exit(0)
+            player["health"] -= 10
+            if player["health"] <= 0:
+                suspense_print("You collapse, darkness swallowing you whole.")
+                game_over()
+                return
+            cyborg = get_enemy("weeping_cyborg")
+            won = fight_enemy(player, cyborg)
+            if won:
+                suspense_print(
+                    "The cyborg collapses.\n"
+                    "As the metal stills, all you see is a broken man beneath it."
+                )
+                gain_xp(player, 100)
+                player["beast_in_way_to_bastion_defeated"] = True
+                add_item(player, "alien_implant", 1)
+                add_item(player, "healing_salve", 2)
+                randomized_bonus_loot(player, {"coin": (20, 30)})
+
+                way_toward_bastion_after_beast(player)
+                return
+
+            suspense_print("Everything goes dark.")
+            game_over()
+            return
+
+
+                
+            
 
         else:
             suspense_print("Invalid choice.")
@@ -3564,12 +3674,14 @@ def wonded_woman_encounter(player):
     if skill_check(player, "perception", 40, visible=False):
         suspense_print(
             "You notice something moving under her skin.\n"
-            "i dont thik she is one of us"
+            "I don't think she is one of us"
         )
-    suspense_print("1) Help her")
-    suspense_print("2) Ignore her and continue to Bastion")
-    suspense_print("3) Shoot her")
+    
     while True:
+        suspense_print("1) Help her")
+        suspense_print("2) Ignore her and continue to Bastion")
+        suspense_print("3) Shoot her")
+        
         choice = get_choice()
         if handle_global_input(choice, player):
             continue
@@ -3587,14 +3699,20 @@ def wonded_woman_encounter(player):
                     player,
                     {"coin": (10, 20), "alien_power_cell": (1, 2)}
                 )
+                player["wonded_woman_rescued"] = True
+                way_toward_bastion_after_beast(player)
                 return
-            game_over(player)
-            return
+            else:
+                game_over()
+                return
 
         elif choice == "2":
             suspense_print("you ignore her and continue to bastion")
+            player["wonded_woman_rescued"] = True
+
             bastion_entrance(player)
             return
+            
         elif choice == "3":
             alien_metamorph = get_enemy("alien_metamorph")
 
@@ -3616,14 +3734,16 @@ def wonded_woman_encounter(player):
                     player,
                     {"coin": (10, 20), "alien_power_cell": (1, 2)}
                 )
+                player["wonded_woman_rescued"] = True
+                way_toward_bastion_after_beast(player)
                 return
-
-            game_over(player)
-            return
+            else:
+                game_over()
+                return
 
         else:
             suspense_print("Invalid choice.")
- #           
+          
 
 #BASTION CITY
 def bastion_entrance(player):
@@ -3666,7 +3786,7 @@ def bastion_entrance(player):
         return
 
     # --- Repeat visit → job offer ---
-    if player.get("bastion_entrance_visited", False) and player["bastion_entrance_count"] >= 5:
+    if player.get("bastion_entrance_visited", False) and player["bastion_entrance_count"] >= 4:
         suspense_print(
             "As you approach the gates again, a guard recognizes you.\n"
             "\"Still alive?\"\n"
@@ -3682,32 +3802,43 @@ def bastion_entrance(player):
             "“Halt! State your business.”"
         )
 
-        while True:
-            suspense_print("1) Explain you're here to join Bastion")
-            suspense_print("2) Ask where you are")
-            suspense_print("3) Go back")
-            suspense_print("I) Open inventory")
+    while True:
+        
+        suspense_print("1) Explain you need to pass through")
+        suspense_print("2) Ask where you are")
+        if player.get("bastion_scout_quest_accepted", False):
+            suspense_print("4) go east toward the old factory")
+        suspense_print("3) Go back")
+        suspense_print("I) Open inventory")
 
-            choice = get_choice()
-            if handle_global_input(choice, player):
-                continue
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
 
-            if choice == "1":
-                suspense_print(
-                    "“We can’t let just anyone in,” the guard says.\n"
-                    "“Only military personnel are allowed.”\n\n"
-                    "“For a fee… we can escort you through.”"
-                )
+        if choice == "1":
+            
+            suspense_print(
+                "“We can’t let just anyone in,” the guard says.\n"
+                "“Only military personnel are allowed.”\n\n"
+                "“For a fee… we can escort you through.”"
+            )
 
-                while True:
-                    suspense_print("1) Pay 50 coins")
-                    suspense_print("2) Refuse and go back")
+            while True:
+                suspense_print("1) Pay 50 coins")
+                suspense_print("2) Refuse and go back")
 
-                    sub_choice = get_choice()
-                    if handle_global_input(sub_choice, player):
-                        continue
+                sub_choice = get_choice()
+                if handle_global_input(sub_choice, player):
+                    continue
 
-                    if sub_choice == "1":
+                if sub_choice == "1":
+                    if not player.get("bastion_gard_paid", False):
+                        if skill_check(player, "charisma", 40):
+                            suspense_print("You convince the gard to let you pass for free.")
+                            player["bastion_gard_paid"] = True
+                            player["bastion_entrance_visited"] = True
+                            alien_land_1(player)
+                            return
                         if player.get("inventory", {}).get("coin", 0) >= 50:
                             remove_item(player, "coin", 50)
                             suspense_print(
@@ -3717,38 +3848,42 @@ def bastion_entrance(player):
                                 "Armed guards watch your every step."
                             )
                             player["bastion_entrance_visited"] = True
+                            player["bastion_gard_paid"] = True
                             alien_land_1(player)
                             return
+                        
                         else:
                             suspense_print("You don’t have enough coins.")
-                    elif sub_choice == "2":
-                        wasteland_4(player)
-                        return
+                            continue
                     else:
-                        suspense_print("Invalid choice.")
+                        suspense_print("the guard says youre clear to pass")
+                        alien_land_1(player)
+                        return
+                elif sub_choice == "2":
+                    way_toward_bastion(player)
+                    return
+                else:
+                    suspense_print("Invalid choice.")
 
-            elif choice == "2":
-                suspense_print(
-                    "“This is Bastion,” the guard says.\n"
-                    "“The last stronghold before alien territory.”\n"
-                    "“And you’re not cleared to enter it.”"
-                )
+        elif choice == "2":
+            suspense_print(
+                "“This is Bastion,” the guard says.\n"
+                "“The last stronghold before alien territory.”\n"
+                "“And you’re not cleared to enter it.”"
+            )
+            continue
 
-            elif choice == "3":
-                wasteland_4(player)
-                return
-
-            else:
-                suspense_print("Invalid choice.")
-
-    # --- Returning without badge ---
-    suspense_print(
-        "The guards recognize you.\n"
-        "You are escorted through the same narrow corridor beneath the walls.\n"
-        "Bastion remains closed to you."
-    )
-    alien_land_1(player)
-    return
+        elif choice == "3":
+            wasteland_4(player)
+            return
+        elif choice == "4" and player.get("bastion_scout_quest_accepted", False):
+            suspense_print("You head east toward the old factory to look for the missing scout."
+            )
+            old_factory_way(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+    
 def Bastion_inside_job_offer(player):
     # Prevent re-offering the same quest
     if player.get("bastion_scout_quest_accepted", False):
@@ -4354,10 +4489,6 @@ def old_factory_inside(player):
     )
     
     
-
-
-
-
 def alien_land_1(player): # to finish
         suspense_print(
             "You arrived in a strange land full of alien flora and fauna\n"
@@ -4385,12 +4516,26 @@ def alien_land_1(player): # to finish
                     "you also see strange alien creatures moving in the distance\n"
                     "you feel a strange energy pulsing through the place"
                 )
+                from save_system import save_game
+                save_game(player)
+                print("game saved")
                 end_demo(player)
                 #alien_land_2(player) futur
                 return
-          
+            elif choice == "2":
+                bastion_entrance(player)
+                return
 def end_demo(player):
-    suspense_print("thank you for playing my demo i hope to see you in the reste of this adventure !!")
+    
+    suspense_print(
+        "as you explore the alien land you feel a strange sense of wonder and curiosity\n"
+        "but also a sense of danger and unease\n"
+        "you realize that this is just the beginning of your adventure\n"
+        "and that there is much more to discover and explore in this strange new world\n"
+        "thank you for playing my demo !! I hope to see you in the reste of this adventure !!"
+    )
+    
+
     return
         # Continue with Bastion storyline or activities
 

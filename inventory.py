@@ -528,7 +528,14 @@ ITEMS = {
         "description": "A rare four-leaf clover said to bring good luck.\n"
         "even luckier when plants dont grow in wasteland",
     },
-    
+    "strange_elixir": {
+        "name": "Strange Elixir",
+        "type": "consumable",
+        "skill_boost": {
+            "intelligence": 2
+        },
+        "description": "A glowing elixir that sharpens the mind.",
+    },
 #weapon________
     "magnum": {
         "name": "Magnum",

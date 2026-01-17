@@ -60,7 +60,8 @@ player = {
     "wasteland_stranger_near_farm_alive": False,#to use later
     "has_pass_hospital_road_count": 0,
     "has_seen_hospital_road_alien": False,
-
+    "medkit_encounter_done": False,
+    "has_deal_with_cactus": False,
     "farm_house_living_room_unlocked": False,
     "farm_house_fridge_searched": False,
     "farm_house_oven_searched": False,
@@ -103,6 +104,7 @@ player = {
     "way_toward_bastion_after_beast_count": 0,
     "way_toward_bastion_after_beast_luck_check_passed": False,
     "bastion_entrance_count": 0,
+    "bastion_gard_paid": False,
     "bastion_scout_quest_accepted": False,
     "has_rescued_bastion_scout": False,
     "complited_bastion_scout_quest": False,
@@ -114,6 +116,8 @@ player = {
     "old_factory_entrance_skill_check_passed": False,
     "old_factory_centipede_killed": False,
     "found_hospital_road_hideout": False,
+    "has_passed_wasteland_2_count": 0,
+    "wasteland_2_shroom_man_killed": False,
     #based on bastion system
     "became_bastion_scout": True,
     "bastion_rank": 1,
