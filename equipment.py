@@ -60,6 +60,20 @@ EQUIPMENT = {
         },
         "description": "Worn boots that have seen better days but still offer some protection and comfort."
     },
+    #IMPLENTS
+    "neural_implant": {
+        "slot": "implant",
+        "bonuses": {
+            "intelligence": 3,},
+        "description": (
+            "A cybernetic implant that enhances cognitive functions,\n"
+            "boosting intelligence and problem-solving abilities.\n"
+            "give you the ability to understand alien technology better"
+        ),
+        "flags": {
+            "understand_alien_language": True   
+        }
+    },
     #exoskeleton
     "old_exoskeleton": {
     "name": "Old Exoskeleton",

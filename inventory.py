@@ -489,6 +489,11 @@ ITEMS = {
         "name": "Left Body Note",
         "type": "note",
     },
+    "alien_tech_part": {
+        "name": "Alien Tech Part",
+        "type": "misc",
+        "description": "A fragment of alien technology. It hums faintly.",
+    },
     #_____Quest Items_____
     "radio_device": {
         "name": "Radio Device",
@@ -499,6 +504,10 @@ ITEMS = {
         "name": "Energy Core",
         "type": "quest_item",
         "description": "A near limitless power source used in military technology.",
+    },"scout_note": {
+        "name": "Scout Note",
+        "type": "note",
+        "description": "A hastily written note from a scout about alien activity.",
     },
     #_____Skill_Boosters_____
     #impliment later
@@ -536,6 +545,30 @@ ITEMS = {
         },
         "description": "A glowing elixir that sharpens the mind.",
     },
+    "bubbling_goo": {
+        "name": "Bubbling Goo",
+        "type": "consumable",
+        "skill_boost": {
+            "stamina": 2
+        },
+        "description": "A viscous substance that invigorates the body.",
+    },
+    "mutation_serum": {
+        "name": "Mutation Serum",
+        "type": "consumable",
+        "skill_boost": {
+            "stealth": 2
+        },
+        "description": "A serum that enhances stealth capabilities.",
+    },
+    "pulsing_vial": {
+        "name": "Pulsing Vial",
+        "type": "consumable",
+        "skill_boost": {
+            "carisma": 2
+        },
+        "description": "A vial containing a substance that enhances charisma.",
+    },
 #weapon________
     "magnum": {
         "name": "Magnum",
@@ -543,5 +576,20 @@ ITEMS = {
         "description": "A powerful handgun known for its stopping power.",
         "sell": 100,
         "buy": 300,
+    },
+    #ingredients for crafting______
+    "alien_biomass": {
+        "name": "Alien Biomass",
+        "type": "crafting_material",
+        "description": "Organic material harvested from alien creatures.",
+        "sell": 10,
+        "buy": 30,
+    },
+    "centipede_chitin": {
+        "name": "Centipede Chitin",
+        "type": "crafting_material",
+        "description": "Durable exoskeleton material from genetically modified centipedes.",
+        "sell": 8,
+        "buy": 25,
     },
 }

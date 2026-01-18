@@ -45,6 +45,9 @@ def resume_game(player):
     elif scene in ("body_search", "abandoned_outpost_body_search"):
         from rooms import body_search
         return body_search(player)
+    elif scene in ("old_factory_entrance",):
+        from rooms import old_factory_entrance
+        return old_factory_entrance(player)
     # TODO: add more scene mappings here
     return old_bunker(player)
 

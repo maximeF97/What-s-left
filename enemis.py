@@ -66,6 +66,44 @@ ENEMIES = {
         "It erupts into a monstrous form and crashes into you!"
     ]
 },
+"alien_soldier": {
+    "name": "Alien Soldier",
+    "health": 25,
+    "hit_chance": 80,
+    "damage": 10, 
+    "xp": 150,
+    "description": "A towering alien warrior clad in advanced armor, wielding a high-powered energy weapon.",
+    "attack_messages": [
+        "The alien soldier fires its energy weapon with deadly accuracy!"
+    ],
+    "miss_messages": [
+        "The blast sizzles past you, scorching the ground."
+    ],
+    "special_attack_chance": 0.2,
+    "special_attack_multiplier": 2.5,
+    "special_attack_messages": [
+        "The soldier charges up a massive energy blast and unleashes it!"
+    ]
+},
+"alien_scientist": {
+    "name": "Alien Scientist",
+    "health": 15,
+    "hit_chance": 70,
+    "damage": 6,
+    "xp": 100,
+    "description": "A cunning alien researcher, using advanced technology to manipulate the battlefield.",
+    "attack_messages": [
+        "The scientist shoots a burst of energy!"
+    ],
+    "miss_messages": [
+        "The gun misfires harmlessly."
+    ],
+    "special_attack_chance": 0.3,
+    "special_attack_multiplier": 2.0,
+    "special_attack_messages": [
+        "The scientist unleashes a devastating energy pulse!"
+    ]
+},
 
 # ---------------- HUMANOIDS ----------------
 
@@ -169,7 +207,7 @@ ENEMIES = {
     "special_attack_chance": 0.25,
     "special_attack_multiplier": 2.2,
     "special_attack_messages": [
-        "The centipede impales you with venomous fangs!"
+        "The centipede impales you with armored fangs!"
     ]
 },
 
@@ -184,9 +222,12 @@ ENEMIES = {
     "xp": 300,
     "attack_messages": [
         "The thing barrels toward you, flesh rippling unnaturally!"
+        "You hear bone grinding beneath its skin as it charges!"
     ],
     "miss_messages": [
         "It crashes past you, tearing chunks from the ground."
+        "It slams into the ground, leaving a smear of blood and fur behind."
+        
     ],
     "special_attack_chance": 0.3,
     "special_attack_multiplier": 2.5,

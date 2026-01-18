@@ -23,6 +23,57 @@ def _clamp(value: int, lo: int, hi: int) -> int:
     return max(lo, min(hi, value))
 
 
+def shoot_and_remove_ranged_ammo(player: Dict) -> int:
+    """
+    Player shoots with a ranged weapon.
+    Returns damage dealt, or 0 if no shot was fired.
+    """
+    inventory = player.get("inventory", {})
+
+    ranged_weapons = [
+        weapon for weapon in ("revolver", "shotgun", "alien_laser_rifle", "magnum", "rifle")
+        if weapon in inventory
+    ]
+
+    if not ranged_weapons:
+        print("You don't have any ranged weapons.")
+        return 0
+
+    print("Choose a weapon to shoot with:")
+    for i, weapon in enumerate(ranged_weapons, start=1):
+        weapon_data = WEAPONS[weapon]
+        ammo_type = weapon_data["ammo_type"]
+        ammo_count = inventory.get(ammo_type, 0)
+        print(f"{i}) {weapon.replace('_', ' ').title()} ({ammo_count} ammo)")
+
+    choice = get_choice()
+    if not choice.isdigit():
+        print("Invalid choice.")
+        return 0
+
+    index = int(choice) - 1
+    if index < 0 or index >= len(ranged_weapons):
+        print("Invalid choice.")
+        return 0
+
+    weapon = ranged_weapons[index]
+    weapon_data = WEAPONS[weapon]
+    ammo_type = weapon_data["ammo_type"]
+
+    if inventory.get(ammo_type, 0) <= 0:
+        print("Click. You're out of ammo.")
+        return 0
+
+    inventory[ammo_type] -= 1
+    damage = weapon_data.get("damage", 5)
+
+    print(f"You fire your {weapon.replace('_', ' ')} and deal {damage} damage!")
+
+    return damage
+
+
+
+
 def get_current_weapon(player: Dict) -> Tuple[Optional[str], Optional[Dict]]:
     weapon_name = player.get("weapon")
     if not weapon_name:

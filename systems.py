@@ -184,6 +184,7 @@ def equip_item(player: Dict, item: str) -> bool:
     player["equipment"][slot] = item
 
     # Handle multi-slot occupation
+    
     if info.get("flags", {}).get("occupies_hands"):
         player["equipment"]["hand"] = item
     if info.get("flags", {}).get("occupies_feet"):
@@ -198,24 +199,25 @@ def equip_item(player: Dict, item: str) -> bool:
    
 
 def unequip_item(player: Dict, slot: str) -> bool:
-    """
-    Unequip whatever is in the given slot: 'head', 'body', 'hand', or 'feet'.
-    """
     ensure_equipment_struct(player)
+
     if slot not in player["equipment"]:
         print(f"Unknown equipment slot: {slot}")
         return False
 
-    current = player["equipment"].get(slot)
-    if not current:
+    item = player["equipment"].get(slot)
+    if not item:
         print(f"No item equipped in {slot}.")
         return False
 
-    player["equipment"][slot] = None
-    _aggregate_equipment_bonuses(player)
-    print(f"Unequipped {current.replace('_', ' ')} from {slot}.")
-    return True
+    # Remove item from ALL slots it occupies
+    for s, equipped in player["equipment"].items():
+        if equipped == item:
+            player["equipment"][s] = None
 
+    _aggregate_equipment_bonuses(player)
+    print(f"Unequipped {item.replace('_', ' ')}.")
+    return True
 
 def inspect_item(player: Dict, item: str) -> None:
     """

@@ -1,7 +1,7 @@
 from unittest import result
 from systems import gain_xp, handle_global_input, get_choice, randomized_bonus_loot
 from Player import skill_check
-from combat import combats, get_current_weapon, player_attack
+from combat import combats, get_current_weapon, player_attack,shoot_and_remove_ranged_ammo
 import random
 from inventory import use_item, add_item,remove_item,ITEMS
 from enemis import get_enemy
@@ -2363,7 +2363,7 @@ def update_bat_phase(beast):
             "Blood sprays as it dives again and again!"
         ])
         suspense_print(
-            "The bat screams — something breaks inside it.\n"
+            "The bat screams something breaks inside it.\n"
             "Its movements become faster. Angrier."
         )
 
@@ -2384,7 +2384,6 @@ def update_bat_phase(beast):
         )
 def farm_house_attic(player):
     def build_beast(hp_bonus=0):
-
         if callable(get_enemy):
             try:
                 beast = get_enemy("hell_genetically_altered_bat")
@@ -3877,13 +3876,10 @@ def bastion_entrance(player):
             wasteland_4(player)
             return
         elif choice == "4" and player.get("bastion_scout_quest_accepted", False):
-            suspense_print("You head east toward the old factory to look for the missing scout."
-            )
             old_factory_way(player)
             return
         else:
-            suspense_print("Invalid choice.")
-    
+            suspense_print("Invalid choice.")  
 def Bastion_inside_job_offer(player):
     # Prevent re-offering the same quest
     if player.get("bastion_scout_quest_accepted", False):
@@ -3988,7 +3984,7 @@ def bastion_inside(player):
             engineer_dialogue(player)
         elif choice == "3":
             
-                if not player.get("bastion_full_clearance", False):
+                if  player.get("bastion_full_clearance", False):
                     suspense_print(
                         "A guard stops you.\n"
                         "\"That badge only grants access to the lower levels.\""
@@ -4017,11 +4013,14 @@ def sergeant_dialogue(player):
     else:
         sergeant_idle(player)
 def sergeant_recruitment(player):
-    
-    "\"Welcome to Bastion,\" the sergeant says.\n"
-    "\" we could use someone with your skills.\"\n"
-    "since you have already proven yourself il like to offer you a position as a scout\"\n"
-    "\"scouts are vital to our survival out here, we need people to go out and gather intel on alien movements and resources\""
+    suspense_print(
+        "\"Welcome to Bastion,\" the sergeant says.\n"
+        "\"We could use someone with your skills.\"\n\n"
+        "\"You’ve already proven yourself.\n"
+        "I’d like to offer you a position as a scout.\"\n\n"
+        "\"Scouts are vital to our survival.\n"
+        "We send them beyond the walls to track alien movement and resources.\""
+    )
     while True:  
         suspense_print("1) Accept the position as a scout")
         suspense_print("2) Decline the position")
@@ -4034,8 +4033,8 @@ def sergeant_recruitment(player):
         if choice == "1":
             suspense_print(
                 "\"Excellent,\" the sergeant says.\n"
-                "\"i already have a mission for you.\""
-                "i need you to go intro alien terrytory and scout an old abandoned military outpost\n"
+                "\"i already have a mission for you.\"\n"
+                "i need you to go into alien territory and scout an old abandoned military outpost\n"
                 "report back any findings and try to gather any useful resources you can find there\""
             )
             player["became_bastion_scout"] = True
@@ -4069,7 +4068,7 @@ def sergeant_scout_outpost(player):
     add_item(player, "coin", 150)
     gain_xp(player, 150)
 
-    player["scout_outpost_completed"] = False
+    player["scout_outpost_completed"] = True
     player["bastion_active_quest"] = "next_mission"
     player["bastion_rank"] += 1
 def sergeant_idle(player):
@@ -4087,7 +4086,7 @@ def engineer_dialogue(player):
             "The engineer looks up from a half-disassembled turret.\n"
             "His eyes widen as he sees the pile of alien tech you brought.\n\n"
             "\"By the rusted gears of Bastion…\"\n"
-            "\"With parts like these, I’ve reinforced the walls, upgraded the guns,\"\n"
+            "\"With parts like these, I’ve reinforced the walls, upgraded the guns,\n"
             "and patched weaknesses we didn’t even know we had.\"\n\n"
             "He wipes grease from his hands and nods at you.\n"
             "\"You’ve done more than most soldiers ever will.\"\n"
@@ -4112,10 +4111,14 @@ def engineer_dialogue(player):
 
     elif given >= 3 and not player.get("engineer_reward_3_given", False):
         suspense_print(
-            "The engineer grunts approvingly.\n"
-            "\"Not bad. These scraps already improved our power flow.\"\n"
-            "\"Bring me more and Bastion might actually survive this war.\""
+            "\"Thanks for the parts,\" the engineer says.\n"
+            "\"With these — and the files our scout brought back — I’ve made real progress.\"\n\n"
+            "He gestures you closer.\n"
+            "\"This neural implant should help you decipher their language.\"\n"
+            "\"Try not to fry your brain.\""
         )
+        add_item(player, "neural_implant", 1)
+        player["understand_alien_language"] = True
         add_item(player, "coin", 50)
         add_item(player, "shotgun_shells", 3)
         gain_xp(player, 50)
@@ -4152,16 +4155,14 @@ def engineer_dialogue(player):
             inventory = player.get("inventory", {})
             if inventory.get("alien_tech_part", 0) > 0:
                 remove_item(player, "alien_tech_part", 1)
-                player["has_given_alien_tech_to_engineer"] = (
-                    player.get("has_given_alien_tech_to_engineer", 0) + 1
-                )
+                player["has_given_alien_tech_to_engineer"] = given + 1
 
                 suspense_print(
                     "You hand over the alien tech.\n"
                     "The engineer examines it closely, nodding.\n"
                     "\"Yeah… this’ll keep a few more people alive.\""
                 )
-                return  # re-enter dialogue so milestone rewards can trigger
+                return  # clean re-entry for milestone check
 
             else:
                 suspense_print(
@@ -4175,7 +4176,6 @@ def engineer_dialogue(player):
         else:
             suspense_print("Invalid choice.")
 
- # 
 
 #OLD FACTORY AREA
 def old_factory_way(player):
@@ -4216,15 +4216,18 @@ def old_factory_way(player):
                 near_old_factory_secret(player)
                 return
 
-            elif skill_check(player, "luck", 30, visible=False):
+            elif skill_check(player, "luck", 30, visible=False) and not player.get("found_lucky_loot_near_factory", False):
+                player["found_lucky_loot_near_factory"] = True
                 suspense_print(
+                    "you got lucky searching the area.\n"
                     "You pry open a half-buried container.\n"
                     "Whatever hid it didn’t come back for it."
                 )
                 add_item(player, "coin", 15)
                 add_item(player, "healing_salve", 1)
 
-            elif skill_check(player, "scavenging", 50, visible=False):
+            elif skill_check(player, "scavenging", 50, visible=False) and not player.get("found_scavenged_loot_near_factory", False):
+                player["found_scavenged_loot_near_factory"] = True
                 suspense_print(
                     "Among the debris, you recover usable parts.\n"
                     "Scavenged. Not abandoned."
@@ -4323,7 +4326,7 @@ def hidden_camp(player):
     if not player.get("has_rescued_bastion_scout", False):
         suspense_print(
             "You see a scout camp overlooking the old factory.\n"
-            "Tracks go down — but none come back."
+            "Tracks go down but none come back."
         )
 
         while True:
@@ -4367,7 +4370,10 @@ def hidden_camp(player):
                 suspense_print("Invalid choice.")
     else:
         suspense_print("The scout camp is abandoned. Nothing left to do here.")
+
+#factory_inside
 def old_factory_entrance(player):
+    player["scene"] = "old_factory_entrance"
     if not player.get("old_factory_centipede_killed", False):
         suspense_print(
             "The old factory looms ahead.\n"
@@ -4479,16 +4485,807 @@ def old_factory_entrance(player):
             "Nothing moves now… at least, not outside."
         )
         old_factory_inside(player)
+        return
 def old_factory_inside(player):
     suspense_print(
         "You enter the old factory.\n"
         "The air is thick with dust and the scent of rust.\n"
         "Dim light filters through cracked windows, casting eerie shadows.\n"
         "You hear faint scuttling sounds deeper inside.\n"
+        "What do you do?")
+    suspense_print("1) Explore upstairs")
+    suspense_print("2) Explore the main floor")
+    suspense_print("3) Go down to the basement")
+    while True:
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            factory_first_floor(player)
+            return
+        elif choice == "2":
+            factory_main_floor(player)
+            return
+        elif choice == "3":
+            factory_basement(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def factory_first_floor(player):
+    if not player.get("factory_first_alien_killed", False):
+        suspense_print("you arrive up the stairs and hear faint noises coming from behind a door\n"
+                    "what do you do ?")
+        while True:
+            suspense_print("1) open the door")
+            suspense_print("2) go back downstairs")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                alien_fight(player)
+                return
+            elif choice == "2":
+                old_factory_inside(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+    else:
+        suspense_print("you arrive up the stairs but the area is eerily silent\n")
+        while True:
+            suspense_print("1) advance to the next room")
+            suspense_print("2)check the crates")
+            suspense_print("3) go back downstairs")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                factory_first_floor_next_room(player)
+                return
+            elif choice == "2":
+                if not player.get("factory_first_floor_crates_looted", False):
+                    suspense_print(
+                        "you check the crates and find some useful items\n"
+                        "there is also some slimy alien armor, a shame no man can fit it\n"
+                    )
+                    add_item(player, "weird_fruit", 1)
+                    add_item(player, "alien_energy_cell", 1)
+                    player["factory_first_floor_crates_looted"] = True
+                else:
+                    suspense_print("The crates are empty. Whatever was useful is gone.")
 
+            elif choice == "3":
+                old_factory_inside(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+def factory_first_floor_next_room(player):
+    if player.get("has_help_bastion_scout", False) and "scout_files"in player.get("inventory", {}):
+        scout_second_talk(player)
+    elif not player.get("has_help_bastion_scout", False):
+        scout_first_talk(player)
+    else:
+        suspense_print(
+            "The scout sits weakly against the table.\n"
+            "\"Please… the files are in the basement lab.\"\n"
+            "\"I can’t leave without them.\""
+        )
+def scout_first_talk(player):
+    suspense_print("you enter the next room and see a man staped to a table\n"
+                   "he looks weak and injured\n"
+                   "he looks at you with pleading eyes,he feats the scout description\n")
+    while True:
+        suspense_print("1) help him")
+        suspense_print("2) ask him who he is")
+        suspense_print("3) go back")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print("you carefully untap him from the table\n"
+                           "he winces in pain but thanks you\n"
+                           "\"thank you stranger i thought i was done for\"\n"
+                            "\"i was sent here to scout this factory but i got captured by aliens\"\n"
+                            "\"they were experimenting on me and others there is a lab in the basement where they keep files\"\n"
+                            "\"i cant leave without those files\"\n"
+                            "\"if you can get those files it would help bastion a lot\"\n")
+            player["has_help_bastion_scout"] = True
+            return
+        elif choice == "2":
+            if skill_check(player, "perception", 40) and not player.get("has_verified_scout_identity", False):
+                player["has_verified_scout_identity"] = True
+                suspense_print("you look closely at him, nothing about him seems off\n")
+                gain_xp(player, 20)
+            else:
+                suspense_print("he looks too weak to be lying about anything\n")
+            suspense_print("please i need your help\n"
+                           "free me from these bonds\n")
+        elif choice == "3":
+            factory_first_floor(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def scout_second_talk(player): 
+    suspense_print("you enter the next room and see the scout binding his wounds\n"
+                   "he looks at you with gratitude\n"
+                     "\"I can't believe you got those files\"\n" 
+                        "\"this will help bastion a lot thank you\"\n")
+    while True:
+        suspense_print("1) ask about the computer downstairs")
+        suspense_print("2) go back")
+        if "scout_files" in player.get("inventory", {}):
+            suspense_print("3) Give him the files")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "3" and not  "scout_files" in player.get("inventory", {}):
+            suspense_print("you dont have the files to give him")
+        elif choice == "3" and "scout_files" in player.get("inventory", {}):
+            if player.get("has_rescued_bastion_scout", False):
+                suspense_print("The scout has already secured the files and thanks you again.")
+                continue
+            suspense_print("thank you so much stranger\n"
+                           "with these files bastion will be able to plan better defenses against the aliens\n"
+                            "there is a lot of info about alien tech i think the engineer at bastion will be very interested in this\n")    
+            gain_xp(player, 50)
+            add_item(player, "coin", 100)
+            remove_item(player, "scout_files", 1)
+            player["has_rescued_bastion_scout"] = True
+            suspense_print(
+                "The scout gathers his strength.\n"
+                "\"I’ll head back to Bastion as soon as I can walk.\"\n"
+                "\"You should return too. They’ll want to hear from you.\""
+)       
+            old_factory_inside(player)
+
+            return
+        elif choice == "1":
+            suspense_print("\"the computer downstairs ?\"\n"
+                           "\"i saw some aliens using it to log data about their experiments\"\n"
+                           "\"but there is no way to use it without deciphering their language\"\n")
+            
+        elif choice == "2":
+            factory_first_floor(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def alien_fight(player):
+    suspense_print("you open the door and see a alien creature rummaging through some crates\n"
+                   "it does not seem to have noticed you yet")
+    suspense_print("what do you do ?")
+    while True:
+        suspense_print("1) sneak attack")
+        suspense_print("2) shoot it")
+        suspense_print("3) analyze it")
+        suspense_print("4) go back")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if skill_check(player, "stealth", 40):
+                suspense_print("you successfully sneak attack the alien")
+                alien = get_enemy("alien_soldier")
+                alien["health"] -= 10
+                won = fight_enemy(player, alien)
+                if won:
+                    suspense_print("you have defeated the alien")
+                    add_item(player, "weird_fruit", 1)
+                    add_item(player, "alien_energy_cell", 2)
+                    player["factory_first_alien_killed"] = True
+                    return
+                else:
+                    game_over()
+                    return
+            else:
+                suspense_print("the alien notices you as you try to sneak attack it")
+                alien = get_enemy("alien_soldier")
+                won = fight_enemy(player, alien)
+                alien["health"] += 5
+                if won:
+                    suspense_print("you have defeated the alien")
+                    gain_xp(player, 100)
+                    add_item(player, "weird_fruit", 1)
+                    add_item(player, "alien_energy_cell", 2)
+                    player["factory_first_alien_killed"] = True
+                    return
+                else:
+                    game_over()
+                    return
+        elif choice == "2":
+            damage = shoot_and_remove_ranged_ammo(player)
+            if damage <= 0:
+                return  # no shot fired
+
+            suspense_print("The alien screeches in pain!")
+            alien = get_enemy("alien_soldier")
+            alien["health"] -= damage
+
+            won = fight_enemy(player, alien)
+            if won:
+                suspense_print("you have defeated the alien")
+                gain_xp(player, 100)
+                add_item(player, "weird_fruit", 1)
+                add_item(player, "alien_energy_cell", 2)
+                player["factory_first_alien_killed"] = True
+                return
+            else:
+                game_over()
+                return
+        elif choice == "3":
+            if skill_check(player, "intelligence", 40):
+                suspense_print("you analyze the alien and find its weak spots\n" \
+                "it can't breathe our air well, if we shoot his scafender it will be easier to fight\n"
+                               "you feel more confident fighting it")
+                gain_xp(player, 20)
+            else:
+                suspense_print("you try to analyze the alien but fail to find anything useful\n")
+        elif choice == "4":
+            factory_first_floor(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def factory_main_floor(player):
+    suspense_print("you enter the main hall you hear machinery humming faintly\n"
+                   "but before you there is only a long empty corridor leading deeper into the factory\n")
+    if skill_check(player, "perception", 40, visible=False):
+        suspense_print("you see red laser tripwires across the corridor\n")
+        player["has_seen_laser_tripwires"] = True
+    suspense_print("what do you do ?")
+    while True:
+        suspense_print("1) go down the corridor")
+        suspense_print("2) look around the hall")   
+        suspense_print("3) go back") 
+        suspense_print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if player.get("has_seen_laser_tripwires", False):
+                suspense_print("you carefully avoid the laser tripwires and move down the corridor safely\n")
+                factory_machine_room(player)
+                return
+            else:
+                player["factory_main_turret_destroyed"] = True
+                suspense_print("as you move down the corridor you suddenly hear a beep\n"
+                               "you triggered a laser tripwire\n"
+                               "suddenly turrets emerge from the walls and open fire on you\n")
+                turret = get_enemy("turret")
+                won = fight_enemy(player, turret)
+                if won:
+                    player["factory_main_turret_destroyed"] = True
+                    suspense_print("you have destroyed the turret and can now proceed down the corridor safely,the laser tripwires turn off\n")
+                    factory_machine_room(player)
+                    return
+                else:
+                    game_over()
+                    return
+        elif choice == "2":
+            suspense_print("you look around the hall but find nothing of interest\n")
+        elif choice == "3":
+            old_factory_inside(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def factory_machine_room(player):
+    if not player.get("factory_machine_room_cleared", False):
+        suspense_print("you arrive in a large room filled with machinery\n"
+                   "barely funtioning generators and conveyor belts creak and hum\n"
+                   "you see a man against a wall it look hurt but alive\n")
+        while True:
+            suspense_print("1) talk to the man")
+            suspense_print("2) look around the room")
+            suspense_print("3) help the man")
+            suspense_print("4) shoot the man")
+            suspense_print("5) go back")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print(
+                    "please i need your help\n"
+                    "they captured me and experimented on me\n"
+                    "im a scout for bastion please help me get out of here\n"
+                )
+
+                # Player already helped a Bastion scout earlier
+                if player.get("has_help_bastion_scout", False):
+                    suspense_print(
+                        "Something doesn't sit right.\n"
+                        "You already helped a Bastion scout upstairs.\n"
+                    )
+
+                    # Perception check – physical tells
+                    if skill_check(player, "perception", 40):
+                        suspense_print(
+                            "You notice his breathing is irregular.\n"
+                            "His shadow flickers unnaturally against the machinery.\n"
+                            "This man is hiding something.\n")
+                        if player.get("suspect_metamorph", False):
+                            gain_xp(player, 10)
+
+                        
+                        player["suspect_metamorph"] = True
+
+                    # Intelligence check – logical contradiction
+                    elif skill_check(player, "intelligence", 40):
+                        suspense_print(
+                            "His story doesn't add up.\n"
+                            "a scout would have left not gone deeper.\n"
+                            "You suspect deception.\n"
+                        )
+                        if player.get("suspect_metamorph", False):
+                                gain_xp(player, 10)
+                        player["suspect_metamorph"] = True
+
+                    else:
+                        suspense_print(
+                            "Despite your doubts, you can't find solid proof.\n"
+                            "Maybe you're just being paranoid.\n"
+                        )
+
+                else:
+                    suspense_print(
+                        "He looks terrified and exhausted.\n"
+                        "If he's lying, he's very convincing.\n"
+                    )
+
+            elif choice == "2":
+                
+                if skill_check(player, "intelligence", 40) and not player.get("machine_room_looted", False):
+
+                    suspense_print("you look around the room and find a gear that dosent seem to belong here\n"
+                                   "upon closer inspection you find a hidden compartment with some useful items\n")
+                    gain_xp(player, 20)
+                    add_item(player, "alien_energy_cell", 1)
+                    add_item(player, "rifled_ammo", 2)
+                    add_item(player, "coin", 50)
+                    player["machine_room_looted"] = True
+
+                else:
+                    suspense_print("you look around nothings seams out of place\n")
+            elif choice == "3":
+                
+                if player.get("suspect_metamorph", False):
+                    suspense_print(
+                        "You keep your distance as you approach.\n"
+                        "The moment he moves, you are ready.\n"
+                        "The disguise melts away — an alien metamorph!\n"
+                    )
+                    alien_metamorph = get_enemy("alien_metamorph")
+                    alien_metamorph["health"] -= 8  # advantage for being cautious
+                else:
+                    suspense_print(
+                        "You come closer to help the man.\n"
+                        "Suddenly he launches a spike at you!\n"
+                        "The flesh twists and reforms — an alien metamorph!\n"
+                    )
+                    player["health"] -= 6
+                    alien_metamorph = get_enemy("alien_metamorph")
+
+                won = fight_enemy(player, alien_metamorph)
+
+                if won:
+                    suspense_print("you have defeated the alien metamorph\n")
+                    gain_xp(player, 100)
+                    add_item(player, "alien_biomass", 2)
+                    add_item(player, "bubbling_goo", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["factory_machine_room_cleared"] = True
+                    player["suspect_metamorph"] = False
+                    return
+                else:
+                    game_over()
+                    return
+            elif choice == "4":
+                damage = shoot_and_remove_ranged_ammo(player)
+                if damage <= 0:
+                    return  # no shot fired
+                
+                suspense_print("you shoot the man,it turns back to you with glowing eyes\n"
+                               "change forms and lunches at you\n")
+                alien_metamorph = get_enemy("alien_metamorph")
+                if player.get("suspect_metamorph", False):
+                    alien_metamorph["health"] -= damage + 5
+                else:
+                    alien_metamorph["health"] -= damage
+                won = fight_enemy(player, alien_metamorph)
+                if won:
+                    suspense_print("you have defeated the alien metamorph\n")
+                    gain_xp(player, 100)
+                    add_item(player, "alien_biomass", 2)
+                    add_item(player, "bubbling_goo", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["factory_machine_room_cleared"] = True
+                    player["suspect_metamorph"] = False
+                else:
+                    game_over()
+                    return
+            elif choice == "5":
+                factory_main_floor(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+    else:
+        suspense_print("the room is eerily silent now that the alien threat has been eliminated\n"
+                       "there is nothing more to do here\n")
+        old_factory_inside(player)  
+def factory_basement(player):
+    suspense_print("you head down to the basement\n"
+                   "the air is damp and musty\n"
+                   "you hear crawling sounds coming from the shadows\n")
+    while True:
+        if not player.get("kill_the_centipedes", False):
+            suspense_print("1) explore the basement")
+            suspense_print("2) go back")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print("as you go down you see glowing eyes in the darkness\n"
+                            "the sound of claping mandibles grows louder\n" \
+                            "you see moving shadows all around you\n"
+                                "suddenly armored giant centipede jump at you from the shadows\n")
+                enemies = [get_enemy("armored_giant_centipede") for _ in range(2)]
+                won = fight_multiple_enemies(player, enemies)   
+                if won:
+                    suspense_print("you have defeated the armored giant centipedes\n")
+                    gain_xp(player, 150)
+                    add_item(player, "centipede_chitin", 4)
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_power_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["kill_the_centipedes"] = True
+                    alien_lab_basement(player)
+                    return
+                else:
+                    game_over()
+                    return
+            elif choice == "2":
+                old_factory_inside(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+        else:
+            suspense_print("the basement is eerily silent now that the centipede threat has been eliminated\n"
+                           "there is nothing more to do here\n")
+            while True: 
+                suspense_print("1) go in the lab")
+                suspense_print("2) go back")
+                choice = get_choice()
+                if handle_global_input(choice, player):
+                    continue
+                if choice == "1":
+                    alien_lab_basement(player)
+                    return
+                elif choice == "2":
+                    old_factory_inside(player)
+                    return
+                else:
+                    suspense_print("Invalid choice.")
+def update_kapibara_phase(beast):
+    """Mutate the boss based on remaining health."""
+    max_hp = beast.get("max_health", beast["health"])
+    current_hp = beast["health"]
+    hp_pct = current_hp / max_hp
+
+    # Phase 2: Aberrant Frenzy
+    if hp_pct <= 0.6 and not beast.get("phase_2", False):
+        beast["phase_2"] = True
+        beast["damage"] += 2
+        beast["special_attack_chance"] = 0.35
+
+        beast["attack_messages"].extend([
+            "Its spine splits with a wet crack as it lunges!",
+            "Jagged bone tears through its hide as it slams into you!",
+            "It moves wrong — joints bending where they shouldn't!"
+        ])
+
+        beast.setdefault("miss_messages", []).extend([
+            "It crashes into the ground, spraying blood and dirt everywhere."
+        ])
+
+        suspense_print(
+            "The creature SCREAMS — not in rage, but in agony.\n"
+            "Bones push outward beneath its skin, tearing through fur and flesh.\n"
+            "It staggers… then steadies itself.\n"
+            "Whatever it was, it isn't anymore."
+        )
+
+    # Phase 3: Terminal Mutation
+    if hp_pct <= 0.25 and not beast.get("phase_3", False):
+        beast["phase_3"] = True
+        beast["damage"] += 3
+        beast["special_attack_chance"] = 0.5
+        beast["special_attack_multiplier"] = 3.0
+
+        beast["attack_messages"].extend([
+            "Its jaw unhinges with a sickening snap as it charges!",
+            "Acidic fluid pours from its mouth as it throws itself at you!",
+            "It collapses — then drags itself forward on broken limbs!"
+        ])
+
+        beast.setdefault("special_attack_messages", []).extend([
+            "Its chest bursts open as it hurls itself at you in a final, screaming charge!"
+        ])
+
+        suspense_print(
+            "The creature should be dead.\n"
+            "Its body is failing — organs exposed, movements erratic.\n"
+            "Yet it keeps coming, driven by something that refuses to let it die.\n"
+            "This is no longer a fight for survival.\n"
+            "It is a corpse lashing out."
+        )
+#boss fight functions
+def mutated_capibara_intro_attack(player, boss):
+    suspense_print(
+        "\nThe container explodes open!\n"
+        "The mutated capibara slams its fists into the ground,\n"
+        "releasing a psychic shockwave!\n"
     )
-    
-    
+
+    damage = 12 + boss.get("level", 1) * 2
+    player["health"] -= damage
+
+    suspense_print(f"You take {damage} damage before the fight even begins!\n")
+
+    if player["health"] <= 0:
+        game_over()
+        return False
+
+    boss["intro_used"] = True
+    return True
+def mutated_capibara_death(boss):
+    suspense_print(
+        "\nThe mutated capibara lets out a final distorted scream.\n"
+        "Its body begins to convulse as the alien mutations destabilize.\n"
+        "Glowing veins rupture, releasing a blinding flash of energy!\n"
+        "With a thunderous crash, the creature collapses — finally still.\n"
+    )
+def alien_lab_basement(player):
+    def build_mutated_capibara():
+        capibara = get_enemy("mutated_capibara")
+        capibara["max_health"] = capibara["health"]
+        capibara["phase_2"] = False
+        capibara["phase_3"] = False
+        update_kapibara_phase(capibara)
+        return capibara
+    if not player.get("old_factory_boss_killed", False):
+        suspense_print(
+            "You enter a lab filled with alien equipment.\n"
+            "Strange lights pulse across glass tanks and metal restraints.\n\n"
+            "An alien scientist works frantically at a console.\n"
+            "It freezes when it sees you.\n\n"
+            "Without a word, it slams a control panel.\n"
+            "A reinforced container unlocks with a heavy CLANG.\n\n"
+            "Something inside MOVES.\n"
+            "A deep, wet growl reverberates through the lab.\n\n"
+            "The alien recoils in terror — then vanishes through a hidden door."
+        )
+
+        Boss = build_mutated_capibara()
+        mutated_capibara_intro_attack(player, Boss)
+        won = fight_enemy(player, Boss)
+        
+        if won:
+            mutated_capibara_death(Boss)
+            suspense_print("you have defeated the mutated capibara\n"
+                           "the alien scientist must have fled through the hidden door\n"
+                           "you search the lab and find some useful items\n")
+            gain_xp(player, 200)
+            add_item(player, "alien_tech_part", 1)
+            add_item(player, "healing_salve", 2)
+            add_item(player, "mutation_serum", 1)
+            randomized_bonus_loot(
+                player,
+                {"alien_power_cell": (1, 2), "rifled_ammo": (2, 4)}
+            )
+            player["old_factory_boss_killed"] = True
+            alien_lab_basement_after_boss(player)
+            return
+        else:
+            game_over()
+            return
+    else:
+        alien_lab_basement_after_boss(player)
+
+def alien_lab_basement_after_boss(player):
+    suspense_print("the lab is now silent after the battle\n"
+                   "the pustuled remains of the mutated capibara lie on the floor\n"
+                   "there is nothing more to do here\n")
+    while True:
+        suspense_print("1) go back upstairs")
+        suspense_print("2) open the door the alien scientist fled through")
+        suspense_print("3) look around the lab")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+                old_factory_inside(player)
+                return   
+        elif choice == "2":
+            if not player.get("dealt_with_alien_scientist", False):
+                suspense_print("you pry open the hidden door and enter a small room\n")
+                factory_alien_scientist_encounter(player)
+                return
+            else:
+                suspense_print("you enter the secret room again")
+                secret_factory_room(player)
+                return
+        elif choice == "3":
+            suspense_print("you look around the lab there is many twistedand amorphous creatures in vats\n"
+                           "some seem to be alien experiments others look like mutated animals\n"
+                           "you find some useful items among the lab equipment\n")
+            add_item(player, "pulsing_vial", 1)
+            add_item(player, "alien_energy_cell", 1)
+        else:
+            suspense_print("Invalid choice.")
+def factory_alien_scientist_encounter(player):
+    suspense_print(
+        "The alien scientist hunches over a flickering console.\n"
+        "Its elongated fingers tremble as they dance across alien symbols.\n\n"
+        "Slowly… it turns toward you.\n"
+        "Its eyes are too large. Too wet.\n"
+        "For a moment, neither of you moves.\n"
+    )
+
+    def resolve_scientist_fight(alien_scientist):
+        won = fight_enemy(player, alien_scientist)
+        if won:
+            suspense_print(
+                "The alien collapses in a heap of twitching limbs.\n"
+                "Its weapon clatters to the floor, still humming softly.\n\n"
+                "You search the room, ignoring the smell of burned flesh.\n"
+            )
+            gain_xp(player, 150)
+            add_item(player, "scout_note", 1)
+            add_item(player, "healing_salve", 1)
+            randomized_bonus_loot(
+                player,
+                {"alien_power_cell": (1, 2), "rifled_ammo": (2, 4)}
+            )
+            player["dealt_with_alien_scientist"] = True
+            secret_factory_room(player)
+        else:
+            game_over()
+
+    while True:
+        suspense_print("1) ask why it is experimenting on creatures")
+        suspense_print("2) demand it surrender")
+        suspense_print("3) shoot it")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        alien_scientist = get_enemy("alien_scientist")
+
+        if choice == "1":
+            suspense_print(
+                "The alien tilts its head at an impossible angle.\n"
+                "It chatters rapidly in a wet, clicking language.\n\n"
+                "You feel like it's explaining something.\n"
+                "Something terrible.\n\n"
+                "Suddenly, its hand snaps toward a weapon.\n"
+            )
+            resolve_scientist_fight(alien_scientist)
+            return
+
+        elif choice == "2":
+            suspense_print(
+                "The alien recoils, pressing itself against the console.\n"
+                "A thin, shrill sound escapes its throat.\n\n"
+                "Then fear turns to desperation.\n"
+                "It raises its weapon and fires.\n"
+            )
+            resolve_scientist_fight(alien_scientist)
+            return
+
+        elif choice == "3":
+            shot = shoot_and_remove_ranged_ammo(player)
+            if shot:
+                suspense_print(
+                    "You fire.\n"
+                    "The shot tears into the alien’s torso.\n"
+                    "It shrieks — a sound halfway between pain and rage.\n"
+                )
+                alien_scientist["health"] -= 8
+            else:
+                suspense_print(
+                    "You fumble for a weapon — but nothing fires.\n"
+                    "The alien notices.\n"
+                )
+
+            suspense_print(
+                "Before you can react, it retaliates with its energy weapon.\n"
+            )
+            resolve_scientist_fight(alien_scientist)
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+def secret_factory_room(player):
+    suspense_print(
+        "You slip into the hidden chamber the alien fled into.\n"
+        "The air here is warmer. Damp.\n"
+        "Strange organic machinery lines the walls, softly pulsing.\n\n"
+        "Research notes are scattered across metal tables.\n"
+        "Some are stained with something dark.\n\n"
+        "At the far end of the room, a data console hums quietly.\n"
+    )
+
+    while True:
+        suspense_print("1) look around the room")
+        suspense_print("2) examine the console")
+        suspense_print("3) go back upstairs")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            if not player.get("secret_room_looted", False):
+                suspense_print(
+                    "You force yourself to search the room.\n"
+                    "Every surface feels… wrong.\n\n"
+                    "Among the alien instruments, you recover a few intact items.\n"
+                )
+                add_item(player, "alien_tech_part", 1)
+                add_item(player, "strange_elixir", 1)
+                player["secret_room_looted"] = True
+            else:
+                suspense_print(
+                    "You search the room again.\n"
+                    "There is nothing left — only the quiet hum of alien machines.\n"
+                )
+
+        elif choice == "2":
+            suspense_print(
+                "You approach the console.\n"
+                "Its surface ripples slightly under your touch.\n"
+            )
+
+            if player.get("understand_alien_language", False):
+                suspense_print(
+                    "The symbols begin to make sense.\n\n"
+                    "Experiment logs scroll across the screen:\n\n"
+                    "• Gene splicing between local fauna and alien biomass\n"
+                    "• Aggression amplification protocols\n"
+                    "• Failure rates marked in red\n\n"
+                    "One entry repeats again and again:\n"
+                    "\"HOST FORM UNSTABLE\"\n\n"
+                    "Near the end, a final section appears:\n"
+                    "\"COLONIZATION TRIAL — PLANET VIABLE\"\n\n"
+                    "They weren’t just experimenting.\n"
+                    "They were preparing replacements.\n"
+                )
+                player["learned_alien_plan"] = True
+            else:
+                suspense_print(
+                    "The symbols crawl and shift as you stare at them.\n"
+                    "You recognize patterns… but no meaning.\n\n"
+                    "Whatever this console contains, it was never meant for humans.\n"
+                )
+
+        elif choice == "3":
+            suspense_print(
+                "You turn away from the alien machinery.\n"
+                "The feeling of being watched lingers as you leave the room.\n"
+            )
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+
+
+
+
+#ALIEN LAND AREA
 def alien_land_1(player): # to finish
         suspense_print(
             "You arrived in a strange land full of alien flora and fauna\n"
