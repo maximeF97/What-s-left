@@ -1,7 +1,7 @@
 import random
 from systems import level_up, skill_check
 player = {
-    "health": 10,
+    "health": 15,
     "max_health": 15,
     "base_health": 15,
     "inventory": {},

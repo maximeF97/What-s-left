@@ -97,7 +97,7 @@ def choose_weapon(player: Dict) -> None:
     inventory = player.get("inventory", {})
     _default_melee(player)
 
-    firearms = [gun for gun in ("revolver", "shotgun", "alien_laser_rifle") if gun in inventory]
+    firearms = [gun for gun in ("revolver", "shotgun", "alien_laser_rifle","rifle","magnum") if gun in inventory]
 
     if not firearms:
         print("You ready your melee weapon.")
@@ -141,13 +141,13 @@ def player_attack(player: Dict, enemy: Dict) -> bool:
         ammo_key = weapon["ammo_type"]
         if inventory.get(ammo_key, 0) <= 0:
             print("Click! You're out of ammo.")
-            _default_melee(player)
+            choose_weapon(player)
             weapon_name, weapon = get_current_weapon(player)
         else:
             # Attempt to consume one ammo; if it fails, fallback to melee
             if not remove_item(player, ammo_key, 1):
                 print("Click! You're out of ammo.")
-                _default_melee(player)
+                choose_weapon(player)
                 weapon_name, weapon = get_current_weapon(player)
 
     # Luck can slightly improve hit chance

@@ -1,5 +1,6 @@
 from equipment import EQUIPMENT
 import random
+from text_effect import suspense_print
 # -----------------------------
 # Input helper (local, safe)
 # -----------------------------
@@ -106,11 +107,11 @@ def has_item(player, item, amount=1):
 def use_consumable(player: dict, item_id: str) -> bool:
     item = ITEMS.get(item_id)
     if not item or item.get("type") != "consumable":
-        print("That item cannot be used.")
+        suspense_print("That item cannot be used.")
         return False
 
     if player.get("inventory", {}).get(item_id, 0) <= 0:
-        print("You don't have that item.")
+        suspense_print("You don't have that item.")
         return False
 
     # Apply skill boosts
@@ -122,7 +123,7 @@ def use_consumable(player: dict, item_id: str) -> bool:
 
     remove_item(player, item_id, 1)
 
-    print(f"You use {item['name']}. You feel more capable.")
+    suspense_print(f"You use {item['name']}. You feel more capable.")
     return True
 
 from combat import take_damage,heal_player
@@ -285,7 +286,7 @@ def read_note(player, note_id):
 # -----------------------------
 def use_item(player):
     if not player["inventory"]:
-        print("You have nothing to use.")
+        suspense_print("You have nothing to use.")
         return
 
     items = list(player["inventory"].keys())
@@ -296,19 +297,19 @@ def use_item(player):
 
     choice = get_choice()
     if not choice.isdigit():
-        print("Invalid choice.")
+        suspense_print("Invalid choice.")
         return
 
     index = int(choice) - 1
     if index < 0 or index >= len(items):
-        print("Invalid item.")
+        suspense_print("Invalid item.")
         return
 
     item_id = items[index]
     data = ITEMS.get(item_id)
 
     if not data:
-        print("You don’t understand how to use this.")
+        suspense_print("You don’t understand how to use this.")
         return
 
     item_type = data.get("type", "misc")
@@ -329,13 +330,13 @@ def use_item(player):
 
         remove_item(player, item_id, 1)
 
-        print(f"You use the {data['name']}.")
+        suspense_print(f"You use the {data['name']}.")
         if heal:
-            print(f"+{heal} health")
+            suspense_print(f"+{heal} health")
         if max_bonus:
-            print("You feel changed.")
+            suspense_print("You feel changed.")
 
-        print(f"Health: {player['health']}/{player['max_health']}")
+        suspense_print(f"Health: {player['health']}/{player['max_health']}")
         return
 
     # -------- NOTE --------
@@ -370,6 +371,13 @@ ITEMS = {
         "heal": 3,
         "sell": 1,
         "buy": 3,
+    },
+    "advance_medkit": {
+        "name": "Advance Medkit",
+        "type": "consumable",
+        "heal": 10,
+        "sell": 10,
+        "buy": 20,
     },
     "canned_food": {
         "name": "Canned Food",

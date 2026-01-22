@@ -196,7 +196,7 @@ ENEMIES = {
     "name": "Armored Giant Centipede",
     "health": 30,
     "hit_chance": 70,
-    "damage": 8,
+    "damage": 6,
     "xp": 250,
     "attack_messages": [
         "The armored centipede slams into you!"

@@ -8,6 +8,14 @@ EQUIPMENT = {
         },
         "description": "A pristine cowboy hat. Somehow untouched by the wasteland."
     },
+    "tactical_helmet": {
+        "slot": "head",
+        "bonuses": {
+            "endurance": 3,
+            "damage_reduction": 3
+        },
+        "description": " Helmet designed for precision work and durability"
+    },
     "respirator": {
        "slot": "head",
     "bonuses": {
@@ -46,6 +54,7 @@ EQUIPMENT = {
     "tactical_gloves": {
         "slot": "hand",
         "bonuses": {
+            "damage_reduction": 1,
             "lockpicking": 2,
             "scavenging": 1
         },
@@ -59,6 +68,14 @@ EQUIPMENT = {
             "luck": 1
         },
         "description": "Worn boots that have seen better days but still offer some protection and comfort."
+    },
+    "tactical_boots": {
+        "slot": "feet",
+        "bonuses": {
+            "stamina": 2,
+            "damage_reduction": 2,
+        },
+        "description": "Boots designed for precision work and durability "
     },
     #IMPLENTS
     "neural_implant": {

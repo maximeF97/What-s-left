@@ -9,7 +9,7 @@ make intro beter in survivor base with each questline
 work on wastland 2
 make it millitary recharche base
 make a concequence toward leting wounded woman leave or not
-
+fixe inventory back
 
 
 

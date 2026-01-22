@@ -3448,7 +3448,7 @@ def wasteland_4(player):
     while True:
         suspense_print("1) Continue toward the city")
         suspense_print("2) Look around")
-        suspense_print("3) Go back to the hospital")
+        suspense_print("3) Go  to the hospital")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -3694,6 +3694,7 @@ def wonded_woman_encounter(player):
             if won:
                 suspense_print("The creature collapses, its outline finally visible.")
                 add_item(player, "alien_energy_cell", 1)
+                add_item(player, "tactical_boots",1)
                 randomized_bonus_loot(
                     player,
                     {"coin": (10, 20), "alien_power_cell": (1, 2)}
@@ -3729,6 +3730,7 @@ def wonded_woman_encounter(player):
             if won:
                 suspense_print("The creature collapses, its outline finally visible.")
                 add_item(player, "alien_energy_cell", 1)
+                add_item(player, "tactical_boots",1)
                 randomized_bonus_loot(
                     player,
                     {"coin": (10, 20), "alien_power_cell": (1, 2)}
@@ -3781,8 +3783,30 @@ def bastion_entrance(player):
             "The massive gates open fully.\n\n"
             "You are allowed into Bastion."
         )
-        bastion_inside(player)
-        return
+        while True:
+        
+            suspense_print("1) Enter")
+            suspense_print("2) go toward hospital")
+            suspense_print("3) Go toward old factory")
+            suspense_print("4) Go in alien land")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+
+            if choice == "1":
+                bastion_inside(player)
+                return
+            elif choice =="2":
+                wasteland_4(player)
+                return
+            elif choice=="3":
+                old_factory_way(player)
+                return
+            elif choice == "4":
+                alien_land_1(player)
+                return
+            else:
+                suspense_print("incorect choice")
 
     # --- Repeat visit → job offer ---
     if player.get("bastion_entrance_visited", False) and player["bastion_entrance_count"] >= 4:
@@ -3960,6 +3984,8 @@ def bastion_inside(player):
         suspense_print("1) Explore the courtyard")
         suspense_print("2) Check out the heavy machinery")
         suspense_print("3) Go down to the underground levels")
+        suspense_print("4) Go outside")
+        
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -3984,7 +4010,7 @@ def bastion_inside(player):
             engineer_dialogue(player)
         elif choice == "3":
             
-                if  player.get("bastion_full_clearance", False):
+                if  not player.get("bastion_full_clearance", False):
                     suspense_print(
                         "A guard stops you.\n"
                         "\"That badge only grants access to the lower levels.\""
@@ -3997,6 +4023,9 @@ def bastion_inside(player):
                     )
                     Bastion_main(player)
                     # Implement underground Bastion levels here
+        elif choice == "4":
+            bastion_entrance(player)
+            return
         else:
             suspense_print("Invalid choice.")    
 def Bastion_main(player):
@@ -4112,7 +4141,7 @@ def engineer_dialogue(player):
     elif given >= 3 and not player.get("engineer_reward_3_given", False):
         suspense_print(
             "\"Thanks for the parts,\" the engineer says.\n"
-            "\"With these — and the files our scout brought back — I’ve made real progress.\"\n\n"
+            "\"With these and the files our scout brought back I’ve made real progress.\"\n\n"
             "He gestures you closer.\n"
             "\"This neural implant should help you decipher their language.\"\n"
             "\"Try not to fry your brain.\""
@@ -4128,7 +4157,7 @@ def engineer_dialogue(player):
         suspense_print(
             "The engineer barely looks up from his work.\n"
             "\"Alien tech keeps this place standing.\"\n"
-            "\"If you find any out there — bring it to me.\""
+            "\"If you find any out there, bring it to me.\""
         )
 
     # --- Menu loop ---
@@ -4344,7 +4373,7 @@ def hidden_camp(player):
                     suspense_print("You find a note and a few shells.")
                     add_item(player, "shotgun_shells", 2)
                     add_item(player, "scout_note", 1)
-
+                    add_item(player,"tactical_helmet",1)
                     suspense_print(
                         "The note reads:\n\n"
                         "The factory was supposed to be abandoned, but I just saw an alien\n"
@@ -4364,6 +4393,8 @@ def hidden_camp(player):
                 )
 
             elif choice == "3":
+                
+                near_old_factory(player)
                 return
 
             else:
@@ -4488,7 +4519,7 @@ def old_factory_entrance(player):
         return
 def old_factory_inside(player):
     suspense_print(
-        "You enter the old factory.\n"
+        "You're in the old factory.\n"
         "The air is thick with dust and the scent of rust.\n"
         "Dim light filters through cracked windows, casting eerie shadows.\n"
         "You hear faint scuttling sounds deeper inside.\n"
@@ -4496,6 +4527,7 @@ def old_factory_inside(player):
     suspense_print("1) Explore upstairs")
     suspense_print("2) Explore the main floor")
     suspense_print("3) Go down to the basement")
+    suspense_print("4) Go outside")
     while True:
         choice = get_choice()
         if handle_global_input(choice, player):
@@ -4508,6 +4540,9 @@ def old_factory_inside(player):
             return
         elif choice == "3":
             factory_basement(player)
+            return
+        elif choice == "4":
+            near_old_factory(player)
             return
         else:
             suspense_print("Invalid choice.")
@@ -4533,7 +4568,7 @@ def factory_first_floor(player):
         suspense_print("you arrive up the stairs but the area is eerily silent\n")
         while True:
             suspense_print("1) advance to the next room")
-            suspense_print("2)check the crates")
+            suspense_print("2) check the crates")
             suspense_print("3) go back downstairs")
             choice = get_choice()
             if handle_global_input(choice, player):
@@ -4548,7 +4583,8 @@ def factory_first_floor(player):
                         "there is also some slimy alien armor, a shame no man can fit it\n"
                     )
                     add_item(player, "weird_fruit", 1)
-                    add_item(player, "alien_energy_cell", 1)
+                    add_item(player, "alien_energy_cell", 3)
+                    add_item(player, "advance_medkit", 2)
                     player["factory_first_floor_crates_looted"] = True
                 else:
                     suspense_print("The crates are empty. Whatever was useful is gone.")
@@ -4569,9 +4605,12 @@ def factory_first_floor_next_room(player):
             "\"Please… the files are in the basement lab.\"\n"
             "\"I can’t leave without them.\""
         )
+        factory_first_floor(player)
+        return
+
 def scout_first_talk(player):
     suspense_print("you enter the next room and see a man staped to a table\n"
-                   "he looks weak and injured\n"
+                   "he seems weak and injured\n"
                    "he looks at you with pleading eyes,he feats the scout description\n")
     while True:
         suspense_print("1) help him")
@@ -4589,12 +4628,14 @@ def scout_first_talk(player):
                             "\"i cant leave without those files\"\n"
                             "\"if you can get those files it would help bastion a lot\"\n")
             player["has_help_bastion_scout"] = True
+            factory_first_floor(player)
             return
         elif choice == "2":
             if skill_check(player, "perception", 40) and not player.get("has_verified_scout_identity", False):
                 player["has_verified_scout_identity"] = True
                 suspense_print("you look closely at him, nothing about him seems off\n")
                 gain_xp(player, 20)
+                player["has_verified_scout_identity"]= True
             else:
                 suspense_print("he looks too weak to be lying about anything\n")
             suspense_print("please i need your help\n"
@@ -4801,10 +4842,8 @@ def factory_machine_room(player):
                             "This man is hiding something.\n")
                         if player.get("suspect_metamorph", False):
                             gain_xp(player, 10)
-
-                        
                         player["suspect_metamorph"] = True
-
+                        continue
                     # Intelligence check – logical contradiction
                     elif skill_check(player, "intelligence", 40):
                         suspense_print(
@@ -4815,19 +4854,19 @@ def factory_machine_room(player):
                         if player.get("suspect_metamorph", False):
                                 gain_xp(player, 10)
                         player["suspect_metamorph"] = True
-
+                        continue
                     else:
                         suspense_print(
                             "Despite your doubts, you can't find solid proof.\n"
                             "Maybe you're just being paranoid.\n"
                         )
-
+                        continue
                 else:
                     suspense_print(
                         "He looks terrified and exhausted.\n"
                         "If he's lying, he's very convincing.\n"
                     )
-
+                    continue
             elif choice == "2":
                 
                 if skill_check(player, "intelligence", 40) and not player.get("machine_room_looted", False):
@@ -4839,6 +4878,7 @@ def factory_machine_room(player):
                     add_item(player, "rifled_ammo", 2)
                     add_item(player, "coin", 50)
                     player["machine_room_looted"] = True
+                    return
 
                 else:
                     suspense_print("you look around nothings seams out of place\n")
@@ -4902,6 +4942,7 @@ def factory_machine_room(player):
                     )
                     player["factory_machine_room_cleared"] = True
                     player["suspect_metamorph"] = False
+                    return
                 else:
                     game_over()
                     return
@@ -4914,6 +4955,7 @@ def factory_machine_room(player):
         suspense_print("the room is eerily silent now that the alien threat has been eliminated\n"
                        "there is nothing more to do here\n")
         old_factory_inside(player)  
+    
 def factory_basement(player):
     suspense_print("you head down to the basement\n"
                    "the air is damp and musty\n"
@@ -4941,6 +4983,8 @@ def factory_basement(player):
                         {"alien_power_cell": (1, 2), "rifled_ammo": (2, 4)}
                     )
                     player["kill_the_centipedes"] = True
+                    suspense_print("you find a healing station in the corner and heal youself to max health")
+                    player["health"] = player["max_health"]
                     alien_lab_basement(player)
                     return
                 else:
@@ -5029,7 +5073,7 @@ def mutated_capibara_intro_attack(player, boss):
         "releasing a psychic shockwave!\n"
     )
 
-    damage = 12 + boss.get("level", 1) * 2
+    damage = 6 + boss.get("level", 1) * 2
     player["health"] -= damage
 
     suspense_print(f"You take {damage} damage before the fight even begins!\n")
@@ -5065,7 +5109,7 @@ def alien_lab_basement(player):
             "A reinforced container unlocks with a heavy CLANG.\n\n"
             "Something inside MOVES.\n"
             "A deep, wet growl reverberates through the lab.\n\n"
-            "The alien recoils in terror — then vanishes through a hidden door."
+            "The alien recoils in terror then vanishes through a hidden door."
         )
 
         Boss = build_mutated_capibara()
@@ -5222,6 +5266,7 @@ def secret_factory_room(player):
     while True:
         suspense_print("1) look around the room")
         suspense_print("2) examine the console")
+        
         suspense_print("3) go back upstairs")
 
         choice = get_choice()
@@ -5237,6 +5282,7 @@ def secret_factory_room(player):
                 )
                 add_item(player, "alien_tech_part", 1)
                 add_item(player, "strange_elixir", 1)
+                add_item(player,"scout_files",1)
                 player["secret_room_looted"] = True
             else:
                 suspense_print(
@@ -5271,12 +5317,13 @@ def secret_factory_room(player):
                     "You recognize patterns… but no meaning.\n\n"
                     "Whatever this console contains, it was never meant for humans.\n"
                 )
-
+        
         elif choice == "3":
             suspense_print(
                 "You turn away from the alien machinery.\n"
                 "The feeling of being watched lingers as you leave the room.\n"
             )
+            alien_lab_basement_after_boss(player)
             return
 
         else:
