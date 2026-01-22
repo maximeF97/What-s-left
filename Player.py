@@ -33,12 +33,16 @@ player = {
     "has_seen_alien": False,
     "bunker_items_taken": False,
     "bunker_door_unlocked": False,
+    "bunker_visite_count": 0,
+    "has_taken_artifact": False,
+
     "wasteland_2_body_looted": False,
     "has_seen_police_station_alien": False,
     "has_freed_police_station_prisoner": False,
     "has_taken_police_station_evidence_items": False,
     "has_unlocked_police_station_evidence_room": False,
     "burned_houses_looted": False,
+
     "has_opened_hospital_safe": False,
     "has_oppened_hospital_lock": False,
     "has_killed_cactus": False,
@@ -54,10 +58,15 @@ player = {
     "has_taken_hospital_pc_fafe": False,
     "Hospital_first_floor_right_room_note_taken": False,
     "has_opened_hospital_back_door": False,
+
+
     "passed_wastland_3_skill_check": False, #still thinking to use or not
     "looted_the_bedroll": False,
     "met_wasteland_stranger_near_farm": False,
     "wasteland_stranger_near_farm_alive": False,#to use later
+    "wasteland_stranger_encounter_count": 0,
+
+
     "has_pass_hospital_road_count": 0,
     "has_seen_hospital_road_alien": False,
     "medkit_encounter_done": False,
@@ -136,7 +145,7 @@ player = {
     "became_bastion_scout": True,
     "bastion_rank": 1,
     "bastion_active_quest": "scout_outpost",
-    "bastion_completed_quests": set(),
+    "bastion_completed_quests": [],
 
 
 

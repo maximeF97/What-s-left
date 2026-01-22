@@ -48,12 +48,22 @@ def _persist_last_selected(save_id: str) -> None:
     _atomic_write_json(LAST_SELECTED_FILE, {"save_id": save_id, "updated_at": _now_iso()})
 
 
+
 def save_game(player: Dict[str, Any], save_id: Optional[str] = None) -> str:
     """
     Save the game state to saves/<save_id>.json with metadata.
     If save_id is None, a timestamp-based ID is generated.
     Returns the save_id.
     """
+    def _find_sets(obj, path="player"):
+        if isinstance(obj, set):
+            print(f"❌ SET FOUND at {path}: {obj}")
+        elif isinstance(obj, dict):
+            for k, v in obj.items():
+                _find_sets(v, f"{path}.{k}")
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                _find_sets(v, f"{path}[{i}]")
     try:
         _ensure_dir(SAVE_DIR)
         if save_id is None:
@@ -236,8 +246,7 @@ if __name__ == "__main__":
         "level": 7,
         "hp": 42,
         "scene": "ForestEntrance",
-        "position": {"x": 12.3, "y": 0.0, "z": -4.5},
-        "playtime": 3600,
+        
     }
 
     cmd = sys.argv[1] if len(sys.argv) > 1 else "menu"

@@ -105,6 +105,15 @@ def fight_multiple_enemies(player, enemies):
 
 #ROADS_______
 def old_bunker(player):
+    # Increment visit counter
+    count = player.get("bunker_visite_count", 0)
+    player["bunker_visite_count"] = count + 1
+    if count >=10  and count <15:
+        suspense_print("you see a door in the back of the bunker you swore to never have seen it before\n"
+                       "a strange feeling overcomes you as you approach it")
+    elif count >= 5 and count <10:
+        suspense_print("you're back again a strange feeling washes over you\n"
+                       "you lived here for decades yet you cant remeber a single thing about it")
     while True:
         if player.get("old_bunker_first_visit", False):
             suspense_print("You are back in the old bunker.\n"
@@ -120,8 +129,9 @@ def old_bunker(player):
         suspense_print("1) Inspect the table")
         suspense_print("2) Open the door")
         suspense_print("3) Go back")
-        suspense_print("4) debug: skip to zone")
-        suspense_print("5) debug: get quest_item")
+        if count >=10 :
+            suspense_print("4) pass through the door")
+       
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -161,17 +171,46 @@ def old_bunker(player):
 
         elif choice == "3":
             return
-        elif choice == "4":
-            suspense_print("Debug: Skipping to old_farmhouse.")
-            way_toward_bastion(player)
+        elif choice == "4" and count >=10 :
+            behind_the_door(player)
+            
             return
-        elif choice == "5":
-            suspense_print("Debug: Adding energy_core to inventory.")
-            add_item(player, "energy_core", 1)
         else:
             suspense_print("Invalid choice.")
         
-
+def behind_the_door(player):
+    if player.get("has_taken_artifact", False):
+        suspense_print("juste an empty concrete room you have no idea what was here before")
+        old_bunker(player)
+    suspense_print("You pass through the door and find yourself in a small room full of blood\n"
+                     "but no bodies. In the center of the room is a strange alien artifact pulsating with energy\n"
+                     "it calls to you"
+                    )
+    while True:
+        suspense_print("1) inspect the alien artifact")
+        suspense_print("2) leave the room")
+        suspense_print("I) Open inventory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print("as you approach the artifact it emits a bright light\n"
+                           "you feel a surge of energy coursing through your body\n"
+                           "your vision blurs and the artifact suddenly vanishes with the voices\n"
+                           "your mind feels sharper your reflexes quicker\n"
+                           "you have gained +1 intelligence and +1 stamina")
+            player["skills"]["intelligence"] +=1
+            player["skills"]["stamina"] +=1
+            player["has_taken_artifact"] = True
+            old_bunker(player)
+            return
+        elif choice == "2":
+            suspense_print("you trye to leave but the voice gets louder\n"
+                           "it says you cannot leave yet")
+            continue
+        else:
+            suspense_print("Invalid choice.")
+            
 def wasteland(player):
     while True:
         if player.get("has_seen_alien", False):
@@ -297,7 +336,7 @@ def wasteland_2(player):
     
     # ... rest of function, but REMOVE the increment lines at choices 2 and 3
     # Show progression messages based on visit count
-    if count == 1:
+    if count <= 2:
         # First visit
         suspense_print("you move forward and see a body on the ground what do you do")
     elif count >= 1 and count <= 6:
@@ -331,13 +370,15 @@ def wasteland_2(player):
                 randomized_bonus_loot(player, {"medkit": (1,2), "healing_salve": (1,3), "bobby_pins": (2,5)})
                 
                 suspense_print(
-                    "They're everywhere.\n"
+                    "I lost my weapon in town\n"
+                    "They were everywhere.\n"
                     "I don't know when it started.\n\n"
                     "They don't always look alien.\n"
                     "Sometimes they look… familiar.\n\n"
                     "If you're reading this,\n"
                     "don't trust what you see.\n"
                     "Don't sleep."
+
                 )
                 player["wasteland_2_body_looted"] = True
             else:
@@ -460,8 +501,12 @@ def grove_town(player):
         else:
             suspense_print("Invalid choice")
 def police_station(player):
+    if not player.get("has_seen_police_station_alien", False):
+        suspense_print("\nYou are inside the ruined police station you see something moving to a other room but when you go there you only see a mug on a desk.")
+    else:
+        suspense_print("\nYou are back inside the police station.")
     while True:
-        suspense_print("\nYou are inside the ruined police station you see something to in a other room but when you go there you only see a mug on a desk.")
+
         suspense_print("1) Inspect the desk")
         suspense_print("2) Explore the cells")
         suspense_print("3) Enter the evidence room")
@@ -537,7 +582,7 @@ def explore_cells(player):
 
             if result["result"] == "win":
                 gain_xp(player, result["xp"])
-                suspense_print("You defeated the alien prisoner and find a weid looking key.")
+                suspense_print("You defeated the alien prisoner and find a weird looking key.")
                 add_item(player,"hospital_safe_key", 1)
                 gain_xp(player, 30)
                 player["has_freed_police_station_prisoner"] = True
@@ -573,7 +618,7 @@ def evidence_room(player):
 def burned_houses(player):
     
     if not player.get("burned_houses_looted", False):
-        suspense_print("you explore the burned down houses and find an leaking healing salve, you une it before it run out and recover 3 health points.")
+        suspense_print("you explore the burned down houses and find an leaking healing salve, you use it before it run out and recover 3 health points.")
         player["health"] += 3
         suspense_print(f"your health is now {player['health']}")
         player["burned_houses_looted"] = True
@@ -740,7 +785,7 @@ def hospital(player):
                 return
             else:
                 if "bobby_pins" in player["inventory"]:
-                    if skill_check(player, "lockpicking", 50):
+                    if skill_check(player, "lockpicking", 20):
                         suspense_print("you successfully lockpick the door and enter the hospital.")
                         player["has_oppened_hospital_lock"] = True
                         hospital_inside(player)
@@ -759,7 +804,7 @@ def hospital(player):
                 continue
             else:
                 suspense_print("you try to look through the dirty windows and see moving shadows.")
-                if skill_check(player, "perception", 40):
+                if skill_check(player, "perception", 20):
                     suspense_print("you clearly see an alien moving inside the hospital, better be careful.")
                     player["has_pass_window_check"] = True
                 else:
@@ -957,6 +1002,7 @@ def scavenger_room(player):
 
         suspense_print("1) Search the body")
         suspense_print("2) Shoot the body with your revolver, just to be sure")
+        suspense_print("3) Go back ")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -1009,9 +1055,11 @@ def scavenger_room(player):
                 add_item(player, "alien_implant", 1)
                 suspense_print("You defeated the alien cyborg scavenger.")
                 return
+            
             else:
                 exit()
-
+        elif choice == "3":
+            return
         else:
             suspense_print("Invalid choice.")
 def hospital_metamorph_encounter(player):
@@ -1264,12 +1312,13 @@ def Hospital_flower_pot(player):
 
     while True:
         if not player.get("hospital_flower_pot_checked", False):
+            suspense_print("1) Check the flower pot")
+            suspense_print("2) Go back")
             if skill_check(player, "perception", 30):
                 suspense_print("Something feels off about a neat little flower pot in the middle of an alien-infested hospital.")
                 suspense_print("3) Shoot the flower!")
 
-        suspense_print("1) Check the flower pot")
-        suspense_print("2) Go back")
+        
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -1474,7 +1523,20 @@ def wasteland_3(player):
 
         else:
             suspense_print("Invalid choice.")
-def wastland_stranger_encounter(player):
+def wasteland_stranger_encounter(player):
+    count =player.get("wasteland_stranger_encounter_count", 0)
+    player["wasteland_stranger_encounter_count"] = count + 1
+    if count >=5:
+        suspense_print(
+            "As you walk, you feel a strange presence behind you.\n"
+            "You quicken your pace, but the feeling persists.\n"
+            "Suddenly, you hear the sound of footsteps matching your own.\n"
+            "before you can react, a blunt pain erupts in the back of your head.\n"
+            "You collapse to the ground, unconscious.\n\n"
+        )
+        alien_cell(player)
+        return
+            
     while True:
         if not player.get("met_wasteland_stranger_near_farm", False):
             suspense_print(
@@ -1720,7 +1782,71 @@ def loot_cowboy(player):
     add_item(player, "revolver_ammo", 6)
     add_item(player, "cowboy_hat", 1)
     add_item(player, "grovetown_note_1", 1)
-
+def alien_cell(player):
+    suspense_print(
+        "You awaken in a slimy damp cell.\n"
+        "Strange symbols glow faintly on the walls.\n"
+        "You hear distant wet clicking sounds echoing through the corridors.")
+    while True:
+            suspense_print("1) Look around the cell")
+            suspense_print("2) Try to open the cell door")
+            if player.get("understand_alien_language", False):  
+                suspense_print("3) Speak in the alien language")
+            suspense_print("I) Open inventory")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print(
+                    "You examine the cell.\n"
+                    "The walls are covered in strange alien symbols that seem to pulse with energy.\n"
+                    "The floor is damp and slippery."
+                )
+            elif choice == "2":
+                if skill_check(player, "lockpicking", 25):
+                    suspense_print(
+                        "You manage to pick the lock and open the cell door quietly.\n"
+                        "You slip out into the dimly lit corridor.\n"
+                        "you hear something calling to you from a crate nearby.\n"
+                        "as your oppen it something grabs your hand from inside the crate\n."
+                        "you feel it going intro your body and you lose consciousness."
+                    )
+                    suspense_print("You woke up in the old bunker.\n"
+                                    "something is atached to your hand it look like a weapon.\n" \
+                    )
+                    add_item(player, "symbiotic_blood_pistol", 1)
+                    old_bunker(player)
+                    
+                    return
+                else:
+                    suspense_print("You fail to pick the lock.\n"
+                        "The clicking sounds grow louder."
+                        "after a moment, a creature appears outside your cell."
+                        "it releasesa gaz in the cell that makes you unconscious."
+                    )
+                    suspense_print("You woke up in the old bunker.\n" \
+                    "you feel like something is missing from you but you feel more aware.")
+                    player["health"] -=10
+                    player["perception"] +=2
+                    old_bunker(player)
+            elif choice == "3" and player.get("understand_alien_language", False):
+                suspense_print(
+                    "You attempt to communicate using the alien language you learned.\n"
+                    "The clicking sounds stop.\n"
+                    "A figure approaches your cell."
+                )
+                suspense_print(
+                    "it tells you that you will be freed when he finish what he must do to you.\n"
+                    "you smell a strange scent and feel dizzy.\n"
+                    "you lose consciousness."
+                )
+                suspense_print("You woke up in the old bunker.\n" \
+                    "you feel like something is missing from you but you feel more aware.")
+                player["health"] -=10
+                player["perception"] +=2
+                old_bunker(player)        
+            else:
+                suspense_print("Invalid choice.")         
 
 #survivor_base
 def old_farm_house(player):

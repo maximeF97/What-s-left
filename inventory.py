@@ -185,7 +185,8 @@ def read_note(player, note_id):
         ),
 
         "wasteland_2_note": (
-            "They’re everywhere.\n"
+            "I lost my weapon in town\n"
+            "They were everywhere.\n"
             "I don’t know when it started.\n\n"
             "They don’t always look alien.\n"
             "Sometimes they look… familiar.\n\n"

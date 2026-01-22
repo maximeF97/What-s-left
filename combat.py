@@ -4,6 +4,17 @@ from text_effect import suspense_print
 
 from inventory import remove_item
 from systems import skill_check, get_choice, gain_xp
+def blood(player):
+    """Special ammo for symbiotic_blood_pistol."""
+    health_cost = 1
+
+    if player["health"] <= health_cost:
+        print("You don't have enough health to use the blood symbiote!")
+        return False
+
+    player["health"] -= health_cost
+    print("You use 1 health to fuel the symbiotic blood pistol.")
+    return True
 
 WEAPONS: Dict[str, Dict] = {
     # Melee
@@ -12,6 +23,7 @@ WEAPONS: Dict[str, Dict] = {
 
     # Ranged
     "revolver": {"min_damage": 3, "max_damage": 6, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
+    "symbiotic_blood_pistol": {"min_damage": 7, "max_damage": 7, "hit_chance": 80, "uses_ammo": True, "ammo_type": blood},
     "alien_laser_rifle": {"min_damage": 7, "max_damage": 12, "hit_chance": 90, "uses_ammo": True, "ammo_type": "alien_energy_cell"},
     "shotgun": {"min_damage": 6, "max_damage": 8, "hit_chance": 75, "uses_ammo": True, "ammo_type": "shotgun_shells"},
     "magnum": {"min_damage": 8, "max_damage": 12, "hit_chance": 80, "uses_ammo": True, "ammo_type": "magnum_ammo"},
@@ -97,7 +109,7 @@ def choose_weapon(player: Dict) -> None:
     inventory = player.get("inventory", {})
     _default_melee(player)
 
-    firearms = [gun for gun in ("revolver", "shotgun", "alien_laser_rifle","rifle","magnum") if gun in inventory]
+    firearms = [gun for gun in ("revolver", "shotgun", "alien_laser_rifle","rifle","magnum","symbiotic_blood_pistol") if gun in inventory]
 
     if not firearms:
         print("You ready your melee weapon.")
@@ -138,17 +150,27 @@ def player_attack(player: Dict, enemy: Dict) -> bool:
     inventory = player.get("inventory", {})
     # Ranged ammo handling
     if weapon["uses_ammo"]:
-        ammo_key = weapon["ammo_type"]
-        if inventory.get(ammo_key, 0) <= 0:
-            print("Click! You're out of ammo.")
-            choose_weapon(player)
-            weapon_name, weapon = get_current_weapon(player)
+        if callable(weapon["ammo_type"]):
+            if not weapon["ammo_type"](player):
+                print("Your body refuses to feed the weapon.")
+                choose_weapon(player)
+            # Special ammo function (e.g., blood symbiote)
+            if not weapon["ammo_type"](player):
+                print("You cannot use your weapon.")
+                choose_weapon(player)
+                weapon_name, weapon = get_current_weapon(player)
         else:
-            # Attempt to consume one ammo; if it fails, fallback to melee
-            if not remove_item(player, ammo_key, 1):
+            ammo_key = weapon["ammo_type"]  
+            if inventory.get(ammo_key, 0) <= 0:
                 print("Click! You're out of ammo.")
                 choose_weapon(player)
                 weapon_name, weapon = get_current_weapon(player)
+            else:
+                # Attempt to consume one ammo; if it fails, fallback to melee
+                if not remove_item(player, ammo_key, 1):
+                    print("Click! You're out of ammo.")
+                    choose_weapon(player)
+                    weapon_name, weapon = get_current_weapon(player)
 
     # Luck can slightly improve hit chance
     luck = player.get("skills", {}).get("luck", 0)

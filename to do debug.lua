@@ -1,5 +1,5 @@
 to do debug
-fix stranger encounter
+
 return weird fruit bonus 2
 replace eat_item with use_item
 changefarmhous si the description change 
@@ -16,7 +16,16 @@ fixe inventory back
 
 
 to do 
-    use the cowboy is still alive somewhere
+    use the cowboy is still alive somewhere(horde)
     bastion full clearance questline
-    make a game over function
-        make a thomas fight
+    
+        
+
+
+
+
+
+        maud debug
+        -pput some hints that you are not in the good way 
+        - fix check after bat dead
+        - look at farmhouse returns living room
