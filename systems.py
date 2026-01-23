@@ -3,7 +3,7 @@ from typing import Dict
 
 from save_system import save_game, load_game
 from equipment import EQUIPMENT
-
+from ui import ui_print, ui_input
 
 # -----------------------------
 # Player progression and stats
@@ -16,35 +16,32 @@ def xp_needed(level: int) -> int:
 def level_up(player: Dict) -> None:
     player["level"] += 1
     player["experience"] = 0
-    # Recompute max health immediately from stamina bonus
     apply_stamina_health_bonus(player)
-    # Restore health and save
     player["health"] = player["max_health"]
     save_game(player)
-    print("You feel refreshed. Health fully restored!")
-    print("the game as been saved")
-    print(f"\nYou reached level {player['level']}!")
+    ui_print("You feel refreshed. Health fully restored!")
+    ui_print("the game as been saved")
+    ui_print(f"\nYou reached level {player['level']}!")
 
     while True:
-        print("\nChoose a skill to upgrade:")
+        ui_print("\nChoose a skill to upgrade:")
         skills = list(player["skills"].keys())
 
         for i, skill in enumerate(skills, 1):
-            print(f"{i}) {skill} (level {player['skills'][skill]})")
+            ui_print(f"{i}) {skill} (level {player['skills'][skill]})")
 
-        choice = input("> ").strip()
+        choice = ui_input("> ").strip()
 
         if choice.isdigit() and 1 <= int(choice) <= len(skills):
             selected_skill = skills[int(choice) - 1]
             player["skills"][selected_skill] += 1
-            print(f"{selected_skill} increased to {player['skills'][selected_skill]}!")
+            ui_print(f"{selected_skill} increased to {player['skills'][selected_skill]}!")
 
             if selected_skill == "stamina":
                 apply_stamina_health_bonus(player)
             break
         else:
-            print("Invalid choice.")
-
+            ui_print("Invalid choice.")
 def get_effective_skill(player: Dict, skill_name: str) -> int:
     base = player.get("skills", {}).get(skill_name, 0)
 
@@ -68,22 +65,20 @@ def skill_check(
     total = roll + skill_value + level
 
     if visible:
-        print(
+        ui_print(
             f"Skill check ({skill_name}): "
             f"roll {roll} + skill {skill_value} + level {level} "
             f"= {total} vs DC {difficulty}"
         )
-
     return total >= difficulty
 
 
 def gain_xp(player: Dict, amount: int) -> None:
-    # Intelligence is usually tracked in player['skills']
     intelligence = player.get("skills", {}).get("intelligence", 0)
-    bonus_multiplier = 1 + (intelligence * 0.05)  # 5% per INT
+    bonus_multiplier = 1 + (intelligence * 0.05)
     gained_xp = int(amount * bonus_multiplier)
     player["experience"] += gained_xp
-    print(f"You gained {gained_xp} XP!")
+    ui_print(f"You gained {gained_xp} XP!")
 
     while player["experience"] >= xp_needed(player["level"]):
         level_up(player)
@@ -171,14 +166,22 @@ def equip_item(player: Dict, item: str) -> bool:
 
     info = EQUIPMENT.get(item)
     if not info:
-        print(f"{item.replace('_', ' ').title()} cannot be equipped.")
+        ui_print(f"{item.replace('_', ' ').title()} cannot be equipped.")
         return False
 
     if player.get("inventory", {}).get(item, 0) <= 0:
-        print(f"You don't have {item.replace('_', ' ')}.")
+        ui_print(f"You don't have {item.replace('_', ' ')}.")
         return False
-
-    slot = info["slot"]
+    slot = info.get("slot")
+    if slot == "one_hand":
+        player["equipment"]["hand"] = item
+        ui_print(f"Equipped {item.replace('_', ' ')} (hand).")
+    elif slot == "two_hands":
+        player["equipment"]["hand"] = item
+        ui_print(f"Equipped {item.replace('_', ' ')} (two hands).")
+    elif slot == "body":
+        player["equipment"]["body"] = item
+        ui_print(f"Equipped {item.replace('_', ' ')} (body, hands, feet).")
 
     # Equip primary slot
     player["equipment"][slot] = item
@@ -202,12 +205,12 @@ def unequip_item(player: Dict, slot: str) -> bool:
     ensure_equipment_struct(player)
 
     if slot not in player["equipment"]:
-        print(f"Unknown equipment slot: {slot}")
+        ui_print(f"Unknown equipment slot: {slot}")
         return False
 
     item = player["equipment"].get(slot)
     if not item:
-        print(f"No item equipped in {slot}.")
+        ui_print(f"No item equipped in {slot}.")
         return False
 
     # Remove item from ALL slots it occupies
@@ -216,29 +219,26 @@ def unequip_item(player: Dict, slot: str) -> bool:
             player["equipment"][s] = None
 
     _aggregate_equipment_bonuses(player)
-    print(f"Unequipped {item.replace('_', ' ')}.")
+    ui_print(f"Unequipped {item.replace('_', ' ')}.")
     return True
 
 def inspect_item(player: Dict, item: str) -> None:
-    """
-    Inspect an item and offer to equip it if equippable.
-    """
     info = EQUIPMENT.get(item)
     if info:
         desc = info.get("description", "No description.")
-        print(f"\n{item.replace('_', ' ').title()} — {info['slot'].title()}")
-        print(desc)
-        print("\nOptions:")
-        print("E) Equip")
-        print("B) Back")
-        choice = input("> ").strip().lower()
+        ui_print(f"\n{item.replace('_', ' ').title()} — {info['slot'].title()}")
+        ui_print(desc)
+        ui_print("\nOptions:")
+        ui_print("E) Equip")
+        ui_print("B) Back")
+        choice = ui_input("> ").strip().lower()
         if choice == "e":
             equip_item(player, item)
         return
     else:
-        print(f"\n{item.replace('_', ' ').title()}: This item cannot be equipped.")
-        print("B) Back")
-        input("> ")
+        ui_print(f"\n{item.replace('_', ' ').title()}: This item cannot be equipped.")
+        ui_print("B) Back")
+        ui_input("> ")
 
 
 # -----------------------------
@@ -246,7 +246,7 @@ def inspect_item(player: Dict, item: str) -> None:
 # -----------------------------
 
 def get_choice() -> str:
-    return input("> ").strip().lower()
+    return ui_input("> ").strip().lower()
 
 def get_perception(player):
     base = player.get("perception", 0)
@@ -255,7 +255,7 @@ def get_perception(player):
 def should_alien_attack(player, enemy):
     if enemy.get("type") == "alien":
         if player.get("status_effects", {}).get("alien_marked"):
-            print("The alien tilts its head… then backs away.")
+            ui_print("The alien tilts its head… then backs away.")
             return False
     return True
 from inventory import open_inventory, add_item, remove_item
@@ -302,7 +302,7 @@ def randomized_bonus_loot(player: Dict, loot_table: Dict[str, tuple]) -> None:
 
     roll = random.randint(1, 100)
     if roll > chance:
-        print("You search carefully, but find nothing more.")
+        ui_print("You search carefully, but find nothing more.")
         return
 
     # Pick random item from table
@@ -311,11 +311,11 @@ def randomized_bonus_loot(player: Dict, loot_table: Dict[str, tuple]) -> None:
     amount = random.randint(min_amt, max_amt)
 
     if amount <= 0:
-        print("You almost miss something… but it turns out to be useless debris.")
+        ui_print("You almost miss something… but it turns out to be useless debris.")
         return
 
     add_item(player, item, amount)
-    print(
+    ui_print(
         f"You dig deeper into the wreckage.\n"
         f"Your instincts pay off.\n"
         f"You find {amount} x {item.replace('_', ' ')}."

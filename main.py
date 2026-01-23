@@ -5,8 +5,8 @@ from combat import combats
 import random
 from systems import handle_global_input, get_choice, gain_xp
 from inventory import use_item
+from text_effect import suspense_print
 
-# Prefer importing interactive load if available
 try:
     from save_system import save_game, load_game, load_menu_interactive
     HAS_INTERACTIVE_LOAD = True
@@ -16,128 +16,92 @@ except ImportError:
     HAS_INTERACTIVE_LOAD = False
 
 
-def start_game():
-    """Run character creation and apply the result to the module-level player dict."""
+def _start_new_game():
     setup = choose_name_and_stats()
     apply_setup_to_player(player, setup)
-    return player
+
+    suspense_print("You finished the last of your rations. Time to face the world.")
+    suspense_print(f"Health: {player['health']}")
+    player.setdefault("scene", "OldBunker")
+    old_bunker(player)
 
 
 def resume_game(player):
-    """
-    Route to the correct room/state based on the saved scene.
-    Fallback to old_bunker if no scene is known.
-    """
     scene = (player.get("scene") or "").lower()
     if scene in ("oldbunker", "old_bunker", "bunker"):
         return old_bunker(player)
     elif scene in ("wasteland",):
         return wasteland(player)
-    elif scene in ("MountainBaseInside", "survivor_mountain_base_inside"):    
-        from rooms import survivor_mountain_base_inside
-        return survivor_mountain_base_inside(player) 
-    elif scene in ("bastion_inside",):
-        from rooms import bastion_inside
-        return bastion_inside(player)    
-    elif scene in ("mountain_tunnel",):
-        from rooms import mountain_tunnel
-        return mountain_tunnel(player)
-    elif scene in ("body_search", "abandoned_outpost_body_search"):
-        from rooms import body_search
-        return body_search(player)
-    elif scene in ("old_factory_entrance",):
-        from rooms import old_factory_entrance
-        return old_factory_entrance(player)
-    # TODO: add more scene mappings here
     return old_bunker(player)
 
 
-def main():
-    print("welcome to what's left of us")
-    print("decade after a mysterious blast from outer space decimated most of the world in the blink of an eye , you are one of the few survivors trying to navigate the ruins of civilization trying to find what actually happened and what's left of us.")
-    running = True
-    while running:
-        print("\nWhat do you want to do?")
-        print("1) Start new game")
-        print("2) Quit")
-        print("C) Continue (latest or last-selected)")
-        print("L) Load game (auto last-selected or latest)")
-        if HAS_INTERACTIVE_LOAD:
-            print("I) Interactive Load Menu")
-        print("S) Save current game")
-
-        choice = get_choice()
-
-        # Allow global handlers to intercept input (e.g. debug keys)
-        if handle_global_input(choice, player):
-            continue
-
-        # Start new game: create player and immediately enter first scene
-        if choice == "1":
-            start_game()  # creates/overwrites player values in-place
-            print("you finishted the last of your rations time to face the world out there again.")
-            print(f"health: {player['health']}")
-            # Ensure an initial scene so saves know where to resume
-            player.setdefault("scene", "OldBunker")
-            old_bunker(player)
-
-        # Quit
-        elif choice == "2":
-            print("goodbye!")
-            running = False
-
-        # Continue: instantly load latest or last-selected
-        elif choice.lower() == "c":
-            loaded = load_game()
-            if not loaded:
-                # load_game already prints an error message
-                continue
-            # Update the module-level player dict in-place so other modules keep referencing it
-            player.clear()
-            player.update(loaded)
-            print("Game loaded. Resuming from your saved state.")
-            print(f"health: {player.get('health', 'unknown')}")
-            resume_game(player)
-
-        # Load saved game (both 'L' and 'l') - same behavior, routes to saved scene
-        elif choice.lower() == "l":
-            loaded = load_game()
-            if not loaded:
-                continue
-            player.clear()
-            player.update(loaded)
-            print("Game loaded. Resuming from your saved state.")
-            print(f"health: {player.get('health', 'unknown')}")
-            resume_game(player)
-
-        # Interactive load menu (if available): lets you select a specific save, defaults to last-selected
-        elif HAS_INTERACTIVE_LOAD and choice.lower() == "i":
-            loaded = load_menu_interactive()
-            if not loaded:
-                continue
-            player.clear()
-            player.update(loaded)
-            print("Game loaded. Resuming from your saved state.")
-            print(f"health: {player.get('health', 'unknown')}")
-            resume_game(player)
-
-        # Save current game (both 'S' and 's')
-        elif choice.lower() == "s":
-            # Check if there is something meaningful to save
-            if not player or (isinstance(player, dict) and not player.get("name") and not player.get("player_name")):
-                print("No player data to save. Start or load a game first.")
-                continue
-            # Ensure we persist scene so we can resume to the correct place
-            if player.get("has_visited_mountain_base_count", 0) >= 1:
-                player.setdefault("scene", "mountain_base")
-                save_game(player)
-            else:
-                player.setdefault("scene", "OldBunker")
-                save_game(player)
-
-        else:
-            print("Invalid choice")
+def start_game():
+    suspense_print("Welcome to What's Left of Us.")
+    suspense_print(
+        "Decades after a mysterious blast from outer space decimated most of the world "
+        "in the blink of an eye, you are one of the few survivors trying to understand "
+        "what happened — and what’s left of us."
+    )
+    main_menu()
 
 
-if __name__ == "__main__":
-    main()
+def main_menu():
+    suspense_print("\nWhat do you want to do?")
+    suspense_print("1) Start new game")
+    suspense_print("2) Quit")
+    suspense_print("C) Continue")
+    suspense_print("L) Load game")
+    if HAS_INTERACTIVE_LOAD:
+        suspense_print("I) Interactive Load Menu")
+    suspense_print("S) Save current game")
+
+    choice = get_choice()
+
+    if handle_global_input(choice, player):
+        return
+
+    if choice == "1":
+        _start_new_game()
+
+    elif choice == "2":
+        suspense_print("Goodbye.")
+        return
+
+    elif choice.lower() == "c":
+        loaded = load_game()
+        if not loaded:
+            return
+        player.clear()
+        player.update(loaded)
+        suspense_print("Game loaded.")
+        resume_game(player)
+
+    elif choice.lower() == "l":
+        loaded = load_game()
+        if not loaded:
+            return
+        player.clear()
+        player.update(loaded)
+        suspense_print("Game loaded.")
+        resume_game(player)
+
+    elif HAS_INTERACTIVE_LOAD and choice.lower() == "i":
+        loaded = load_menu_interactive()
+        if not loaded:
+            return
+        player.clear()
+        player.update(loaded)
+        suspense_print("Game loaded.")
+        resume_game(player)
+
+    elif choice.lower() == "s":
+        if not player:
+            suspense_print("Nothing to save.")
+            return
+        player.setdefault("scene", "OldBunker")
+        save_game(player)
+        suspense_print("Game saved.")
+
+    else:
+        suspense_print("Invalid choice.")
+        main_menu()

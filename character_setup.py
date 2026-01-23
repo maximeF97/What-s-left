@@ -1,3 +1,5 @@
+from ui import ui_print, ui_input
+
 # character_setup.py
 # Ask for player name and let the player distribute 10 skill points among stats.
 # Returns a dict: {"name": str, "stats": {...}}
@@ -29,24 +31,24 @@ SKILL_DESCRIPTIONS = {
 
 def input_nonempty(prompt: str) -> str:
     while True:
-        s = input(prompt).strip()
+        s = ui_input(prompt).strip()
         if s:
             return s
-        print("Please enter a non-empty value.")
+        ui_print("Please enter a non-empty value.")
 
 
 def ask_name() -> str:
-    name = input("Enter your character's name (or press Enter for 'Player'): ").strip()
+    name = ui_input("Enter your character's name (or press Enter for 'Player'): ").strip()
     if not name:
         name = "Player"
     return name
 
 
 def _print_all_skill_descriptions():
-    print("\nSkill descriptions:")
+    ui_print("\nSkill descriptions:")
     for k in BASE_STATS.keys():
-        print(f"  {k.capitalize():12} — {SKILL_DESCRIPTIONS.get(k, '')}")
-    print()
+        ui_print(f"  {k.capitalize():12} — {SKILL_DESCRIPTIONS.get(k, '')}")
+    ui_print("")
 
 
 def allocate_points() -> dict:
@@ -54,37 +56,37 @@ def allocate_points() -> dict:
         remaining = POINTS_TO_DISTRIBUTE
         allocations = {k: 0 for k in BASE_STATS.keys()}
 
-        print(f"\nYou have {POINTS_TO_DISTRIBUTE} skill points to distribute among:")
-        print("  " + ", ".join(BASE_STATS.keys()) + ".")
-        print("\nTips:")
-        print("  - Type a number to assign points to the current stat.")
-        print("  - Press Enter to assign 0.")
-        print("  - Type 'd' to see all skill descriptions.")
-        print("  - Type 's' to see a summary of current allocations.")
-        print("  - Type 'r' to restart allocation from the beginning.\n")
+        ui_print(f"\nYou have {POINTS_TO_DISTRIBUTE} skill points to distribute among:")
+        ui_print("  " + ", ".join(BASE_STATS.keys()) + ".")
+        ui_print("\nTips:")
+        ui_print("  - Type a number to assign points to the current stat.")
+        ui_print("  - Press Enter to assign 0.")
+        ui_print("  - Type 'd' to see all skill descriptions.")
+        ui_print("  - Type 's' to see a summary of current allocations.")
+        ui_print("  - Type 'r' to restart allocation from the beginning.\n")
 
         stats_in_order = list(BASE_STATS.keys())
         i = 0
         while i < len(stats_in_order):
             stat = stats_in_order[i]
             desc = SKILL_DESCRIPTIONS.get(stat, "")
-            print(f"--- {stat.capitalize()} ---")
-            print(desc)
-            print(f"Base {stat}: {BASE_STATS[stat]}")
-            print(f"Remaining points: {remaining}")
-            raw = input(f"Add points to {stat} (0-{remaining}, 'd' descriptions, 's' summary, 'r' restart): ").strip().lower()
+            ui_print(f"--- {stat.capitalize()} ---")
+            ui_print(desc)
+            ui_print(f"Base {stat}: {BASE_STATS[stat]}")
+            ui_print(f"Remaining points: {remaining}")
+            raw = ui_input(f"Add points to {stat} (0-{remaining}, 'd' descriptions, 's' summary, 'r' restart): ").strip().lower()
 
             if raw == "d":
                 _print_all_skill_descriptions()
                 continue
             if raw == "s":
-                print("\nCurrent allocations:")
+                ui_print("\nCurrent allocations:")
                 for k in stats_in_order:
-                    print(f"  {k.capitalize():12} = {BASE_STATS[k]} + {allocations[k]} (total {BASE_STATS[k] + allocations[k]})")
-                print(f"  Remaining: {remaining}\n")
+                    ui_print(f"  {k.capitalize():12} = {BASE_STATS[k]} + {allocations[k]} (total {BASE_STATS[k] + allocations[k]})")
+                ui_print(f"  Remaining: {remaining}\n")
                 continue
             if raw == "r":
-                print("Restarting allocation...\n")
+                ui_print("Restarting allocation...\n")
                 remaining = POINTS_TO_DISTRIBUTE
                 allocations = {k: 0 for k in BASE_STATS.keys()}
                 i = 0
@@ -93,15 +95,15 @@ def allocate_points() -> dict:
                 val = 0
             else:
                 if not raw.isdigit():
-                    print("Please enter a non-negative integer, or 'd'/'s'/'r'.\n")
+                    ui_print("Please enter a non-negative integer, or 'd'/'s'/'r'.\n")
                     continue
                 val = int(raw)
 
             if val < 0:
-                print("Enter 0 or a positive number.\n")
+                ui_print("Enter 0 or a positive number.\n")
                 continue
             if val > remaining:
-                print(f"You only have {remaining} points left. Try a smaller number.\n")
+                ui_print(f"You only have {remaining} points left. Try a smaller number.\n")
                 continue
 
             allocations[stat] = val
@@ -110,7 +112,7 @@ def allocate_points() -> dict:
 
         # If points remain, auto-assign them to stamina by default
         if remaining > 0:
-            print(f"\nYou have {remaining} unassigned points. They will be added to stamina by default.")
+            ui_print(f"\nYou have {remaining} unassigned points. They will be added to stamina by default.")
             allocations["stamina"] += remaining
             remaining = 0
 
@@ -124,25 +126,25 @@ def allocate_points() -> dict:
         final["health"] = final["max_health"]
 
         # Show final results with descriptions
-        print("\nFinal stats:")
+        ui_print("\nFinal stats:")
         for k in stats_in_order:
-            print(f"  {k.capitalize():12} {final[k]:>3}  — {SKILL_DESCRIPTIONS.get(k, '')}")
-        print(f"  {'Max Health':12} {final['max_health']:>3}")
-        print(f"  {'Health':12} {final['health']:>3}\n")
+            ui_print(f"  {k.capitalize():12} {final[k]:>3}  — {SKILL_DESCRIPTIONS.get(k, '')}")
+        ui_print(f"  {'Max Health':12} {final['max_health']:>3}")
+        ui_print(f"  {'Health':12} {final['health']:>3}\n")
 
         # Confirm
         while True:
-            conf = input("Confirm these stats? (y/n): ").strip().lower()
+            conf = ui_input("Confirm these stats? (y/n): ").strip().lower()
             if conf in ("y", "yes"):
                 return final
             if conf in ("n", "no"):
-                print("\nLet's re-distribute your points.\n")
+                ui_print("\nLet's re-distribute your points.\n")
                 break  # restart outer loop
-            print("Enter 'y' or 'n'.")
+            ui_print("Enter 'y' or 'n'.")
 
 
 def choose_name_and_stats() -> dict:
-    print("=== Character Creation ===")
+    ui_print("=== Character Creation ===")
     name = ask_name()
     stats = allocate_points()
     return {"name": name, "stats": stats}

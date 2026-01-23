@@ -4,8 +4,11 @@ from text_effect import suspense_print
 # -----------------------------
 # Input helper (local, safe)
 # -----------------------------
+from ui import ui_input, ui_print
+
 def get_choice():
-    return input("> ").lower()
+    return ui_input("> ").strip()
+
 
 
 # -----------------------------
@@ -13,27 +16,27 @@ def get_choice():
 # -----------------------------
 def open_inventory(player):
     while True:
-        print("\n--- Inventory ---")
+        ui_print("\n--- Inventory ---")
 
-        print("EQUIPPED:")
+        ui_print("EQUIPPED:")
         for slot, item in player["equipment"].items():
             if item:
-                print(f"  {slot.capitalize()}: {item.replace('_', ' ')}")
+                ui_print(f"  {slot.capitalize()}: {item.replace('_', ' ')}")
             else:
-                print(f"  {slot.capitalize()}: (empty)")
+                ui_print(f"  {slot.capitalize()}: (empty)")
 
-        print("\nITEMS:")
+        ui_print("\nITEMS:")
         if not player["inventory"]:
-            print("Your inventory is empty.")
+            ui_print("Your inventory is empty.")
         else:
             for i, (item, qty) in enumerate(player["inventory"].items(), 1):
-                print(f"{i}) {item.replace('_', ' ')} x{qty}")
+                ui_print(f"{i}) {item.replace('_', ' ')} x{qty}")
 
-        print("\nOPTIONS:")
-        print("  [number] Inspect item")
-        print("  U) Unequip item")
-        print("  X) Use item")
-        print("  B) Back")
+        ui_print("\nOPTIONS:")
+        ui_print("  [number] Inspect item")
+        ui_print("  U) Unequip item")
+        ui_print("  X) Use item")
+        ui_print("  B) Back")
 
         choice = get_choice()
 
@@ -51,24 +54,24 @@ def open_inventory(player):
                     from systems import inspect_item
                     inspect_item(player, items[index])
                 except ImportError:
-                    print("Unable to inspect item right now.")
+                    ui_print("Unable to inspect item right now.")
         else:
-            print("Invalid choice.")
+            ui_print("Invalid choice.")
 
 
 # -----------------------------
 # EQUIPMENT
 # -----------------------------
 def unequip_menu(player):
-    print("\nUNEQUIP WHICH SLOT?")
+    ui_print("\nUNEQUIP WHICH SLOT?")
     slots = list(player["equipment"].keys())
 
     for i, slot in enumerate(slots, 1):
         current = player["equipment"][slot]
         name = current.replace("_", " ") if current else "(empty)"
-        print(f"{i}) {slot.capitalize()} — {name}")
+        ui_print(f"{i}) {slot.capitalize()} — {name}")
 
-    print("B) Back")
+    ui_print("B) Back")
     choice = get_choice()
 
     if choice == "b":
@@ -81,7 +84,7 @@ def unequip_menu(player):
                 from systems import unequip_item
                 unequip_item(player, slots[index])
             except ImportError:
-                print("Unable to unequip right now.")
+                ui_print("Unable to unequip right now.")
 
 
 # -----------------------------
@@ -89,7 +92,7 @@ def unequip_menu(player):
 # -----------------------------
 def add_item(player, item, amount=1):
     player["inventory"][item] = player["inventory"].get(item, 0) + amount
-    print(f"Added {amount} x {item.replace('_', ' ')}")
+    ui_print(f"Added {amount} x {item.replace('_', ' ')}")
 
 
 def remove_item(player, item, amount=1):
@@ -135,18 +138,18 @@ def handle_weird_fruit(player):
     player["weird_fruit_eaten"] += 1
     count = player["weird_fruit_eaten"]
 
-    print("The fruit tastes wrong. Sweet… and metallic.")
+    ui_print("The fruit tastes wrong. Sweet… and metallic.")
 
     # Early unease
     if random.random() < 0.2:
-        print("For a moment… you swear it moves in your stomach.")
+        ui_print("For a moment… you swear it moves in your stomach.")
 
     # 🍽️ Always heal a bit when eaten
     heal_player(player, 4)
     
     # 🔍 3 fruits → perception bonus
     if count == 3:
-        print("Your senses sharpen. Sounds feel closer. Shadows clearer.")
+        ui_print("Your senses sharpen. Sounds feel closer. Shadows clearer.")
         player["status_effects"]["perception_bonus"] = 1
 
     # 🔍 Scaling perception (soft cap)
@@ -155,14 +158,14 @@ def handle_weird_fruit(player):
 
     # 👽 10 fruits → aliens stop attacking
     if count == 7:
-        print("Something inside you stirs… and the world feels quieter.")
-        print("Alien creatures hesitate when they look at you.")
+        ui_print("Something inside you stirs… and the world feels quieter.")
+        ui_print("Alien creatures hesitate when they look at you.")
         player["status_effects"]["alien_marked"] = True
         player["can_breathe_in_alien_environments"] = True
         player["has_eaten_10_fruits"] = True
     # ☠️ Too many fruits → body rejection
     if count >= 8 and random.random() < 0.1:
-        print("Pain erupts inside you."
+        ui_print("Pain erupts inside you."
               "tentacles erupt from your skin, writhing wildly before retracting back.")
         take_damage(player, 25)
 
@@ -278,7 +281,7 @@ def read_note(player, note_id):
                         "I need to g—"),
     }
 
-    print(notes.get(note_id, "The note is unreadable."))
+    ui_print(notes.get(note_id, "The note is unreadable."))
 
 
 
@@ -292,9 +295,9 @@ def use_item(player):
 
     items = list(player["inventory"].keys())
 
-    print("Choose an item to use:")
+    ui_print("Choose an item to use:")
     for i, item in enumerate(items, 1):
-        print(f"{i}) {item.replace('_', ' ')} x{player['inventory'][item]}")
+        ui_print(f"{i}) {item.replace('_', ' ')} x{player['inventory'][item]}")
 
     choice = get_choice()
     if not choice.isdigit():
@@ -347,11 +350,11 @@ def use_item(player):
 
     # -------- AMMO --------
     if item_type == "ammo":
-        print("You can’t use ammo directly.")
+        ui_print("You can’t use ammo directly.")
         return
 
     # -------- TOOL / MISC --------
-    print(data.get("description", "Nothing happens."))
+    ui_print(data.get("description", "Nothing happens."))
 
 
 # -----------------------------

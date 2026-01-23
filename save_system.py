@@ -3,6 +3,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from ui import ui_print, ui_input
 
 SAVE_DIR = "saves"                 # Directory for multiple save files
 QUICK_SAVE_FILE = "savegame.json"  # Back-compat: single quick-save file
@@ -57,7 +58,7 @@ def save_game(player: Dict[str, Any], save_id: Optional[str] = None) -> str:
     """
     def _find_sets(obj, path="player"):
         if isinstance(obj, set):
-            print(f"❌ SET FOUND at {path}: {obj}")
+            ui_print(f"❌ SET FOUND at {path}: {obj}")
         elif isinstance(obj, dict):
             for k, v in obj.items():
                 _find_sets(v, f"{path}.{k}")
@@ -82,12 +83,12 @@ def save_game(player: Dict[str, Any], save_id: Optional[str] = None) -> str:
         }
         path = _save_path(save_id)
         _atomic_write_json(path, data)
-        print(f"💾 Game saved successfully: {path}")
+        ui_print(f"💾 Game saved successfully: {path}")
         # Set this as last selected
         _persist_last_selected(save_id)
         return save_id
     except Exception as e:
-        print(f"❌ Failed to save game: {e}")
+        ui_print(f"❌ Failed to save game: {e}")
         raise
 
 
@@ -98,9 +99,9 @@ def quick_save(player: Dict[str, Any]) -> None:
     try:
         with open(QUICK_SAVE_FILE, "w", encoding="utf-8") as f:
             json.dump(player, f, indent=4)
-        print(f"💾 Quick-saved to {QUICK_SAVE_FILE}.")
+        ui_print(f"💾 Quick-saved to {QUICK_SAVE_FILE}.")
     except Exception as e:
-        print(f"❌ Failed to quick-save game: {e}")
+        ui_print(f"❌ Failed to quick-save game: {e}")
 
 
 def list_saves() -> List[Dict[str, Any]]:
@@ -148,17 +149,17 @@ def load_game(save_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
             if os.path.exists(path):
                 data = _read_json(path)
                 if data and "player" in data:
-                    print(f"📂 Loaded save '{chosen_id}'.")
+                    ui_print(f"📂 Loaded save '{chosen_id}'.")
                     _persist_last_selected(chosen_id)
                     return data["player"]
                 else:
-                    print(f"❌ Save file corrupted: {path}")
+                    ui_print(f"❌ Save file corrupted: {path}")
 
         latest = get_latest_save()
         if latest:
             data = _read_json(latest["path"])
             if data and "player" in data:
-                print(f"📂 Loaded latest save '{latest['save_id']}'.")
+                ui_print(f"📂 Loaded latest save '{latest['save_id']}'.")
                 _persist_last_selected(latest["save_id"])
                 return data["player"]
 
@@ -166,13 +167,13 @@ def load_game(save_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         if os.path.exists(QUICK_SAVE_FILE):
             with open(QUICK_SAVE_FILE, "r", encoding="utf-8") as f:
                 player = json.load(f)
-            print("📂 Loaded quick-save.")
+            ui_print("📂 Loaded quick-save.")
             return player
 
-        print("❌ No save file found.")
+        ui_print("❌ No save file found.")
         return None
     except Exception as e:
-        print(f"❌ Failed to load game: {e}")
+        ui_print(f"❌ Failed to load game: {e}")
         return None
 
 
@@ -189,7 +190,7 @@ def load_menu_interactive(default_to_last_selected: bool = True) -> Optional[Dic
     """
     saves = list_saves()
     if not saves:
-        print("❌ No saves found.")
+        ui_print("❌ No saves found.")
         return None
 
     last_selected = _load_last_selected() if default_to_last_selected else None
@@ -202,39 +203,39 @@ def load_menu_interactive(default_to_last_selected: bool = True) -> Optional[Dic
                 initial_idx = i
                 break
 
-    print("\n=== Load Game ===")
+    ui_print("\n=== Load Game ===")
     for idx, s in enumerate(saves):
         marker = "▶" if idx == initial_idx else " "
         scene = s["meta"].get("scene") or "-"
         when = s["updated_at"]
-        print(f"{marker} [{idx+1}] {s['save_id']}  ({when})  scene={scene}")
+        ui_print(f"{marker} [{idx+1}] {s['save_id']}  ({when})  scene={scene}")
 
-    print("\nPress Enter to load the preselected save, number to choose, or 'q' to cancel.")
+    ui_print("\nPress Enter to load the preselected save, number to choose, or 'q' to cancel.")
     choice = input("> ").strip()
 
     if choice.lower() == "q":
-        print("Cancelled.")
+        ui_print("Cancelled.")
         return None
 
     if choice == "":
         chosen = saves[initial_idx]
     else:
         if not choice.isdigit():
-            print("Invalid input.")
+            ui_print("Invalid input.")
             return None
         idx = int(choice) - 1
         if not (0 <= idx < len(saves)):
-            print("Invalid selection.")
+            ui_print("Invalid selection.")
             return None
         chosen = saves[idx]
 
     _persist_last_selected(chosen["save_id"])
     data = _read_json(chosen["path"])
     if not data or "player" not in data:
-        print("❌ Selected save is corrupted.")
+        ui_print("❌ Selected save is corrupted.")
         return None
 
-    print(f"📂 Loaded save '{chosen['save_id']}'.")
+    ui_print(f"📂 Loaded save '{chosen['save_id']}'.")
     return data["player"]
 
 
@@ -256,10 +257,10 @@ if __name__ == "__main__":
     elif cmd == "load":
         save_id = sys.argv[2] if len(sys.argv) > 2 else None
         player = load_game(save_id=save_id)
-        print("Player:", player)
+        ui_print("Player:", player)
     elif cmd == "quick-save":
         quick_save(example_player)
     else:
         # Default: launch interactive load menu
         player = load_menu_interactive()
-        print("Player:", player)
+        ui_print("Player:", player)

@@ -126,7 +126,7 @@ def handle_old_bunker(player, choice):
 
 6️⃣ Main Entry Point (main.py)
 import tkinter as tk
-from ui import GameUI
+from gui import GameUI
 from game_output import set_ui
 from rooms import old_bunker
 from player import player
