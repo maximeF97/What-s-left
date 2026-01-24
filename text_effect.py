@@ -1,56 +1,64 @@
-import time
 import re
-from ui import ui_write, ui_print
+from ui import ui_write, ui_print, ui_after
 
-# Set to True if you ever want real delays in pure terminal mode.
-ENABLE_TEXT_DELAYS = False
-
-
-def slow_print_word(text: str, wps: float = 3.0, punctuation_pause: bool = True) -> None:
-    if wps <= 0:
-        wps = 0.1
-
-    base_delay = 1.0 / wps
-    words = re.findall(r"\S+\s*", text)
-
-    for w in words:
-        ui_write(w)
-
-        if ENABLE_TEXT_DELAYS:
-            extra = 0.0
-            if punctuation_pause:
-                trimmed = w.strip()
-                if trimmed.endswith(("...", "…")):
-                    extra = base_delay * 2.5
-                elif trimmed.endswith((".", "!", "?")):
-                    extra = base_delay * 2.0
-                elif trimmed.endswith((",", ";", ":")):
-                    extra = base_delay * 1.25
-            time.sleep(base_delay + extra)
-
-    ui_print("")  # newline
+_message_queue = []
+_is_running = False
 
 
-def slow_print_char(text: str, cps: int = 28, punctuation_pause: bool = True) -> None:
-    if cps <= 0:
-        cps = 1
-
-    base_delay = 1.0 / cps
-
-    for ch in text:
-        ui_write(ch)
-
-        if ENABLE_TEXT_DELAYS:
-            extra = 0.0
-            if punctuation_pause:
-                if ch in (".", "!", "?"):
-                    extra = base_delay * 8
-                elif ch in (",", ";", ":"):
-                    extra = base_delay * 4
-            time.sleep(base_delay + extra)
-
-    ui_print("")  # newline
+def slow_print_char(text: str, cps: int = 30, punctuation_pause: bool = True):
+    """
+    Backwards-compatible wrapper that just uses suspense_print with a delay
+    derived from cps. punctuation_pause is ignored but kept for signature.
+    """
+    cps = max(1, cps)
+    delay = max(5, int(1000 / cps))
+    suspense_print(text, delay=delay)
 
 
-def suspense_print(text: str) -> None:
-    slow_print_word(text, wps=6, punctuation_pause=True)
+def slow_print_word(text: str, wps: float = 3.0, punctuation_pause: bool = True):
+    """
+    Backwards-compatible wrapper: just delegates to suspense_print.
+    """
+    suspense_print(text)
+
+
+def suspense_print(text: str, delay: int = 30):
+    """
+    Queue text to be printed character-by-character using ui_after.
+    Calls are processed sequentially so characters never overlap.
+    """
+    global _is_running
+
+    if text is None:
+        text = ""
+
+    _message_queue.append((text, max(5, delay)))
+
+    if not _is_running:
+        _run_next()
+
+
+def _run_next():
+    global _is_running
+
+    if not _message_queue:
+        _is_running = False
+        return
+
+    _is_running = True
+    text, delay = _message_queue.pop(0)
+    chars = list(text)
+    index_state = {"i": 0}
+
+    def step():
+        i = index_state["i"]
+        if i >= len(chars):
+            ui_print("")  # newline after this message
+            _run_next()
+            return
+
+        ui_write(chars[i])
+        index_state["i"] += 1
+        ui_after(delay, step)
+
+    step()

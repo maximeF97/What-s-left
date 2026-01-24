@@ -1,10 +1,11 @@
+from ui import ui_input, ui_print, ui_update_inventory
 from equipment import EQUIPMENT
 import random
 from text_effect import suspense_print
+
 # -----------------------------
 # Input helper (local, safe)
 # -----------------------------
-from ui import ui_input, ui_print
 
 def get_choice():
     return ui_input("> ").strip()
@@ -93,6 +94,7 @@ def unequip_menu(player):
 def add_item(player, item, amount=1):
     player["inventory"][item] = player["inventory"].get(item, 0) + amount
     ui_print(f"Added {amount} x {item.replace('_', ' ')}")
+    ui_update_inventory(player["inventory"], flash=True)
 
 
 def remove_item(player, item, amount=1):
@@ -101,6 +103,7 @@ def remove_item(player, item, amount=1):
     player["inventory"][item] -= amount
     if player["inventory"][item] <= 0:
         del player["inventory"][item]
+    ui_update_inventory(player["inventory"])
     return True
 
 

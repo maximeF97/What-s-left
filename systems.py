@@ -3,7 +3,7 @@ from typing import Dict
 
 from save_system import save_game, load_game
 from equipment import EQUIPMENT
-from ui import ui_print, ui_input
+from ui import ui_print, ui_input, ui_update_equipment
 
 # -----------------------------
 # Player progression and stats
@@ -39,6 +39,7 @@ def level_up(player: Dict) -> None:
 
             if selected_skill == "stamina":
                 apply_stamina_health_bonus(player)
+            ui_update_equipment(player)  # ← Add this line
             break
         else:
             ui_print("Invalid choice.")
@@ -79,6 +80,7 @@ def gain_xp(player: Dict, amount: int) -> None:
     gained_xp = int(amount * bonus_multiplier)
     player["experience"] += gained_xp
     ui_print(f"You gained {gained_xp} XP!")
+    ui_update_equipment(player)  # ← Add this line
 
     while player["experience"] >= xp_needed(player["level"]):
         level_up(player)
@@ -101,6 +103,8 @@ def apply_max_health_bonus(player: Dict) -> None:
     player["max_health"] = base_max + bonus
     player["health"] = min(player["health"], player["max_health"])
 
+def apply_health_restore_bonus(player: Dict) -> None:
+    pass#todo
 
 def apply_bonuses(player: Dict, bonuses: Dict[str, int]) -> None:
     for stat, value in bonuses.items():
@@ -172,34 +176,49 @@ def equip_item(player: Dict, item: str) -> bool:
     if player.get("inventory", {}).get(item, 0) <= 0:
         ui_print(f"You don't have {item.replace('_', ' ')}.")
         return False
+
     slot = info.get("slot")
-    if slot == "one_hand":
-        player["equipment"]["hand"] = item
-        ui_print(f"Equipped {item.replace('_', ' ')} (hand).")
-    elif slot == "two_hands":
-        player["equipment"]["hand"] = item
-        ui_print(f"Equipped {item.replace('_', ' ')} (two hands).")
-    elif slot == "body":
-        player["equipment"]["body"] = item
-        ui_print(f"Equipped {item.replace('_', ' ')} (body, hands, feet).")
+    if not slot:
+        ui_print(f"{item.replace('_', ' ').title()} has no slot defined.")
+        return False
 
-    # Equip primary slot
-    player["equipment"][slot] = item
-
-    # Handle multi-slot occupation
+    # Determine which slots this item will occupy
+    slots_to_occupy = [slot]
     
     if info.get("flags", {}).get("occupies_hands"):
-        player["equipment"]["hand"] = item
+        if "hand" not in slots_to_occupy:
+            slots_to_occupy.append("hand")
+    
     if info.get("flags", {}).get("occupies_feet"):
-        player["equipment"]["feet"] = item
+        if "feet" not in slots_to_occupy:
+            slots_to_occupy.append("feet")
+
+    # Unequip any existing items in those slots
+    for occupied_slot in slots_to_occupy:
+        current_item = player["equipment"].get(occupied_slot)
+        if current_item and current_item != item:
+            ui_print(f"Unequipping {current_item.replace('_', ' ')} from {occupied_slot}.")
+            # Clear ALL slots that old item occupied
+            for s, equipped in list(player["equipment"].items()):
+                if equipped == current_item:
+                    player["equipment"][s] = None
+
+    # Equip the new item in all required slots
+    for occupied_slot in slots_to_occupy:
+        player["equipment"][occupied_slot] = item
 
     _aggregate_equipment_bonuses(player)
 
-    print(f"Equipped {item.replace('_', ' ')} (body, hands, feet).")
+    # Build friendly message
+    if len(slots_to_occupy) == 1:
+        ui_print(f"Equipped {item.replace('_', ' ')} ({slot}).")
+    else:
+        slot_names = ", ".join(slots_to_occupy)
+        ui_print(f"Equipped {item.replace('_', ' ')} ({slot_names}).")
+    
+    ui_update_equipment(player)  # ← Add this line
     return True
 
-
-   
 
 def unequip_item(player: Dict, slot: str) -> bool:
     ensure_equipment_struct(player)
@@ -220,6 +239,7 @@ def unequip_item(player: Dict, slot: str) -> bool:
 
     _aggregate_equipment_bonuses(player)
     ui_print(f"Unequipped {item.replace('_', ' ')}.")
+    ui_update_equipment(player)  # ← Add this line
     return True
 
 def inspect_item(player: Dict, item: str) -> None:

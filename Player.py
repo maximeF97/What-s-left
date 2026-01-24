@@ -14,7 +14,7 @@ player = {
         "head": None,
         "body": None,
         "hand": None,
-        "Feet" : None,
+        "feet" : None,
         "implant": None
     },
     "skills": {

@@ -1,3 +1,4 @@
+from ui import ui_update_inventory, ui_update_equipment
 from Player import player as player, apply_setup_to_player
 from character_setup import choose_name_and_stats
 from rooms import old_bunker, wasteland
@@ -19,7 +20,9 @@ except ImportError:
 def _start_new_game():
     setup = choose_name_and_stats()
     apply_setup_to_player(player, setup)
-
+    ui_update_inventory(player.get("inventory", {}))
+    ui_update_equipment(player)
+    
     suspense_print("You finished the last of your rations. Time to face the world.")
     suspense_print(f"Health: {player['health']}")
     player.setdefault("scene", "OldBunker")
@@ -40,7 +43,7 @@ def start_game():
     suspense_print(
         "Decades after a mysterious blast from outer space decimated most of the world "
         "in the blink of an eye, you are one of the few survivors trying to understand "
-        "what happened — and what’s left of us."
+        "what happened — and what's left of us."
     )
     main_menu()
 
@@ -74,6 +77,8 @@ def main_menu():
         player.clear()
         player.update(loaded)
         suspense_print("Game loaded.")
+        ui_update_inventory(player.get("inventory", {}))
+        ui_update_equipment(player)
         resume_game(player)
 
     elif choice.lower() == "l":
@@ -83,6 +88,8 @@ def main_menu():
         player.clear()
         player.update(loaded)
         suspense_print("Game loaded.")
+        ui_update_inventory(player.get("inventory", {}))
+        ui_update_equipment(player)
         resume_game(player)
 
     elif HAS_INTERACTIVE_LOAD and choice.lower() == "i":
@@ -92,6 +99,8 @@ def main_menu():
         player.clear()
         player.update(loaded)
         suspense_print("Game loaded.")
+        ui_update_inventory(player.get("inventory", {}))
+        ui_update_equipment(player)
         resume_game(player)
 
     elif choice.lower() == "s":
