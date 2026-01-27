@@ -54,6 +54,7 @@ def main_menu():
     suspense_print("2) Quit")
     suspense_print("C) Continue")
     suspense_print("L) Load game")
+    suspense_print("H) Help")
     if HAS_INTERACTIVE_LOAD:
         suspense_print("I) Interactive Load Menu")
     suspense_print("S) Save current game")

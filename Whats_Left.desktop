@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=What's Left
+Comment=A post-apocalyptic text adventure game
+Exec=/home/fuhrm/boot.dev.ls/github.com/maximeF97/Whats_left/launch_game.sh
+Path=/home/fuhrm/boot.dev.ls/github.com/maximeF97/Whats_left
+Icon=dialog-information
+Terminal=false
+Categories=Game;

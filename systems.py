@@ -73,7 +73,6 @@ def skill_check(
         )
     return total >= difficulty
 
-
 def gain_xp(player: Dict, amount: int) -> None:
     intelligence = player.get("skills", {}).get("intelligence", 0)
     bonus_multiplier = 1 + (intelligence * 0.05)
@@ -296,7 +295,14 @@ def handle_global_input(choice: str, player: Dict) -> bool:
             player.clear()
             player.update(loaded_player)
         return True
-
+    if choice.lower() == "h":
+        ui_print("\n--- Help Menu ---")
+        ui_print("i) Open Inventory")
+        ui_print("s) Save Game")
+        ui_print("l) Load Game")
+        ui_print("h) Help Menu")
+        ui_print("------------------\n")
+        return True
     return False
 
 

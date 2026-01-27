@@ -67,6 +67,22 @@ and the terrifying truth of **what's left of us**.
    python3 run_gui.py
    ```
 
+### **One-Click Launcher (Linux)**
+If you want a desktop/app-menu icon:
+
+```bash
+cd path/to/Whats_left
+chmod +x setup_launcher.sh
+./setup_launcher.sh
+```
+
+What it does:
+- Installs a launcher into your user applications menu
+- Makes it executable
+- Registers it so you can search **"What's Left"** and click to play
+
+Manual fallback: copy `Whats_Left.desktop` to `~/.local/share/applications/` and ensure it is executable; the icon will then appear in your launcher.
+
 ### **First Time Setup (Optional)**
 
 If you want to use a virtual environment (recommended):
