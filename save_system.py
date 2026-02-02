@@ -211,7 +211,7 @@ def load_menu_interactive(default_to_last_selected: bool = True) -> Optional[Dic
         ui_print(f"{marker} [{idx+1}] {s['save_id']}  ({when})  scene={scene}")
 
     ui_print("\nPress Enter to load the preselected save, number to choose, or 'q' to cancel.")
-    choice = input("> ").strip()
+    choice = ui_input().strip()
 
     if choice.lower() == "q":
         ui_print("Cancelled.")
