@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -e
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -12,4 +14,4 @@ if [ -f ".venv/bin/activate" ]; then
 fi
 
 # Launch the GUI
-python3 run_gui.py
+exec python3 run_gui.py
