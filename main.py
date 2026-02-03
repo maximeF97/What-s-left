@@ -39,7 +39,7 @@ def resume_game(player):
 
 
 def start_game():
-    suspense_print("Welcome to What's Left of Us.")
+    suspense_print("  Welcome to What's Left of Us.")
     suspense_print(
         "Decades after a mysterious blast from outer space decimated most of the world "
         "in the blink of an eye, you are one of the few survivors trying to understand "

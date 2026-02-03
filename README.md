@@ -32,7 +32,39 @@ and the terrifying truth of **what's left of us**.
 - Python 3.8 or higher
 - Tkinter (usually included with Python)
 
-### **Installation & Running**
+### **Quick Start - Automatic Installer (All Platforms)**
+
+The easiest way to install and launch the game with desktop icons:
+
+#### **Windows**
+1. Navigate to the game folder in Windows File Explorer
+2. Double-click `launch_game.bat` to launch the game
+3. **For desktop shortcut with icon**: Double-click `create_windows_shortcut.vbs`
+   - This automatically creates a shortcut on your desktop with the game icon
+
+#### **Linux / WSL**
+1. Open Terminal in the game folder
+2. Run the installer:
+   ```bash
+   bash setup_launcher.sh
+   ```
+3. The game will be installed to your applications menu with icon
+4. Launch by searching **"What's Left"** in your app launcher
+
+#### **macOS**
+1. Open Terminal in the game folder
+2. Run the installer:
+   ```bash
+   bash setup_launcher.sh
+   ```
+3. The game will be installed as an app: `~/Applications/WhatsLeft.app`
+4. Launch from Applications or Spotlight
+
+---
+
+### **Manual Installation & Running**
+
+If you prefer to run manually without the installer:
 
 #### **Windows**
 1. Open Command Prompt (Win + R, type `cmd`)
@@ -67,21 +99,31 @@ and the terrifying truth of **what's left of us**.
    python3 run_gui.py
    ```
 
-### **One-Click Launcher (Linux)**
-If you want a desktop/app-menu icon:
+---
 
-```bash
-cd path/to/Whats_left
-chmod +x setup_launcher.sh
-./setup_launcher.sh
-```
+### **Cross-Platform Launcher Files**
 
-What it does:
-- Installs a launcher into your user applications menu
-- Makes it executable
-- Registers it so you can search **"What's Left"** and click to play
+The game includes multiple launcher options:
 
-Manual fallback: copy `Whats_Left.desktop` to `~/.local/share/applications/` and ensure it is executable; the icon will then appear in your launcher.
+- **`launch.py`** - Universal Python launcher (all platforms)
+- **`launch_game.bat`** - Windows batch launcher with error handling
+- **`launch_game.sh`** - Linux/WSL bash launcher
+- **`launch_game_macos.sh`** - macOS bash launcher
+- **`create_windows_shortcut.vbs`** - Windows desktop shortcut creator with icon
+- **`setup_launcher.sh`** - Automatic installer for all platforms
+- **`Whats_Left.desktop`** - Linux desktop entry file
+
+---
+
+### **Desktop Icons**
+
+The game includes custom icons for all platforms:
+- **`assets/game_icon.ico`** - Windows/Linux icon
+- **`assets/IMG_5863.png`** - Linux/macOS icon (PNG format)
+
+Icons are automatically configured when using the installer scripts.
+
+---
 
 ### **First Time Setup (Optional)**
 
@@ -242,6 +284,10 @@ New areas, functions, enemies, items, interactions, and story elements are activ
 - ✅ Thread-safe, non-blocking architecture
 - ✅ Equipment bonuses and stat aggregation
 - ✅ Interactive save/load system
+- ✅ Cross-platform launcher system (Windows/Linux/macOS)
+- ✅ Automatic desktop icon installation
+- ✅ Windows desktop shortcut creator with icon
+- ✅ One-click installers for all platforms
 
 ### **Known Issues**
 - Some rooms may still have legacy `print()` statements (being converted)
