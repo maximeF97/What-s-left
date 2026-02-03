@@ -97,27 +97,18 @@ EOF
         echo "Installing for Windows (Native)..."
         echo ""
         
-        # Create desktop shortcut if Desktop folder exists
-        DESKTOP_DIR=$(wslpath "$(cmd.exe /c echo %USERPROFILE%\\Desktop 2>/dev/null)" 2>/dev/null | tr -d '\r' 2>/dev/null)
-        if [ -z "$DESKTOP_DIR" ]; then
-            DESKTOP_DIR="$HOME/Desktop"
-        fi
-        
-        if [ -d "$DESKTOP_DIR" ]; then
-            # Create a shortcut using VBScript
-            SHORTCUT_TARGET="$DESKTOP_DIR/What's Left.lnk"
-            echo "Creating desktop shortcut..."
-            
-            # Note: This requires Windows PowerShell to create .lnk files
-            echo "✓ Windows batch launcher is ready: launch_game.bat"
-            echo "  Double-click 'launch_game.bat' to launch the game"
-            echo ""
-            echo "  To create a desktop shortcut, right-click launch_game.bat"
-            echo "  and select 'Send to > Desktop (create shortcut)'"
-        else
-            echo "✓ Windows batch launcher is ready: launch_game.bat"
-            echo "  Double-click 'launch_game.bat' to launch the game"
-        fi
+        echo "✓ Windows batch launcher is ready: launch_game.bat"
+        echo "✓ Icon file available: assets\\game_icon.ico"
+        echo ""
+        echo "To create a desktop shortcut WITH ICON:"
+        echo "  1. Double-click 'create_windows_shortcut.vbs'"
+        echo "     This will automatically create a shortcut on your desktop with the game icon!"
+        echo ""
+        echo "OR manually:"
+        echo "  1. Right-click launch_game.bat"
+        echo "  2. Select 'Send to > Desktop (create shortcut)'"
+        echo "  3. Right-click the new shortcut → Properties → Change Icon"
+        echo "  4. Browse to: assets\\game_icon.ico"
         ;;
         
     wsl)
@@ -127,13 +118,36 @@ EOF
         # Install both Linux launcher AND Windows launcher
         mkdir -p "$HOME/.local/share/applications"
         
+        # Create icons directory
+        mkdir -p "$HOME/.local/share/icons/hicolor/256x256/apps"
+        
+        # Copy icon to standard location (if PNG exists)
+        if [ -f "$SCRIPT_DIR/assets/IMG_5863.png" ]; then
+            cp "$SCRIPT_DIR/assets/IMG_5863.png" "$HOME/.local/share/icons/hicolor/256x256/apps/whatsleft.png"
+            echo "✓ Icon copied to system icons directory"
+        fi
+        
         # Create Linux desktop entry for WSL with icon
         sed -e "s|%U|$SCRIPT_DIR|g" "$DESKTOP_FILE" > "$DESKTOP_DEST"
+        
+        # Update icon path to use system icon location
+        sed -i "s|Icon=.*|Icon=whatsleft|g" "$DESKTOP_DEST"
+        
         chmod +x "$DESKTOP_DEST" 2>/dev/null || true
         
         # Update desktop database if available
         if command -v update-desktop-database &> /dev/null; then
             update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+        fi
+        
+        # Try to refresh icon cache
+        if command -v gtk-update-icon-cache &> /dev/null; then
+            gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+        fi
+        
+        # Alternative: use xdg-icon-resource if available
+        if command -v xdg-icon-resource &> /dev/null && [ -f "$SCRIPT_DIR/assets/IMG_5863.png" ]; then
+            xdg-icon-resource install --novendor --size 256 "$SCRIPT_DIR/assets/IMG_5863.png" whatsleft 2>/dev/null || true
         fi
         
         echo "✓ Installed Linux launcher in WSL applications menu"
@@ -142,6 +156,10 @@ EOF
         echo "You can launch the game using:"
         echo "  1. Search 'What's Left' in your WSL application launcher, OR"
         echo "  2. Double-click launch_game.bat from Windows Explorer"
+        echo ""
+        echo "To create a Windows desktop shortcut with icon:"
+        echo "  - Double-click 'create_windows_shortcut.vbs' from Windows Explorer"
+        echo "    (This will create a shortcut on your Windows desktop with the game icon)"
         ;;
         
     linux|unix)
@@ -151,8 +169,20 @@ EOF
         # Create applications directory if it doesn't exist
         mkdir -p "$HOME/.local/share/applications"
         
+        # Create icons directory
+        mkdir -p "$HOME/.local/share/icons/hicolor/256x256/apps"
+        
+        # Copy icon to standard location (if PNG exists)
+        if [ -f "$SCRIPT_DIR/assets/IMG_5863.png" ]; then
+            cp "$SCRIPT_DIR/assets/IMG_5863.png" "$HOME/.local/share/icons/hicolor/256x256/apps/whatsleft.png"
+            echo "✓ Icon copied to system icons directory"
+        fi
+        
         # Copy the desktop file with correct path and icon
         sed -e "s|%U|$SCRIPT_DIR|g" "$DESKTOP_FILE" > "$DESKTOP_DEST"
+        
+        # Update icon path to use system icon location
+        sed -i "s|Icon=.*|Icon=whatsleft|g" "$DESKTOP_DEST"
         
         # Make it executable
         chmod +x "$DESKTOP_DEST"
@@ -165,6 +195,11 @@ EOF
         # Try to refresh icon cache
         if command -v gtk-update-icon-cache &> /dev/null; then
             gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+        fi
+        
+        # Alternative: use xdg-icon-resource if available
+        if command -v xdg-icon-resource &> /dev/null && [ -f "$SCRIPT_DIR/assets/IMG_5863.png" ]; then
+            xdg-icon-resource install --novendor --size 256 "$SCRIPT_DIR/assets/IMG_5863.png" whatsleft 2>/dev/null || true
         fi
         
         echo "✓ Installation complete!"

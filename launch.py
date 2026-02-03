@@ -21,16 +21,29 @@ def get_python_executable():
     """Get the path to the Python executable."""
     # Use the venv Python if available, otherwise system Python
     project_dir = get_project_dir()
-    venv_paths = [
-        project_dir / ".venv" / "Scripts" / "python.exe",  # Windows venv
-        project_dir / ".venv" / "bin" / "python",          # Unix venv
-    ]
+    
+    # On Windows, prefer pythonw.exe for GUI apps (no console window)
+    if platform.system() == "Windows":
+        venv_paths = [
+            project_dir / ".venv" / "Scripts" / "pythonw.exe",  # Windows venv GUI
+            project_dir / ".venv" / "Scripts" / "python.exe",   # Windows venv fallback
+        ]
+    else:
+        venv_paths = [
+            project_dir / ".venv" / "bin" / "python",  # Unix venv
+        ]
     
     for venv_path in venv_paths:
         if venv_path.exists():
             return str(venv_path)
     
-    # Fallback to system Python
+    # Fallback to system Python (pythonw on Windows if available)
+    if platform.system() == "Windows":
+        import shutil
+        pythonw = shutil.which("pythonw")
+        if pythonw:
+            return pythonw
+    
     return sys.executable
 
 

@@ -1,21 +1,25 @@
 ' VBScript to create a Windows desktop shortcut with icon
+' Auto-creates shortcut on desktop with game icon
+
 Set WshShell = WScript.CreateObject("WScript.Shell")
-Set oArgs = WScript.Arguments
+Set fso = CreateObject("Scripting.FileSystemObject")
 
-If oArgs.Length < 3 Then
-    WScript.Echo "Usage: create_windows_shortcut.vbs <shortcut_path> <target_path> <icon_path>"
-    WScript.Quit 1
-End If
+' Get script directory
+scriptPath = fso.GetParentFolderName(WScript.ScriptFullName)
 
-shortcutPath = oArgs(0)
-targetPath = oArgs(1)
-iconPath = oArgs(2)
+' Desktop path
+desktopPath = WshShell.SpecialFolders("Desktop")
+shortcutPath = desktopPath & "\What's Left.lnk"
 
+' Create shortcut
 Set oShellLink = WshShell.CreateShortcut(shortcutPath)
-oShellLink.TargetPath = targetPath
-oShellLink.WorkingDirectory = WshShell.CurrentDirectory
-oShellLink.IconLocation = iconPath & ",0"
+oShellLink.TargetPath = scriptPath & "\launch_game.bat"
+oShellLink.WorkingDirectory = scriptPath
+oShellLink.IconLocation = scriptPath & "\assets\game_icon.ico,0"
 oShellLink.Description = "What's Left - Post-apocalyptic Adventure Game"
 oShellLink.Save
 
-WScript.Echo "Shortcut created successfully at: " & shortcutPath
+WScript.Echo "Desktop shortcut created successfully!"
+WScript.Echo "Location: " & shortcutPath
+WScript.Echo ""
+WScript.Echo "You can now launch the game from your desktop."
