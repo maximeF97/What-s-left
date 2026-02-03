@@ -8,10 +8,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Navigate to the project directory
 cd "$SCRIPT_DIR"
 
-# Activate virtual environment if it exists
-if [ -f ".venv/bin/activate" ]; then
-    source .venv/bin/activate
+# Launch the GUI using venv Python if available
+if [ -x ".venv/bin/python" ]; then
+    exec ".venv/bin/python" run_gui.py
+else
+    exec python3 run_gui.py
 fi
-
-# Launch the GUI
-exec python3 run_gui.py
