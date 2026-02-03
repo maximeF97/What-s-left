@@ -17,6 +17,9 @@ cp "$DESKTOP_FILE" "$DESKTOP_DEST"
 # Make it executable
 chmod +x "$DESKTOP_DEST"
 
+# Ensure launcher script is executable
+chmod +x "$SCRIPT_DIR/launch_game.sh"
+
 # Update desktop database
 update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
 
