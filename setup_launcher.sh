@@ -1,28 +1,181 @@
 #!/bin/bash
 
-# Setup script to automatically install the game launcher
+# Setup script to automatically detect OS and install the appropriate game launcher
+# Supports Linux, Windows (WSL/Git Bash/Native), and macOS
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DESKTOP_FILE="$SCRIPT_DIR/Whats_Left.desktop"
 DESKTOP_DEST="$HOME/.local/share/applications/Whats_Left.desktop"
+LAUNCHER_SCRIPT="$SCRIPT_DIR/launch_game.sh"
+LAUNCHER_MACOS="$SCRIPT_DIR/launch_game_macos.sh"
+LAUNCHER_BAT="$SCRIPT_DIR/launch_game.bat"
+LAUNCH_PY="$SCRIPT_DIR/launch.py"
 
-echo "Installing What's Left launcher..."
+echo "=== What's Left Game Installer ==="
+echo ""
+echo "Detecting your operating system..."
 
-# Create applications directory if it doesn't exist
-mkdir -p "$HOME/.local/share/applications"
+# Make all launcher scripts executable
+chmod +x "$LAUNCH_PY" 2>/dev/null || true
+chmod +x "$LAUNCHER_SCRIPT" 2>/dev/null || true
+chmod +x "$LAUNCHER_MACOS" 2>/dev/null || true
 
-# Copy the desktop file
-cp "$DESKTOP_FILE" "$DESKTOP_DEST"
+# Detect OS
+OS_TYPE=""
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    OS_TYPE="macos"
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    OS_TYPE="windows_native"
+elif [[ -f "/proc/version" ]] && grep -qi microsoft /proc/version; then
+    OS_TYPE="wsl"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    OS_TYPE="linux"
+else
+    OS_TYPE="unix"
+fi
 
-# Make it executable
-chmod +x "$DESKTOP_DEST"
+echo "Detected: $OS_TYPE"
+echo ""
 
-# Ensure launcher script is executable
-chmod +x "$SCRIPT_DIR/launch_game.sh"
+# Install based on OS
+case $OS_TYPE in
+    macos)
+        echo "Installing for macOS..."
+        echo ""
+        
+        # Create a simple launcher in Applications
+        APP_DIR="$HOME/Applications/WhatsLeft.app"
+        mkdir -p "$APP_DIR/Contents/MacOS"
+        
+        cat > "$APP_DIR/Contents/MacOS/WhatsLeft" << EOF
+#!/bin/bash
+cd "$SCRIPT_DIR"
+if [ -x ".venv/bin/python" ]; then
+    .venv/bin/python launch.py
+else
+    python3 launch.py
+fi
+EOF
+        
+        chmod +x "$APP_DIR/Contents/MacOS/WhatsLeft"
+        
+        # Create Info.plist with icon
+        cat > "$APP_DIR/Contents/Info.plist" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>WhatsLeft</string>
+    <key>CFBundleName</key>
+    <string>What's Left</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.maximeF97.whatsleft</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundleIconFile</key>
+    <string>game_icon</string>
+</dict>
+</plist>
+EOF
+        
+        # Copy icon file to Resources folder
+        mkdir -p "$APP_DIR/Contents/Resources"
+        if [ -f "$SCRIPT_DIR/assets/game_icon.ico" ]; then
+            cp "$SCRIPT_DIR/assets/game_icon.ico" "$APP_DIR/Contents/Resources/game_icon.ico"
+        fi
+        if [ -f "$SCRIPT_DIR/assets/IMG_5863.png" ]; then
+            cp "$SCRIPT_DIR/assets/IMG_5863.png" "$APP_DIR/Contents/Resources/game_icon.png"
+        fi
+        
+        echo "✓ Installed to: $APP_DIR"
+        echo "✓ You can launch the game from Applications/WhatsLeft.app"
+        echo "  Or double-click launch_game_macos.sh"
+        ;;
+        
+    windows_native)
+        echo "Installing for Windows (Native)..."
+        echo ""
+        
+        # Create desktop shortcut if Desktop folder exists
+        DESKTOP_DIR=$(wslpath "$(cmd.exe /c echo %USERPROFILE%\\Desktop 2>/dev/null)" 2>/dev/null | tr -d '\r' 2>/dev/null)
+        if [ -z "$DESKTOP_DIR" ]; then
+            DESKTOP_DIR="$HOME/Desktop"
+        fi
+        
+        if [ -d "$DESKTOP_DIR" ]; then
+            # Create a shortcut using VBScript
+            SHORTCUT_TARGET="$DESKTOP_DIR/What's Left.lnk"
+            echo "Creating desktop shortcut..."
+            
+            # Note: This requires Windows PowerShell to create .lnk files
+            echo "✓ Windows batch launcher is ready: launch_game.bat"
+            echo "  Double-click 'launch_game.bat' to launch the game"
+            echo ""
+            echo "  To create a desktop shortcut, right-click launch_game.bat"
+            echo "  and select 'Send to > Desktop (create shortcut)'"
+        else
+            echo "✓ Windows batch launcher is ready: launch_game.bat"
+            echo "  Double-click 'launch_game.bat' to launch the game"
+        fi
+        ;;
+        
+    wsl)
+        echo "Installing for Windows Subsystem for Linux..."
+        echo ""
+        
+        # Install both Linux launcher AND Windows launcher
+        mkdir -p "$HOME/.local/share/applications"
+        
+        # Create Linux desktop entry for WSL with icon
+        sed -e "s|%U|$SCRIPT_DIR|g" "$DESKTOP_FILE" > "$DESKTOP_DEST"
+        chmod +x "$DESKTOP_DEST" 2>/dev/null || true
+        
+        # Update desktop database if available
+        if command -v update-desktop-database &> /dev/null; then
+            update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+        fi
+        
+        echo "✓ Installed Linux launcher in WSL applications menu"
+        echo "✓ Windows batch launcher also available: launch_game.bat"
+        echo ""
+        echo "You can launch the game using:"
+        echo "  1. Search 'What's Left' in your WSL application launcher, OR"
+        echo "  2. Double-click launch_game.bat from Windows Explorer"
+        ;;
+        
+    linux|unix)
+        echo "Installing for Linux..."
+        echo ""
+        
+        # Create applications directory if it doesn't exist
+        mkdir -p "$HOME/.local/share/applications"
+        
+        # Copy the desktop file with correct path and icon
+        sed -e "s|%U|$SCRIPT_DIR|g" "$DESKTOP_FILE" > "$DESKTOP_DEST"
+        
+        # Make it executable
+        chmod +x "$DESKTOP_DEST"
+        
+        # Update desktop database if available
+        if command -v update-desktop-database &> /dev/null; then
+            update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+        fi
+        
+        # Try to refresh icon cache
+        if command -v gtk-update-icon-cache &> /dev/null; then
+            gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+        fi
+        
+        echo "✓ Installation complete!"
+        echo "✓ Desktop entry installed to: $DESKTOP_DEST"
+        echo ""
+        echo "The game launcher should now appear in your applications menu."
+        echo "Search for 'What's Left' in your application launcher, or"
+        echo "run: ./launch_game.sh"
+        ;;
+esac
 
-# Update desktop database
-update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+echo ""
+echo "=== Installation Complete ==="
 
-echo "✓ Installation complete!"
-echo "The game launcher should now appear in your applications menu."
-echo "You can also find it by searching 'What's Left' in your application launcher."

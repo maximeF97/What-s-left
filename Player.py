@@ -146,7 +146,8 @@ player = {
     "bastion_rank": 1,
     "bastion_active_quest": "scout_outpost",
     "bastion_completed_quests": [],
-
+    #alien land related
+    "alien_land_2_count": 0,
 
 
 }

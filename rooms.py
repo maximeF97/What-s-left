@@ -6,6 +6,7 @@ import random
 from inventory import use_item, add_item,remove_item,ITEMS
 from enemis import get_enemy
 from text_effect import slow_print_char, suspense_print,slow_print_word
+DEMO_MODE = True
 
 
 
@@ -5489,7 +5490,11 @@ def alien_land_1(player): # to finish
                 from save_system import save_game
                 save_game(player)
                 print("game saved")
-                end_demo(player)
+                if DEMO_MODE:
+                    end_demo(player)
+                else:
+                    alien_land_2(player)
+
                 #alien_land_2(player) futur
                 return
             elif choice == "2":
@@ -5508,5 +5513,10 @@ def end_demo(player):
 
     return
         # Continue with Bastion storyline or activities
-
-            
+def alien_land_2(player):
+    if player.get("alien_land_2_count", 0) == 0:
+        suspense_print(
+            "as you move deeper into the alien land you feel a strange presence watching you\n"
+            "you see strange alien structures in the distance that seem to be made of organic material\n"
+            "you also see strange a spore wall at the horizon\n"
+        )  
