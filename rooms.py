@@ -3916,6 +3916,8 @@ def bastion_entrance(player):
             suspense_print("2) go toward hospital")
             suspense_print("3) Go toward old factory")
             suspense_print("4) Go in alien land")
+            if "bastion_map" in player.get("inventory", {}):
+                suspense_print("5) go toward twisted forest")
             choice = get_choice()
             if handle_global_input(choice, player):
                 continue
@@ -3931,6 +3933,9 @@ def bastion_entrance(player):
                 return
             elif choice == "4":
                 alien_land_1(player)
+                return
+            elif choice == "5":
+                twisted_forest(player)
                 return
             else:
                 suspense_print("incorect choice")
@@ -4191,7 +4196,8 @@ def sergeant_recruitment(player):
                 "\"Excellent,\" the sergeant says.\n"
                 "\"i already have a mission for you.\"\n"
                 "i need you to go into alien territory and scout an old abandoned military outpost\n"
-                "report back any findings and try to gather any useful resources you can find there\""
+                "report back any findings and try to gather any useful resources you can find there\n\""
+                "and i got something for you if you manage to clear the outpost"
             )
             player["became_bastion_scout"] = True
             player["bastion_active_quest"] = "scout_outpost"
@@ -4209,24 +4215,53 @@ def sergeant_recruitment(player):
         else:
             suspense_print("Invalid choice.") 
 def sergeant_scout_outpost(player):
-    if not player.get("scout_outpost_completed", False):
+    
+
+    # FULL CLEAR PATH (violent)
+    if player.get("enemy_in_outpost_killed_count", 0) >= 10:
+        suspense_print(
+            "\"You did it!\" the sergeant exclaims.\n"
+            "\"The outpost is secure thanks to you.\"\n"
+            "\"Bastion won’t forget this.\""
+        )
+        add_item(player, "combat_knife", 1)
+        add_item(player, "coin", 200)
+        gain_xp(player, 200)
+
+        player["scout_outpost_completed"] = True
+        player["bastion_active_quest"] = "private_mission"
+        player["bastion_rank"] += 1
+        return
+
+    # DATA EXTRACTION PATH (stealth / smart)
+    elif player.get("outpost_data_count", 0) >= 3:
+        suspense_print(
+            "\"You’re back — and alive,\" he says.\n"
+            "\"This data will save lives.\""
+        )
+        add_item(player, "coin", 150)
+        gain_xp(player, 150)
+
+        player["scout_outpost_completed"] = True
+        player["bastion_active_quest"] = "private_mission"
+        player["bastion_rank"] += 1
+        return
+
+    # NOT DONE YET
+    else:
         suspense_print(
             "\"The outpost is still out there,\" the sergeant says.\n"
             "\"Bring back anything you find.\""
         )
         return
 
-    suspense_print(
-        "\"You’re back — and alive,\" he says.\n"
-        "\"Let’s see what you found.\""
-    )
+def sergeant_private_mission(player):
+    pass
 
-    add_item(player, "coin", 150)
-    gain_xp(player, 150)
+#todo
 
-    player["scout_outpost_completed"] = True
-    player["bastion_active_quest"] = "next_mission"
-    player["bastion_rank"] += 1
+
+
 def sergeant_idle(player):
     suspense_print(
         "\"Keep your eyes open out there,\" the sergeant says.\n"
@@ -5457,8 +5492,6 @@ def secret_factory_room(player):
             suspense_print("Invalid choice.")
 
 
-
-
 #ALIEN LAND AREA
 def alien_land_1(player): # to finish
         suspense_print(
@@ -5520,3 +5553,736 @@ def alien_land_2(player):
             "you see strange alien structures in the distance that seem to be made of organic material\n"
             "you also see strange a spore wall at the horizon\n"
         )  
+    else:
+        suspense_print(
+            "you are back in the alien land\n"
+            "the strange alien structures are still in the distance\n"
+            "the spore wall at the horizon seems to be getting closer\n"
+        )  
+    while True: 
+        suspense_print("1) go towards the alien structures")
+        suspense_print("2) investigate the spore wall")
+        suspense_print("3) go back to bastion")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            way_toward_organic_structures(player)
+            return
+        elif choice == "2":
+            spore_wall_investigation(player)
+            return
+        elif choice == "3":
+            bastion_entrance(player)
+            return
+def way_toward_organic_structures(player): # to finish
+    pass 
+
+
+#horde encounter 
+def spore_wall_investigation(player):
+    if player.get("spore_wall_zombie_killed", False) and player.get("has_survived_horde_in_alien_land", False):
+        suspense_print("you are back at the spore wall\n"
+                       "the fungal zombie you defeated earlier lies motionless on the ground\n"
+                       "there is nothing more to do here\n")
+        #add placement to go back
+        return
+    suspense_print(
+        "you move towards the spore wall\n"
+        "as you get closer you see that the wall is made of thick fungal growths\n"
+        "the mushrooms are expanding rapidly and releasing spores into the air\n")
+    while True:
+        suspense_print("1) try to cross the spore wall")
+        suspense_print("2) go back")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "as you try to cross the spore wall you hear a loud coughing fit\n"
+                "you look around and see a man loudly coughing and struggling to breathe\n"
+                "his body full of fungal growths and his eyes red wit blood \n"
+                "you lock eyes with him, it stops coughing and starts moving towards you menacingly\n"
+                "you realize he has been infected by the spores and turned into a fungal zombie\n"
+            )
+            sporebound_slave = get_enemy("sporebound_slave")
+            won = fight_enemy(player, sporebound_slave)
+            if won:
+                suspense_print("you have defeated the fungal zombie\n")
+                gain_xp(player, 100)
+                add_item(player, "med_kit", 1)
+                add_item(player, "alien_energy_cell", 1)
+                player["spore_wall_zombie_killed"] = True
+                randomized_bonus_loot(
+                    player,
+                    {"healing_salve": (1, 2), "rifled_ammo": (2, 4)}
+                )
+                suspense_print("the zombie dead you crawl through the spore wall safely\n")
+                horde_encounter(player)
+                return
+                
+        elif choice == "2":
+            alien_land_2(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def horde_encounter(player):
+    if player.get("has_survived_horde_in_alien_land", False):
+        suspense_print("you are back at the fungal horde encounter site\n"
+                       "they are gone now\n"
+                       "you can go to the military base\n")
+        way_toward_military_base(player)
+        return
+    suspense_print(
+        "you finally cross the spore wall\n"
+        "you see a military complex in the distance\n"
+        "but as you move forward you hear loud growls and snarls\n"
+        "you see a horde of fungal zombies emerging from the horizon\n"
+        "they have noticed you and are moving towards you aggressively\n"
+    )
+    slow_print_char("Run !!!")
+    while True:
+        suspense_print("1) run towards the cave on the left")
+        suspense_print("run towards the canion on the right")
+        if not player.get("wasteland_stranger_near_farm_alive", True):
+            suspense_print("you see a stranger near the canion waving at you to come towards him... you reconized that cowboy hat")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print("you run towards the cave on the left\n"
+                           "the fungal zombies are closing in on you\n"
+                           "the cave is a dead end you have nowhere to go\n"
+                           "the fungal zombies catch up to you and overwhelm you\n")
+            game_over()
+            return
+        elif choice == "2":
+            if not player.get("wasteland_stranger_near_farm_alive", True):
+                suspense_print("you run towards the canyon on the right\n"
+                               "the fungal zombies are closing in on you\n"
+                               "the stranger tell you to follow him toward a safe path\n")
+            else:
+                suspense_print("you run towards the canyon on the right\n"
+                               "the fungal zombies are closing in on you\n" \
+                               "you manage to go down a narrow path down\n")     
+            horde_part_2(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def horde_part_2(player):
+    suspense_print(
+        "you arrived down to a river at the bottom of the canyon\n"
+        "you see the hord at the top of the canyon\n"
+        "they seem to have stop... then they start crashing down slowly forming a flesh cushion\n"
+        "you realize they are trying to reach you by sacrificing themselves"
+        "you run along the river bank trying to find a way out\n"
+    )
+    if not player.get("wasteland_stranger_near_farm_alive", True):
+        suspense_print("the stranger from before tell you to go toward a boat down the river\n")
+    while True:
+            suspense_print("1)keep running along the river bank")
+            suspense_print("2) go toward the boat")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print("you keep running along the river bank\n"
+                               "the fungal zombies are still crashing down from above\n"
+                               "suddenly one of them grab you from behind\n"
+                               "you struggle to break free but there are too many of them\n")
+                game_over()
+                return
+            elif choice == "2":
+                suspense_print("you run toward the boat and manage to get in\n"
+                               "the current is strong and you gain distance from the horde\n")
+                horde_part_3(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+def horde_part_3(player):
+    suspense_print(
+        "you are now on the boat drifting down the river\n"
+        "the fungal zombies are far but still coming down the canyon\n"
+        "you arrived near a massive waterfall\n")
+    if not player.get("wasteland_stranger_near_farm_alive", True):
+        suspense_print("the stranger from before shouts at you to stay on the boat\n")
+    while True:
+            suspense_print("1) brace yourself and stay on the boat")
+            suspense_print("2) jump off the boat before the waterfall")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                if player.get("wasteland_stranger_near_farm_alive", True):
+                    suspense_print("the stranger from before shouts at you to hold on tight\n"
+                                   "you brace yourself as the boat goes over the waterfall\n"
+                               "the fall is long and you hit the water hard\n"
+                               "you manage to swim to shore and escape the fungal horde\n")
+                    player["has_survived_horde_in_alien_land"] = True
+                    stranger_hideout(player)
+                    return
+                else:
+                    suspense_print("you brace yourself as the boat goes over the waterfall\n"
+                               "the fall is long and you hit the water hard\n"
+                               "you manage to swim to shore and escape the fungal horde\n")
+                player["has_survived_horde_in_alien_land"] = True
+                twisted_forest(player)
+                return
+            elif choice == "2":
+                suspense_print("you jump off the boat before the waterfall\n"
+                               "thepath stops here and the horde catches up to you\n"
+                                 "you are overwhelmed by the fungal zombies\n")
+                game_over()
+                return
+            else:
+                suspense_print("Invalid choice.")
+def stranger_hideout(player):
+    suspense_print(
+        "you follow the stranger for a while arriving in a strange forest to a hidden hideout\n"
+        "the stranger thanks you for saving him from the fungal horde\n"
+        "he insistes to offer you one of is weapons as a token of gratitude\n"
+    )
+    while True:
+            suspense_print("1) take the weapon")
+            suspense_print("2) politely decline")
+            suspense_print("3) kill the stranger and take all his stuff")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                weapon_selection(player)
+                return
+            elif choice == "2":
+                suspense_print("you politely decline the stranger's offer\n"
+                               "he understands and wishes you good luck on your journey\n"
+                               "saying if you change your mind you know where to find him\n")
+                twisted_forest(player)
+                return
+            elif choice == "3":
+                suspense_print("mad by greed you attack the stranger\n")
+                stranger = get_enemy("wasteland_cowboy")
+                won = fight_enemy(player, stranger)
+                if won:
+                    suspense_print("you have defeated the stranger\n"
+                                   "you loot all his stuff\n")
+                    add_item(player, "cowboy_revolver", 1)
+                    add_item(player, "cowboy_hat", 1)
+                    add_item(player, "cowboy_rifle", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"healing_salve": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["wasteland_stranger_near_farm_alive"] = False
+                    twisted_forest(player)
+                    return
+                else:
+                    game_over()
+                    return
+            else:
+                suspense_print("Invalid choice.")
+def weapon_selection(player):
+    suspense_print(
+        "the stranger shows you his weapons\n"
+        "he has a cowboy revolver and a cowboy rifle\n"
+        "both look well maintained and reliable\n"
+        "which one do you choose?\n"
+    )
+    while True:
+            suspense_print("1) take the cowboy revolver")
+            suspense_print("2) take the cowboy rifle")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print("you take the cowboy revolver\n"
+                               "the stranger nods approvingly\n"
+                               "he wishes you good luck on your journey\n")
+                add_item(player, "cowboy_revolver", 1)
+                twisted_forest(player)
+                return
+            elif choice == "2":
+                suspense_print("you take the cowboy rifle\n"
+                               "the stranger nods approvingly\n"
+                               "he wishes you good luck on your journey\n")
+                add_item(player, "cowboy_rifle", 1)
+                twisted_forest(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+
+def twisted_forest(player):
+    if player.get("twisted_forest_searched_soldier", False):
+        twisted_forest_2(player)
+        return
+    suspense_print(
+        "you enter a twisted forest full of strange alien plants and creatures\n"
+        "the trees are tall and twisted with crimson leaves\n"   
+        "you see a dead soldier on the ground\n"
+        "you reconise bastion military gear on him\n"
+    )
+    while True:
+            suspense_print("1) search the dead soldier")
+            suspense_print("2) go deeper into the forest")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                suspense_print("you search the dead soldier\n"
+                               "you find a map of a secret path leading to bastion\n"
+                               "you find some useful items on him\n")
+                add_item(player, "med_kit", 1)
+                add_item(player, "rifled_ammo", 5)
+                add_item(player, "bastion_map", 1)
+                player["twisted_forest_searched_soldier"] = True
+            elif choice == "2":
+                suspense_print("you go deeper into the twisted forest\n"
+                               "the alien flora and fauna become more bizarre and dangerous\n"
+                               "you see a path leading to a military base in the distance\n")
+                twisted_forest_2(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+def twisted_forest_2(player):
+    suspense_print(
+        "you are now deeper in the twisted forest\n"
+        "the alien flora and fauna are more bizarre and dangerous\n"
+        "you see a path leading to a military base in the distance\n"
+    )
+    while True:
+            suspense_print("1) go toward the military base")
+            suspense_print("2) look around the forest")
+            if "bastion_map" in player["inventory"]:
+                suspense_print("3) go back to bastion")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                forest_toward_military_base(player)
+                return
+            elif choice == "2":
+                suspense_print("you see one of those strange fruit growing on a large flowering plant\n")
+                suspense_print("do you want to get it ?")
+                player_pick_fruit(player)
+            elif choice == "3" and "bastion_map" in player["inventory"]:
+                bastion_entrance(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+def player_pick_fruit(player):
+    if player.get("has_taken_weird_fruit", False):
+        suspense_print("you have already taken the strange fruit from this plant\n"
+                       "there is nothing more to do here\n")
+        twisted_forest_2(player)
+        return
+    while True:
+            if skill_check(player, "perception", 50, visible=False):
+                suspense_print("you see  a vein full of torns and spikes around the plant\n"
+                               "you realize the plant is may be dangerous\n")
+                player["plant_skill_check_passed"] = True
+            suspense_print("1) pick the fruit")
+            suspense_print("2) leave it be")
+            if player.get("plant_skill_check_passed", False):
+                suspense_print("3) shoot the plant")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                if player.get("plant_skill_check_passed", False):
+                    suspense_print("you pick the fruit carefully avoiding the plant surprise attack\n"
+                    )
+                    player["has_taken_weird_fruit"] = True
+                    add_item(player, "weird_fruit", 1)
+                else:
+                    suspense_print("as you pick the fruit the plant springs to life\n"
+                                   "it attacks you with its sharp vines\n")
+                    carnivorous_trap_plant = get_enemy("carnivorous_trap_plant")
+                    won = fight_enemy(player, carnivorous_trap_plant)
+                    player["health"] -= 3
+                    if won:
+                        suspense_print("you have defeated the carnivorous trap plant\n"
+                                       "you manage to get the fruit safely\n")
+                        add_item(player, "weird_fruit", 1)
+                        randomized_bonus_loot(
+                            player,
+                            {"healing_salve": (1, 2), "rifled_ammo": (2, 4)}
+                        )
+                        player["has_taken_weird_fruit"] = True
+                        return
+                    else:
+                        game_over()
+                        return
+            elif choice == "2":
+                suspense_print("you decide to leave the fruit be\n")
+                return
+            elif choice == "3" and player.get("plant_skill_check_passed", False):
+                shot = shoot_and_remove_ranged_ammo(player)
+                if shot:
+                    suspense_print("you shoot the plant\n"
+                                   "the plant writhes in pain before collapsing\n")
+                    add_item(player, "weird_fruit", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"healing_salve": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["has_taken_weird_fruit"] = True
+                    return
+                else:
+                    suspense_print("you fumble for a weapon — but nothing fires.\n"
+                                   "the plant attacks you with its sharp vines\n")
+                    carnivorous_trap_plant = get_enemy("carnivorous_trap_plant")
+                    won = fight_enemy(player, carnivorous_trap_plant)
+                    if won:
+                        suspense_print("you have defeated the carnivorous trap plant\n"
+                                       "you manage to get the fruit safely\n")
+                        add_item(player, "weird_fruit", 1)
+                        randomized_bonus_loot(
+                            player,
+                            {"healing_salve": (1, 2), "rifled_ammo": (2, 4)}
+                        )
+                        return
+                    else:
+                        game_over()
+                        return
+            else:
+                suspense_print("Invalid choice.")
+def forest_toward_military_base(player):
+    suspense_print(
+        "you move toward the military base\n"
+        "the alien flora and fauna become more sparse and the environment more familiar\n"
+        "you see a path leading down to the military base entrance\n"
+    )
+    while True:
+            suspense_print("1) go down to the military base entrance")
+            suspense_print("2) scout around the area")
+            suspense_print("3) go back to bastion")
+            choice = get_choice()
+            if handle_global_input(choice, player):
+                continue
+            if choice == "1":
+                military_base_entrance(player)
+                return
+            elif choice == "2":
+                if skill_check(player, "perception", 40, visible=False) or skill_check(player, "luck", 40, visible=False):
+                    suspense_print("you scout around the area and find fresh alien boots prints\n"
+                                   "they seam to be leading toward the military base entrance\n"
+                                   " you also find a crate hidden behind some bushes\n")
+                    add_item(player, "alien_energy_cell", 3)
+                    add_item(player, "strange_elixir", 1)
+                else:
+                    suspense_print("you scout around the area but find nothing of interest\n")
+            elif choice == "3":
+                bastion_entrance(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+def military_base_entrance(player):
+            
+    if player.get("visited_military_base_entrance", False):
+        suspense_print(
+            "you are back at the military base entrance\n"
+            "the massive blast doors still stand silent\n"
+        )
+    else:
+        suspense_print(
+            "you arrive at the military base entrance\n"
+            "the concrete walls are cracked and overgrown with alien matter\n"
+            "burn marks and claw scratches cover the blast doors\n"
+            "whatever happened here… it wasn’t quick\n"
+        )
+        player["visited_military_base_entrance"] = True
+
+    while True:
+        suspense_print("1) approach the blast doors")
+        suspense_print("2) search the perimeter")
+        suspense_print("3) retreat into the forest")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            if skill_check(player, "intelligence", 45, visible=False):
+                suspense_print(
+                    "you hack the blast doors open just enough to slip inside\n"
+                    "darkness and the smell of decay rush out to meet you\n"
+                )
+                military_base_inside(player)
+                return
+            else:
+                suspense_print(
+                    "you try to hack the blast doors, but they barely move\n"
+                    "something inside shifts… you’re not alone\n"
+                )
+                enemy = get_enemy("sporebound_automaton")
+                won = fight_enemy(player, enemy)
+                if won:
+                    suspense_print(
+                        "the automaton collapses in a heap of twitching limbs.\n"
+                        "you manage to pry the blast doors open and slip inside\n"
+                        "darkness and the smell of decay rush out to meet you\n"
+                    )
+                    gain_xp(player, 100)
+                    add_item(player, "alien_tech_part", 1)
+                    add_item(player, "healing_salve", 1)
+                    player["enemy_in_outpost_killed_count"] += 1
+
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    military_base_inside(player)
+                    return
+                else:
+                    game_over()
+                    return
+        elif choice == "2":
+            if skill_check(player, "perception", 40, visible=False):
+                suspense_print(
+                    "you find a damaged side access hatch hidden under alien growth\n"
+                    "it might be possible to enter quietly\n"
+                )
+                player["found_side_entrance"] = True
+                side_base_entrance(player)
+                return
+            else:
+                suspense_print(
+                    "you circle the base but find nothing useful\n"
+                    "the silence feels wrong\n"
+                )
+
+        elif choice == "3":
+            forest_toward_military_base(player)
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+def military_base_inside(player):
+    suspense_print(
+        "you step inside the military base\n"
+        "the walls are scarred with damage,dry blood and covered in alien growths\n"
+        "the air is thick with the smell of decay and something else…\n"
+        "you see security robots they look inactive but might still be functional\n"
+    )
+    while True:
+        suspense_print("1) examine the security robots")
+        suspense_print("2) explore deeper into the base")
+        suspense_print("3) go back outside")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":   
+            if player.get("dealt_with_security_robot", False):
+                suspense_print(
+                    "you are back at the security robots\n"
+                    "they still seem to be inactive\n"
+                    "there is nothing more to do here\n"
+                )
+                continue
+            suspense_print(
+                "you approach the security robots\n"
+                "everywhere you see signs of damage and decay\n"
+                "but the robots seem intact\n"
+                "something has caused them to shut down but they might still be functional\n"
+            )
+            if skill_check(player, "intelligence", 50, visible=False):
+                suspense_print(
+                    "you manage to reactivate one of the security robots\n"
+                    "it whirs to life and scans you with its sensors\n"
+                    "it seems to recognize you as a non-threat and stands down\n"
+                    "it might be possible to use it to your advantage\n"
+                    "a noise activates in the distance… the robot shuts back down,weirdly"
+                )
+                player["reactivated_security_robot"] = True
+                player["dealt_with_security_robot"] = True
+                continue
+            else:
+                suspense_print(
+                    "you try to reactivate the security robots but they remain unresponsive\n"
+                    "as you examine them, you accidentally trigger a hidden alarm\n"
+                    "the sound echoes through the base…"
+                )
+                enemy = get_enemy("sporebound_automaton")
+                won = fight_enemy(player, enemy)
+                if won:
+                    suspense_print(
+                        "the automaton collapses in a heap of twitching limbs.\n"
+                        "you manage to escape the alarm and continue exploring the base\n"
+                    )
+                    gain_xp(player, 100)
+                    add_item(player, "alien_tech_part", 1)
+                    add_item(player, "healing_salve", 1)
+                    player["enemy_in_outpost_killed_count"] += 1
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )   
+                    player["dealt_with_security_robot"] = True
+
+                    return
+                
+                else:   
+                    game_over()
+                    return
+        elif choice == "2":
+            main_hall(player)
+            return
+        elif choice == "3":
+            military_base_entrance(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def side_base_entrance(player):
+    
+
+    if player.get("side_entrance_alien_killed", False):
+        suspense_print(
+            "the side access hatch is quiet now\n"
+            "the alien you encountered here is gone\n"
+        )
+        military_base_zone_2(player)
+        return
+
+    suspense_print(
+        "you enter through the side access hatch\n"
+        "you see a alien in tweaking with a computer console\n"
+        "it doesn't seem to have noticed you yet\n"
+    )
+    while True:
+        suspense_print("1) sneak up and attack the alien")
+        suspense_print("2) shoot the alien from a distance")
+        if player.get("understand_alien_language", False):
+            suspense_print("3) try to communicate with the alien")
+        suspense_print("4) retreat back outside")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if skill_check(player, "stealth", 50):
+                suspense_print(
+                    "you sneak up behind the alien and attack it\n"
+                    "the alien is caught off guard and you manage to defeat it quickly\n"
+                )
+                gain_xp(player, 100)
+                add_item(player, "alien_tech_part", 1)
+                add_item(player, "healing_salve", 1)
+                randomized_bonus_loot(
+                    player,
+                    {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                )
+                player["enemy_in_outpost_killed_count"] += 1
+                player["side_entrance_alien_killed"] = True
+                military_base_zone_2(player)
+                return
+            else:
+                suspense_print(
+                    "you try to sneak up on the alien but it senses your presence\n"
+                    "it turns around and attacks you with a strange energy weapon\n"
+                )
+                alien_guard = get_enemy("alien_soldier")
+                won = fight_enemy(player, alien_guard)
+                if won:
+                    suspense_print(
+                        "you have defeated the alien guard\n"
+                        "you loot its body and find some useful items\n"
+                    )
+                    gain_xp(player, 100)
+                    add_item(player, "alien_tech_part", 1)
+                    add_item(player, "healing_salve", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["enemy_in_outpost_killed_count"] += 1
+                    player["side_entrance_alien_killed"] = True
+                    military_base_zone_2(player)
+                    return  
+                else:
+                    game_over()
+                    return
+        elif choice == "2":
+            shoot = shoot_and_remove_ranged_ammo(player)
+            if shoot:
+                suspense_print(
+                    "you take aim and shoot the alien from a distance\n"
+                    "your shot hits true and you manage to harm it\n"
+                )
+                alien_guard = get_enemy("alien_soldier")
+                alien_guard["health"] -= 6
+                won = fight_enemy(player, alien_guard)
+                if won:
+                    add_item(player, "alien_tech_part", 1)
+                    add_item(player, "healing_salve", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["enemy_in_outpost_killed_count"] += 1
+                    player["side_entrance_alien_killed"] = True
+                    military_base_zone_2(player)
+                    return
+            else:
+                suspense_print(
+                    "you try to shoot the alien but your aim is off\n"
+                    "the alien quickly retaliates with its energy weapon\n"
+                )
+                alien_guard = get_enemy("alien_soldier")
+                won = fight_enemy(player, alien_guard)
+                if won:
+                    suspense_print(
+                        "you have defeated the alien guard\n"
+                        "you loot its body and find some useful items\n"
+                    )
+                    add_item(player, "alien_tech_part", 1)
+                    add_item(player, "healing_salve", 1)
+                    randomized_bonus_loot(
+                        player,
+                        {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                    )
+                    player["enemy_in_outpost_killed_count"] += 1
+                    player["side_entrance_alien_killed"] = True
+                    military_base_zone_2(player)
+                    return  
+                else:
+                    game_over()
+                    return
+        elif choice == "3" and player.get("understand_alien_language", False):
+            suspense_print(
+                "you attempt to communicate with the alien using your knowledge of their language\n"
+                "surprisingly, it seems to understand, it points at vats behinde you\n"
+                "humans here use to experiment on captured aliens, it says now we experiment on you !\n" 
+                "it attacks you.\n"
+            )
+            alien_guard = get_enemy("alien_soldier")
+            won = fight_enemy(player, alien_guard)
+            if won:
+                suspense_print(
+                    "you have defeated the alien guard\n"
+                    "you loot its body and find some useful items\n"
+                )
+                add_item(player, "alien_tech_part", 1)
+                add_item(player, "healing_salve", 1)
+                randomized_bonus_loot(
+                    player,
+                    {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+                )
+                player["enemy_in_outpost_killed_count"] += 1
+                player["side_entrance_alien_killed"] = True
+                military_base_zone_2(player)
+                return
+            else:
+                game_over()
+                return
+def military_base_zone_2(player):
+    suspense_print(
+        "the alien you defeated lies motionless on the ground\n")
+    while True:
+        suspense_print("1) proceed deeper into the military base")
+        suspense_print("2) look around the area")
+        suspense_print("3) check the computer console the alien was using")
+        suspense_print("4) go to the main hall")
+        choice = get_choice() 
+
+
+def main_hall(player):
+            
+            

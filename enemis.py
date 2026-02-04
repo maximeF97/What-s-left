@@ -522,7 +522,7 @@ ENEMIES = {
     "xp": 30,
     "description": "A humanoid figure, its body twisted and controlled by invasive fungal growths.",
     "attack_messages": [
-        "The slave lunges, coughing spores!"
+        "The man lunges, coughing spores!"
     ],
     "miss_messages": [
         "It stumbles, barely missing you."
@@ -532,5 +532,29 @@ ENEMIES = {
     "special_attack_messages": [
         "It convulses violently, striking with unnatural strength!"
     ]
-}
+},
+
+# ---------------- PLANT ENEMIES ----------------
+
+"carnivorous_trap_plant": {
+    "name": "Carnivorous Trap Plant",
+    "health": 15,   
+    "hit_chance": 60,
+    "damage": 5,
+    "xp": 80,
+    "description": "A large, stationary plant with a beautiful flower and hidden thorns, waiting to snap shut on prey.",
+    "attack_messages": [
+        "The trap plant snaps its thorny vines toward you!"
+    ],
+    "miss_messages": [
+        "The plant's vines lash out but miss you."
+    ],
+    "special_attack_chance": 0.2,
+    "special_attack_multiplier": 2.0,
+    "special_attack_messages": [
+        "The plant's vines slash you through from an unexpected angle!"
+    ],
+},
+
+
 }

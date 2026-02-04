@@ -140,7 +140,7 @@ player = {
     "has_verified_scout_identity": False,
     "factory_main_turret_destroyed": False, 
     "machine_room_looted": False,
-    "understand_alien_language" : False,#implimentation later
+    "understand_alien_language" : False,#implimentation later--------------------------------
     #based on bastion system
     "became_bastion_scout": True,
     "bastion_rank": 1,
@@ -148,7 +148,14 @@ player = {
     "bastion_completed_quests": [],
     #alien land related
     "alien_land_2_count": 0,
-
+    "spore_wall_zombie_killed": False,
+    "has_survived_horde_in_alien_land": False,   
+    "twisted_forest_searched_soldier": False,
+    "outpost_data_count": 0,
+    "side_entrance_alien_killed": False,
+    "visited_military_base_entrance": False,
+    "enemy_in_outpost_killed_count": 0,#------------------------
+    "reactivated_security_robot": False,#-------------------------
 
 }
 

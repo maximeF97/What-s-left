@@ -20,14 +20,17 @@ WEAPONS: Dict[str, Dict] = {
     # Melee
     "rusty_knife": {"min_damage": 1, "max_damage": 3, "hit_chance": 70, "uses_ammo": False},
     "sharp_kitchen_knife": {"min_damage": 2, "max_damage": 4, "hit_chance": 75, "uses_ammo": False},
-
+    "combat_knife": {"min_damage": 3, "max_damage": 5, "hit_chance": 80, "uses_ammo": False},
     # Ranged
     "revolver": {"min_damage": 3, "max_damage": 6, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
+    "cowboy_revolver": {"min_damage": 5, "max_damage": 8, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
     "symbiotic_blood_pistol": {"min_damage": 7, "max_damage": 7, "hit_chance": 80, "uses_ammo": True, "ammo_type": blood},
     "alien_laser_rifle": {"min_damage": 7, "max_damage": 12, "hit_chance": 90, "uses_ammo": True, "ammo_type": "alien_energy_cell"},
     "shotgun": {"min_damage": 6, "max_damage": 8, "hit_chance": 75, "uses_ammo": True, "ammo_type": "shotgun_shells"},
     "magnum": {"min_damage": 8, "max_damage": 12, "hit_chance": 80, "uses_ammo": True, "ammo_type": "magnum_ammo"},
     "rifle": {"min_damage": 5, "max_damage": 10, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
+    "cowboy_rifle": {"min_damage": 7, "max_damage": 14, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
+
 }   
 
 
@@ -43,7 +46,7 @@ def shoot_and_remove_ranged_ammo(player: Dict) -> int:
     inventory = player.get("inventory", {})
 
     ranged_weapons = [
-        weapon for weapon in ("revolver", "shotgun", "alien_laser_rifle", "magnum", "rifle")
+        weapon for weapon in ("revolver", "shotgun", "alien_laser_rifle", "magnum", "rifle", "symbiotic_blood_pistol", "cowboy_revolver", "cowboy_rifle")
         if weapon in inventory
     ]
 
@@ -95,7 +98,9 @@ def get_current_weapon(player: Dict) -> Tuple[Optional[str], Optional[Dict]]:
 
 def _default_melee(player: Dict) -> None:
     """Set a deterministic melee fallback for the player."""
-    if "sharp_kitchen_knife" in player.get("inventory", {}):
+    if "combat_knife" in player.get("inventory", {}):
+        player["weapon"] = "combat_knife"
+    elif "sharp_kitchen_knife" in player.get("inventory", {}):
         player["weapon"] = "sharp_kitchen_knife"
     else:
         player["weapon"] = "rusty_knife"

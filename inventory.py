@@ -509,6 +509,10 @@ ITEMS = {
         "type": "misc",
         "description": "A fragment of alien technology. It hums faintly.",
     },
+    "bastion_map": {
+        "name": "Bastion Map",
+        "type": "misc",
+        "description": "A map of a secret path leading to Bastion .",
     #_____Quest Items_____
     "radio_device": {
         "name": "Radio Device",
