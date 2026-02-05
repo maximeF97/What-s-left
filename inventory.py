@@ -529,7 +529,7 @@ ITEMS = {
         "description": "A hastily written note from a scout about alien activity.",
     },
     #_____Skill_Boosters_____
-    #impliment later
+    
     "scavenging_notebook": {
         "name": "Scavenging Notebook",
         "type": "consumable",
@@ -611,4 +611,11 @@ ITEMS = {
         "sell": 8,
         "buy": 25,
     },
-}
+
+#_________KEYS_________
+"blast-door key-card": {
+        "name": "Blast-Door Key-Card",
+        "type": "key",
+        "description": "A key-card that grants access to secure blast-doors.",
+    },
+    }

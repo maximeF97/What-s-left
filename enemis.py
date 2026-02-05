@@ -398,7 +398,7 @@ ENEMIES = {
 
 "vanguard_mk2": {
     "name": "Vanguard Mk-II",
-    "health": 28,
+    "health": 24,
     "hit_chance": 80,
     "damage": 8,
     "xp": 80,

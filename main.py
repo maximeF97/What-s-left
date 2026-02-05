@@ -1,7 +1,7 @@
 from ui import ui_update_inventory, ui_update_equipment
 from Player import player as player, apply_setup_to_player
 from character_setup import choose_name_and_stats
-from rooms import old_bunker, wasteland
+from rooms import military_base_inside, old_bunker, wasteland
 from combat import combats
 import random
 from systems import handle_global_input, get_choice, gain_xp
@@ -35,6 +35,8 @@ def resume_game(player):
         return old_bunker(player)
     elif scene in ("wasteland",):
         return wasteland(player)
+    elif scene in ("millitary_base_inside", "military_base", "base_inside"):
+        return military_base_inside(player):
     return old_bunker(player)
 
 

@@ -156,9 +156,16 @@ player = {
     "visited_military_base_entrance": False,
     "enemy_in_outpost_killed_count": 0,#------------------------
     "reactivated_security_robot": False,#-------------------------
-
+    "has_deactivated_security_robots": False,
+    "activated_security_system": False,
+    "has_looted_safe_in_millitary_base": False,
+    "has_looted_cabinet_in_millitary_base": False,
+    "has_salvaged_armory_in_millitary_base": False,
+    "ai_lied_about_core": False
+    "tried_core_by_force": False,
 }
-
+player.setdefault("outpost_data_count", 0)
+player.setdefault("enemy_in_outpost_killed_count", 0)
 player.setdefault("weird_fruit_eaten", 0)
 player.setdefault("status_effects", {})
 

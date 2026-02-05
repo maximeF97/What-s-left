@@ -29,6 +29,21 @@ EQUIPMENT = {
         "A respirator that filters out harmful airborne particles, "
         "improving endurance and awareness."
     ) },
+    "military_respirator_mask": {
+        "slot": "head",
+        "bonuses": {
+            "stamina": 3,
+            "perception": 2,
+            "damage_reduction": 1
+        },
+        "flags": {
+            "can_breathe_in_alien_environments": True
+        },
+        "description": (
+            "A military-grade respirator mask, offering superior filtration and protection.\n"
+            "It enhances your endurance and perception, while providing some damage reduction."
+        )
+    },
     #dody gear
     "alien_scientist_suit": {
         "slot": "body",

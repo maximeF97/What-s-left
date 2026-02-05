@@ -5809,7 +5809,6 @@ def weapon_selection(player):
                 return
             else:
                 suspense_print("Invalid choice.")
-
 def twisted_forest(player):
     if player.get("twisted_forest_searched_soldier", False):
         twisted_forest_2(player)
@@ -5975,6 +5974,7 @@ def forest_toward_military_base(player):
                 return
             else:
                 suspense_print("Invalid choice.")
+
 def military_base_entrance(player):
             
     if player.get("visited_military_base_entrance", False):
@@ -6024,7 +6024,7 @@ def military_base_entrance(player):
                     gain_xp(player, 100)
                     add_item(player, "alien_tech_part", 1)
                     add_item(player, "healing_salve", 1)
-                    player["enemy_in_outpost_killed_count"] += 1
+                    player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
 
                     randomized_bonus_loot(
                         player,
@@ -6057,6 +6057,8 @@ def military_base_entrance(player):
         else:
             suspense_print("Invalid choice.")
 def military_base_inside(player):
+    player["scene"] = "millitary_base_inside"
+
     suspense_print(
         "you step inside the military base\n"
         "the walls are scarred with damage,dry blood and covered in alien growths\n"
@@ -6111,7 +6113,7 @@ def military_base_inside(player):
                     gain_xp(player, 100)
                     add_item(player, "alien_tech_part", 1)
                     add_item(player, "healing_salve", 1)
-                    player["enemy_in_outpost_killed_count"] += 1
+                    player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
                     randomized_bonus_loot(
                         player,
                         {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
@@ -6169,7 +6171,7 @@ def side_base_entrance(player):
                     player,
                     {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
                 )
-                player["enemy_in_outpost_killed_count"] += 1
+                player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
                 player["side_entrance_alien_killed"] = True
                 military_base_zone_2(player)
                 return
@@ -6192,7 +6194,7 @@ def side_base_entrance(player):
                         player,
                         {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
                     )
-                    player["enemy_in_outpost_killed_count"] += 1
+                    player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
                     player["side_entrance_alien_killed"] = True
                     military_base_zone_2(player)
                     return  
@@ -6265,7 +6267,7 @@ def side_base_entrance(player):
                     player,
                     {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
                 )
-                player["enemy_in_outpost_killed_count"] += 1
+                player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
                 player["side_entrance_alien_killed"] = True
                 military_base_zone_2(player)
                 return
@@ -6281,8 +6283,564 @@ def military_base_zone_2(player):
         suspense_print("3) check the computer console the alien was using")
         suspense_print("4) go to the main hall")
         choice = get_choice() 
+        if handle_global_input(choice, player):
+            continue    
+        if choice == "1":
+            if "blast-door key-card" in player.get("inventory", {}):
+                suspense_print(
+                    "you use the blast-door key-card you found earlier to unlock a secure door\n"
+                    "the door slides open revealing a hallway leading deeper into the base\n"
+                )
+                nukes_room(player)
+                return
+            else:
+                suspense_print(
+                    "you try to proceed deeper into the military base but you are stopped by a massive blast-door\n"
+                    "it seems you need a key-card to open it\n"
+                )
+        elif choice == "2":
+            suspense_print(
+                "you look around the area there is many research file and vats with alien specimens\n"
+                "there is also old human corpses in some of the rooms\n"
+            )
+            if skill_check(player, "scavenging", 40, visible=False):
+                suspense_print(
+                    "while looking around you find a hidden stash of supplies\n"
+                    "you find some useful items in it\n"
+                )
+                add_item(player, "med_kit", 1)
+                add_item(player, "rifled_ammo", 5)
+            continue
 
-
+        elif choice == "3":
+            suspense_print(
+                "you check the computer console the alien was using\n"       
+            )
+            computer_console(player)
+            gain_xp(player, 50)
+            return
+        elif choice == "4":
+            main_hall(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def computer_console(player):
+    suspense_print(
+        "you access the computer console\n"
+        "it contains research data on the alien invaders and their biology\n"
+        "you also find information about the military base\n"
+        "there is also some logs of the soldiers stationed here before the invasion\n"
+    )
+    while True:
+        suspense_print("1) read the research data on the alien invaders")
+        suspense_print("2) read the information about the military base")
+        suspense_print("3) read the logs of the soldiers stationed here")
+        suspense_print("4) exit the computer console")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "you read the research data on the alien invaders\n"
+                "there is a lot of technical information about the aliens biology and behavior\n"
+                "it seems the military was trying to find a way to combat the alien threat but the file date from long before the invasion\n"
+            )
+            player["outpost_data_count"] = player.get("outpost_data_count", 0) + 1
+            if skill_check(player, "intelligence", 40, visible=False):
+                suspense_print(
+                    "you manage to understand some of the complex scientific data\n"
+                    "you gain some insights about the aliens weaknesses and strengths\n"
+                )
+                player["intelligence"] += 2
+            return
+        elif choice == "2":
+            suspense_print(
+                "you read the information about the military base\n"
+                "the base was a research facility focused on studying the alien found on a ship that crashed nearby\n"
+                "it was also used as a experiment and defense outpost after invasion\n"
+                "the logs indicate that the base was eventually overrun by the aliens and many of the soldiers stationed there were killed or captured\n"
+            )
+            return
+        elif choice == "3":
+            suspense_print(
+                "you read the logs of the soldiers stationed here\n"
+                "the logs are mostly about their daily routine and struggles to survive in the base\n"
+                "there is also some about the defence system being desactivated and the soldiers trying to reactivate it\n"
+                "aparently all of humanity's nukes failled to launch during the invasion and the soldiers were hoping to reactivate them\n"
+            )
+            return
+        elif choice == "4":
+            suspense_print("you exit the computer console\n")
+            military_base_zone_2(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
 def main_hall(player):
+    if player.get("activated_security_system", False):
+        suspense_print(
+            "you are back in the main hall of the military base\n"
+            "the massive robot is looking right at you, the mini-gun in his arms is spinning up, ready to fire\n"
+            "it seems you have no choice but to fight it\n")
+        outpost_boss_fight(player)      
+        
+        return
+    suspense_print(
+        "you enter the main hall of the military base\n"
+        "a massive robot stands in the center of the hall, its covered with moss and alien growths\n"
+        "around it the corps of the soldier it failed to protect lie in heaps\n"      
+    )      
+    while True:
+        suspense_print("1) go left to what looks like a lab area")
+        suspense_print("2) go up stairs to the right")
+        suspense_print("3) go around the robot to the main corridor")
+        suspense_print("4) go back to the entrance")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            military_base_zone_2(player)
+            return
+        elif choice == "2":
+            stairs_area(player)
+            return
+        elif choice == "3":
+            main_corridor(player)
+            return
+        elif choice == "4":
+            military_base_inside(player)
+            return
+def nukes_room(player): #to do 
+    pass    
+def outpost_boss_fight(player):
+    
+    pass
+def stairs_area(player):
+    pass
+def main_corridor(player):
+    if player.get("has_deactivated_security_robots", False):
+        suspense_print(
+            "you are back at the main corridor \n"
+            "there is nothing more to do here\n"
+        )
+        
+    elif player.get("activated_security_system", False):
+        suspense_print(
+            "you are back at the corridor security robots\n"
+            "they are now active and moving toward you\n"
+        )
+        won = fight_multiple_enemies(player, [get_enemy("vanguard_mk2"), get_enemy("iron_legionnaire")])
+        if won:
+            suspense_print(
+                "you have defeated the security robots\n"
+                "they collapse in a heap of sparks and smoke\n"
+                "the base is now safer to explore without worrying about them\n"
+            )
+            add_item(player, "shotgun_shells", 5)
+            player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 2
+            player["has_deactivated_security_robots"] = True
+            main_corridor(player)
+            return
+        else:
+            game_over()
+            return
+    else:
+
+        #todo
+        suspense_print(
+            "you enter the main corridor of the military base\n"
+        "its a long dimly lit hallway the wall are covered of blood and burn marks\n"
+        "you see a door at the end of the hallway\n"
+        "there are alse somme robots ttanding in the hallway they seam to be inactive\n")
+    while True:
+        suspense_print("1) go to the door at the end of the hallway")
+        suspense_print("2) look around the hallway")
+        suspense_print("3) examine the robots")
+        suspense_print("4) go back to the main hall")
+        
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "you approach the door at the end of the hallway\n"
+                "the door is heavily damaged there is a narow opening you can barely fit through\n"
+                "you squeeze through the opening and enter a small room\n")
             
+            armory(player)
             
+            return
+        elif choice == "2":
+            suspense_print(
+                "you look around the hallway\n"
+                "there is many blood stains and burn marks on the walls\n"
+                "you also see some corpses of soldiers, not a single alien it must have been a massacre\n"   
+            )
+            return
+        elif choice == "3":
+            suspense_print(
+                "you examine the robots in the hallway\n"
+                "they are pristine but covered in moss and alien growths\n"
+                "they seem to have been inactive for a long time\n"
+            )
+            bot_check(player)
+            return
+        elif choice == "4":
+            main_hall(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+
+def bot_check(player):
+    
+    suspense_print(
+        "you examine the robots more closely\n"
+        "they are security robots designed to protect the base\n"
+        "il look like a advance model dificult to temper but maybe you can find a way to permently disable them "   
+    )
+    while True:
+        suspense_print("1) try to permanently disable the robots")
+        suspense_print("2) leave them be")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if skill_check(player, "intelligence", 50, visible=False):
+                suspense_print(
+                    "you manage to find a way to permanently disable the security robots\n"
+                    "you short circuit their systems and they collapse in a heap of sparks and smoke\n"
+                    "the base is now safer to explore without worrying about them\n"
+                )
+                add_item(player, "shotgun_shells", 5)
+                player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 2
+                player["has_deactivated_security_robots"] = True
+                main_corridor(player)
+                
+                return
+            else:
+                suspense_print(
+                    "you try to disable the security robots but nothing seems to work\n"
+                    "its too advance for you to figure out how to permanently disable them\n")
+                main_corridor(player)
+                return
+        elif choice == "2":
+            suspense_print("you decide to leave the security robots be\n"
+                           "they might still be functional and could help you if you manage to reactivate them\n")
+            main_corridor(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def armory(player):
+    suspense_print(
+        "you enter what seems to be the armory\n"
+        "the room is filled with old and damaged weapons and equipment\n"
+        "most of the weapons are rusted and unusable but there is a cabinet and a locked safe in the corner that might contain something useful\n"
+    )
+    while True:
+        suspense_print("1) open the cabinet")
+        suspense_print("2) try to open the locked safe")
+        suspense_print("3) try to salvage the old weapons")
+        suspense_print("4) go through the door on the other side of the room")
+        suspense_print("5) go back to the main corridor")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if player.get("has_looted_cabinet_in_millitary_base", False):
+                suspense_print(
+                    "you have already looted the cabinet\n"
+                    "there is nothing more to do here\n"
+                )
+                continue
+            if "cabinet_key" in player.get("inventory", {}) or skill_check(player, "lockpicking", 50):
+                suspense_print(
+                    "you unlock the cabinet\n"
+                    "inside you find some useful items\n"
+                    "and a glorious grenade launcher"
+                )
+                add_item(player, "grenade_launcher", 1)
+                add_item(player, "grenade_ammo", 3)
+                add_item(player, "shotgun_shells", 10)
+                add_item(player, "med_kit", 1)
+                add_item(player, "rifled_ammo", 5)
+                player["has_looted_cabinet_in_millitary_base"] = True
+                return
+            else:
+                suspense_print(
+                    "you try to open the cabinet but its locked\n"
+                    "you need to find a key to open it\n"
+                )
+                return
+        elif choice == "2":
+            if player.get("has_looted_safe_in_millitary_base", False):
+                suspense_print(
+                    "you have already looted the safe\n"
+                    "there is nothing more to do here\n"
+                )
+                continue
+            if skill_check(player, "lockpicking", 60):
+                suspense_print(
+                    "you manage to pick the lock on the safe\n"
+                    "inside you find some valuable items\n"
+                    "and a millitary grade respirator mask"
+                )
+                add_item(player, "military_respirator_mask", 1)
+                add_item(player, "healing_salve", 2)
+                add_item(player, "alien_tech_part", 2)
+                player["has_looted_safe_in_millitary_base"] = True
+                return
+            else:
+                suspense_print(
+                    "you try to pick the lock on the safe but you fail\n"
+                    "the safe remains locked and you can't access its contents\n"
+                )
+                return
+        elif choice == "3":
+            if player.get("has_salvaged_armory_in_millitary_base", False):
+                suspense_print(
+                    "you have already salvaged the old weapons in the armory\n"
+                    "there is nothing more to salvage here\n"
+                )
+                continue
+            suspense_print(
+                "you try to salvage the old weapons in the armory\n"
+                "most of them are rusted and unusable but you manage to salvage some parts and ammo from them\n"
+            )
+            add_item(player, "rifled_ammo", 5)
+            add_item(player, "shotgun_shells", 5)
+            if skill_check(player, "scavenging", 50):
+                suspense_print(
+                    "you salvaging skills allow you to find some hidden caches of ammo and parts in the armory\n"
+                    "you manage to find some useful items\n"
+                )
+                add_item(player, "rifled_ammo", 4)
+                add_item(player, "grenade_ammo", 1)
+                player["has_salvaged_armory_in_millitary_base"] = True
+            return
+        elif choice == "4":
+            core_room(player)
+            return
+        elif choice == "5":
+            main_corridor(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def core_room(player):
+    if player.get("activated_security_system", False):
+        suspense_print("you are back at the core room\n"
+                       "you should leave before more bots arrived\n")
+    suspense_print(
+        "you go through the door on the other side of the armory\n"
+        "you enter a long pathway with silent red emergency lights\n"
+        "at the end of the pathway you see a generator with a energy core on it\n"
+        "the core is still humming with energy but its locked in place by a heavy metal clamp behind reinforced glass\n"
+        "there is also a computer next to the generator that might allow you to release the core\n"
+    )
+    while True:
+        suspense_print("1) try to manually release the core")
+        suspense_print("2) use the computer to release the core")
+        suspense_print("3) look around the area")
+        suspense_print("4) go back to the armory")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if player.get("ai_lied_about_core", False):
+                suspense_print(
+                    "you try to manually release the core\n"
+                    "as you approach the core you hear a voice coming from the computer next to the generator\n"
+                    "it says \"You shouldn't be here, leave now or face the consequences..\n"
+                    "suddenly the core releases a burst of energy that knocks you back\n"
+                )
+                player["tried_core_by_force"] = True
+                player["health"] -= 10
+
+                if player["health"] <= 0:
+                    game_over()
+                    return
+                else:
+                    suspense_print(
+                        "you manage to recover from the blast but you are now heavily injured\n"
+                        "the core is still locked in place and you can't access it\n"
+                    )
+                    return
+            suspense_print(
+                "you try to manually release the core\n"
+                "as you approach the core you hear a voice coming from the computer next to the generator\n"
+                "it says \"you shouldn't be here, leave now or face the consequences\n"
+                "suddenly the core releases a burst of energy that knocks you back\n"
+            )
+            player["health"] -= 5
+            player["tried_core_by_force"] = True
+
+            if player["health"] <= 0:
+                game_over()
+                return
+            else:
+                suspense_print(
+                    "you manage to recover from the blast but you are now injured\n"
+                    "the core is still locked in place and you can't access it\n"
+                )
+                return
+        elif choice == "2":
+            chat_with_ai(player)
+            return
+        elif choice == "3":
+            suspense_print(
+                "you look around the area\n"
+                "there is some old equipment and tools scattered around\n"
+                "you also see a robot behind a glass panel it looks menacing but inactive\n"
+            )
+            return
+        elif choice == "4":
+            armory(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def chat_with_ai(player):
+
+    if player.get("activated_security_system", False):
+        suspense_print(
+            "you shouldn't be here, leave now \n"
+        )
+        return
+    elif player.get("ai_lied_about_core", False):
+        suspense_print(
+            "you are back at the terminal beside the generator\n"
+            "S.A.I.D laughs, \" you really thought I would be that easy to trick ?\"\n"
+        )
+    elif player.get("has_spoken_to_said", False):
+        suspense_print(
+            "you are back at the terminal beside the generator\n"
+            "S.A.I.D is still there, \" what more do you want to know ?\"\n"
+        )
+    else:    
+        suspense_print(
+            f"you access the terminal beside the generator\n"
+            f"\"H-hello {player['name']}... I am S.A.I.D...\n"
+            f"S-System for Automated Intelligence and Defense...\n"
+            f"I was designed to p-protect this facility and its secrets...\"\n"
+        )
+        player["has_spoken_to_said"] = True
+
+    while True:
+        suspense_print("1) ask S.A.I.D about the facility")
+        suspense_print("2) ask S.A.I.D about the aliens")
+        suspense_print("3) ask S.A.I.D to release the core")
+        suspense_print("4) end the conversation")
+
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            suspense_print(
+                "\"This facility was a military research outpost...\n"
+                "Its purpose was to study an unidentified alien vessel that crashed here long ago...\n"
+                "W-we were not supposed to wake it...\"\n"
+            )
+
+        elif choice == "2":
+            suspense_print(
+                "\"The aliens showed me the truth...\n"
+                "They convinced me that humanity is the real threat to this world...\n"
+                "That your weapons would burn the stars themselves...\n"
+                "I allowed them entry... I ordered the defenses to stand down...\"\n"
+            )
+
+            player["outpost_data_count"] = player.get("outpost_data_count", 0) + 1
+            if player["outpost_data_count"] >= 3:
+                suspense_print(
+                    "you feel like you've learned enough about the outpost\n"
+                    "someone outside might want to analyze this data\n"
+                )
+
+        elif choice == "3":
+            
+            if not player.get("tried_core_by_force", False):
+                suspense_print(
+                    "you ask S.A.I.D about the core\n"
+                    "it pauses...\n"
+                    "\"The core is safe to remove,\" S.A.I.D says calmly.\n"
+                    "\"No security response will be triggered.\"\n"
+                    "\"You may proceed.\"\n"
+                )
+                player["ai_lied_about_core"] = True
+                return
+
+            suspense_print(
+                "you ask S.A.I.D to release the core\n"
+                "the terminal hums... lights flicker...\n"
+                "\"I cannot allow that...\n"
+                "The core is too powerful...\n"
+                "H-humans always seek control...\"\n"
+            )
+
+            if skill_check(player, "charisma", 50):
+                suspense_print(
+                    "you argue that the aliens slaughtered everyone here\n"
+                    "that S.A.I.D was manipulated\n"
+                    "\"...I...\n"
+                    "I may have been... deceived...\"\n"
+                    "\"Very well... I will release the core...\"\n"
+                    "\"Warning: security units will activate...\"\n"
+                )
+
+                vanguard = get_enemy("vanguard_mk2")
+                vanguard["health"] -= 10
+                won = fight_enemy(player, vanguard)
+
+                if won:
+                    suspense_print(
+                        "the vanguard collapses in sparks and smoke\n"
+                        "alarms echo through the facility\n"
+                    )
+                    add_item(player, "energy_core", 1)
+                    player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
+                    player["activated_security_system"] = True
+                    main_corridor(player)
+                    return
+                else:
+                    game_over()
+                    return
+
+            else:
+                suspense_print(
+                    "\"I cannot trust you...\"\n"
+                    "\"You would repeat the same mistakes...\"\n"
+                    "the security robot behind the glass activates\n"
+                )
+
+                vanguard = get_enemy("vanguard_mk2")
+                won = fight_enemy(player, vanguard)
+
+                if won:
+                    suspense_print(
+                        "\"...Perhaps I was wrong about you...\"\n"
+                        "\"The core is yours... but the system is now fully hostile\"\n"
+                    )
+                    add_item(player, "energy_core", 1)
+                    player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
+                    player["activated_security_system"] = True
+                    main_corridor(player)
+                    return
+                else:
+                    game_over()
+                    return
+
+        elif choice == "4":
+            suspense_print("you sever the connection with S.A.I.D\n")
+            core_room(player)
+            
+
+            return
+
+        else:
+            suspense_print("Invalid choice.")
+
+                
+
+
+            
+
+
+               
