@@ -1,0 +1,36 @@
+==========================================
+   What's Left - Icon Installation
+==========================================
+
+This game includes custom icons for all platforms:
+- assets/game_icon.ico (Windows/Linux)
+- assets/IMG_5863.png (Linux/macOS backup)
+
+AUTOMATIC INSTALLATION:
+-----------------------
+Run the installer script and the icon will be automatically configured:
+  - Linux/WSL: bash setup_launcher.sh
+  - Windows: INSTALL.bat (or python INSTALL.py)
+  - macOS: bash setup_launcher.sh
+
+MANUAL ICON SETUP:
+------------------
+
+WINDOWS:
+1. Right-click launch.py or launch_game.bat
+2. Select "Create shortcut"
+3. Right-click the shortcut → Properties
+4. Click "Change Icon" button
+5. Click "Browse" and navigate to: assets\game_icon.ico
+6. Click OK to apply
+
+LINUX:
+The icon is automatically installed to:
+  ~/.local/share/applications/Whats_Left.desktop
+Icon path: (project_folder)/assets/game_icon.ico
+
+macOS:
+The icon is copied to the .app bundle automatically:
+  ~/Applications/WhatsLeft.app/Contents/Resources/game_icon.ico
+
+==========================================
