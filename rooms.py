@@ -6376,11 +6376,7 @@ def computer_console(player):
         else:
             suspense_print("Invalid choice.")
 def main_hall(player):
-    if player.get("activated_security_system", False):
-        suspense_print(
-            "you are back in the main hall of the military base\n"
-            "the massive robot is looking right at you, the mini-gun in his arms is spinning up, ready to fire\n"
-            "it seems you have no choice but to fight it\n")
+    if player.get("activated_security_system", False) and not player.get("has_defeated_guardian", False): 
         outpost_boss_fight(player)      
         
         return
@@ -6409,21 +6405,165 @@ def main_hall(player):
         elif choice == "4":
             military_base_inside(player)
             return
-def nukes_room(player): #to do 
-    pass    
+        else:   
+            suspense_print("Invalid choice.")
+
+def boss_intro_guardian(player, beast):
+    if beast.get("intro_used", False):
+        return True
+
+    suspense_print(
+        "\nas you step into the main hall, the massive robot suddenly whirs to life\n"
+        "its eyes ignite with a red glow\n"
+        "before you can react, it slams you into the wall\n"
+    )
+
+    damage = 3 + beast.get("level", 1) * 2
+    player["health"] -= damage
+
+    suspense_print(f"you take {damage} damage but manage to stand back up\n")
+
+    if player["health"] <= 0:
+        game_over()
+        return False
+
+    beast["intro_used"] = True
+    return True
+
+def update_steel_plated_guardian_phase(player, beast):
+    max_hp = beast["max_health"]
+    hp_pct = beast["health"] / max_hp
+
+    # PHASE 2 — armor break
+    if hp_pct <= 0.6 and not beast.get("phase_2", False):
+        beast["phase_2"] = True
+        beast["damage"] += 2
+        beast["special_attack_chance"] = 0.35
+
+        if player.get("reactivated_security_robot", False):
+            suspense_print(
+                "the hacked robot suddenly reactivates and joins the fight\n"
+                "it fires at the guardian, cracking its armor\n"
+                "the guardian retaliates, slicing it in half\n"
+            )
+            beast["health"] -= 10
+
+        beast["attack_messages"].extend([
+            "it lunges forward, blades screaming through the air!",
+            "razor arms slash toward you with terrifying speed!"
+        ])
+
+        beast["miss_messages"].extend([
+            "its blades scrape sparks from the floor as you roll away!",
+        ])
+
+        beast["special_attack_messages"].extend([
+            "it spins violently, blades carving a deadly arc around itself!"
+        ])
+
+        suspense_print(
+            "the guardian's steel plating cracks and falls away\n"
+            "it drops its heavy weapon\n"
+            "razor blades extend from its arms\n"
+        )
+
+    # PHASE 3 — overdrive
+    if hp_pct <= 0.25 and not beast.get("phase_3", False):
+        beast["phase_3"] = True
+        beast["damage"] += 3
+        beast["special_attack_chance"] = 0.5
+        beast["special_attack_multiplier"] = 3.0
+
+        beast["attack_messages"].extend([
+            "it moves in a violent blur, striking without warning!"
+        ])
+
+        beast["special_attack_messages"].extend([
+            "it tears open its chest core and unleashes a devastating energy blast!"
+        ])
+
+        suspense_print(
+            "the guardian enters overdrive\n"
+            "its movements become erratic and violent\n"
+            "systems screaming as it pushes past safety limits\n"
+        )
+
+    # PHASE 3 — overdrive
+    if hp_pct <= 0.25 and not beast.get("phase_3"):
+        beast["phase_3"] = True
+        beast["damage"] += 3
+        beast["special_attack_chance"] = 0.5
+        beast["special_attack_multiplier"] = 3.0
+
+        suspense_print(
+            "the guardian enters overdrive\n"
+            "its movements become erratic and violent\n"
+            "systems screaming as it pushes past safety limits\n"
+        )
+        beast["attack_messages"].extend([
+    "it moves in a violent blur, striking without warning!",
+    ])
+
+    beast["special_attack_messages"].extend([
+        "it tears open its chest core and unleashes a devastating energy blast!"
+    ])
+
 def outpost_boss_fight(player):
+    guardian = get_enemy("steel_plated_guardian")
+    guardian["max_health"] = guardian["health"]
+    guardian["phase_2"] = False
+    guardian["phase_3"] = False
+
+    if not boss_intro_guardian(player, guardian):
+        return
+
+    while guardian["health"] > 0:
+        won = fight_enemy(player, guardian)
+        if not won:
+            game_over()
+            return
+
+        update_steel_plated_guardian_phase(player, guardian)
+
+    # ☠️ BOSS DEAD
+    suspense_print(
+        "with a final violent screech, the steel-plated guardian collapses\n"
+        "the hall falls silent\n"
+    )
+
+    gain_xp(player, 500)
+    add_item(player, "cabinet_key", 1)
+    add_item(player, "broken_minigun", 1)
+    add_item(player, "rifle_ammo", 10)
+    add_item(player, "4_leaf_clover", 1)
+    player["has_defeated_guardian"] = True
+    player["enemy_in_outpost_killed_count"] = (
+        player.get("enemy_in_outpost_killed_count", 0) + 1
+    )
+
+    if player["enemy_in_outpost_killed_count"] >= 10:
+        suspense_print("you have cleared the outpost\n")
+
+
+                    
     
-    pass
 def stairs_area(player):
     pass
 def main_corridor(player):
-    if player.get("has_deactivated_security_robots", False):
+    high_alert = player.get("activated_security_system", False)
+    if player.get("deactivated_security_robots", False) and high_alert:
+        suspense_print(
+            "you are back at the main corridor\n"
+            "you deactivated the security robots but the alarm is still going strong\n"
+            "you should hurry")
+        
+    elif player.get("has_deactivated_security_robots", False) and not high_alert:
         suspense_print(
             "you are back at the main corridor \n"
             "there is nothing more to do here\n"
         )
         
-    elif player.get("activated_security_system", False):
+    elif high_alert:
         suspense_print(
             "you are back at the corridor security robots\n"
             "they are now active and moving toward you\n"
@@ -6436,6 +6576,7 @@ def main_corridor(player):
                 "the base is now safer to explore without worrying about them\n"
             )
             add_item(player, "shotgun_shells", 5)
+            add_item(player, "rifle_ammo", 5)
             player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 2
             player["has_deactivated_security_robots"] = True
             main_corridor(player)
@@ -6495,7 +6636,7 @@ def bot_check(player):
     suspense_print(
         "you examine the robots more closely\n"
         "they are security robots designed to protect the base\n"
-        "il look like a advance model dificult to temper but maybe you can find a way to permently disable them "   
+        "il look like a advance model difficult to tamper but maybe you can find a way to permanently disable them "   
     )
     while True:
         suspense_print("1) try to permanently disable the robots")
@@ -6530,32 +6671,51 @@ def bot_check(player):
         else:
             suspense_print("Invalid choice.")
 def armory(player):
-    suspense_print(
-        "you enter what seems to be the armory\n"
-        "the room is filled with old and damaged weapons and equipment\n"
-        "most of the weapons are rusted and unusable but there is a cabinet and a locked safe in the corner that might contain something useful\n"
-    )
+    high_alert = player.get("activated_security_system", False)
+
+    if high_alert:
+        suspense_print(
+            "you are back in the armory\n"
+            "alarms are blaring, red lights pulse violently\n"
+            "every second you stay here feels dangerous\n"
+        )
+    else:
+        suspense_print(
+            "you enter what seems to be the armory\n"
+            "the room is filled with old and damaged weapons and equipment\n"
+            "most of the weapons are rusted and unusable\n"
+            "a cabinet and a locked safe stand in the corner\n"
+        )
+
     while True:
         suspense_print("1) open the cabinet")
         suspense_print("2) try to open the locked safe")
         suspense_print("3) try to salvage the old weapons")
         suspense_print("4) go through the door on the other side of the room")
         suspense_print("5) go back to the main corridor")
+
         choice = get_choice()
         if handle_global_input(choice, player):
             continue
+
+        # 🔴 HIGH ALERT PRESSURE
+        if high_alert and random.random() < 0.15:
+            suspense_print(
+                "you hear heavy metallic footsteps echoing nearby\n"
+                "something is moving fast...\n"
+            )
+
+        # ─────────────── CABINET ───────────────
         if choice == "1":
             if player.get("has_looted_cabinet_in_millitary_base", False):
-                suspense_print(
-                    "you have already looted the cabinet\n"
-                    "there is nothing more to do here\n"
-                )
+                suspense_print("the cabinet is empty\n")
                 continue
+
             if "cabinet_key" in player.get("inventory", {}) or skill_check(player, "lockpicking", 50):
                 suspense_print(
-                    "you unlock the cabinet\n"
-                    "inside you find some useful items\n"
-                    "and a glorious grenade launcher"
+                    "you force the cabinet open\n"
+                    "inside you find a glorious grenade launcher\n"
+                    "along with fresh ammo and supplies\n"
                 )
                 add_item(player, "grenade_launcher", 1)
                 add_item(player, "grenade_ammo", 3)
@@ -6565,23 +6725,19 @@ def armory(player):
                 player["has_looted_cabinet_in_millitary_base"] = True
                 return
             else:
-                suspense_print(
-                    "you try to open the cabinet but its locked\n"
-                    "you need to find a key to open it\n"
-                )
+                suspense_print("the cabinet is locked tight\n")
                 return
+
+        # ─────────────── SAFE ───────────────
         elif choice == "2":
             if player.get("has_looted_safe_in_millitary_base", False):
-                suspense_print(
-                    "you have already looted the safe\n"
-                    "there is nothing more to do here\n"
-                )
+                suspense_print("the safe is already empty\n")
                 continue
+
             if skill_check(player, "lockpicking", 60):
                 suspense_print(
-                    "you manage to pick the lock on the safe\n"
-                    "inside you find some valuable items\n"
-                    "and a millitary grade respirator mask"
+                    "the lock clicks open\n"
+                    "inside you find protected military equipment\n"
                 )
                 add_item(player, "military_respirator_mask", 1)
                 add_item(player, "healing_salve", 2)
@@ -6589,52 +6745,68 @@ def armory(player):
                 player["has_looted_safe_in_millitary_base"] = True
                 return
             else:
-                suspense_print(
-                    "you try to pick the lock on the safe but you fail\n"
-                    "the safe remains locked and you can't access its contents\n"
-                )
+                suspense_print("you fail to open the safe\n")
                 return
+
+        # ─────────────── SALVAGE ───────────────
         elif choice == "3":
-            if player.get("has_salvaged_armory_in_millitary_base", False):
+            if high_alert:
                 suspense_print(
-                    "you have already salvaged the old weapons in the armory\n"
-                    "there is nothing more to salvage here\n"
+                    "it's too dangerous to salvage equipment while the alarms are blaring\n"
+                    "you'd be an easy target standing still\n"
                 )
                 continue
+
+            if player.get("has_salvaged_armory_in_millitary_base", False):
+                suspense_print("there is nothing left worth salvaging\n")
+                continue
+
             suspense_print(
-                "you try to salvage the old weapons in the armory\n"
-                "most of them are rusted and unusable but you manage to salvage some parts and ammo from them\n"
+                "you quickly salvage what you can from the ruined weapons\n"
             )
             add_item(player, "rifled_ammo", 5)
             add_item(player, "shotgun_shells", 5)
+
             if skill_check(player, "scavenging", 50):
                 suspense_print(
-                    "you salvaging skills allow you to find some hidden caches of ammo and parts in the armory\n"
-                    "you manage to find some useful items\n"
+                    "your scavenging skills reveal hidden caches\n"
                 )
                 add_item(player, "rifled_ammo", 4)
                 add_item(player, "grenade_ammo", 1)
-                player["has_salvaged_armory_in_millitary_base"] = True
+
+            player["has_salvaged_armory_in_millitary_base"] = True
             return
+
+        # ─────────────── EXIT ───────────────
         elif choice == "4":
             core_room(player)
             return
+
         elif choice == "5":
             main_corridor(player)
             return
+
         else:
             suspense_print("Invalid choice.")
+
 def core_room(player):
     if player.get("activated_security_system", False):
         suspense_print("you are back at the core room\n"
                        "you should leave before more bots arrived\n")
-    suspense_print(
+    elif player.get("introduced_to_core", False):
+        suspense_print(
+            "you are back at the core room\n"
+
+        )
+    else:
+        suspense_print(
         "you go through the door on the other side of the armory\n"
         "you enter a long pathway with silent red emergency lights\n"
         "at the end of the pathway you see a generator with a energy core on it\n"
         "the core is still humming with energy but its locked in place by a heavy metal clamp behind reinforced glass\n"
         "there is also a computer next to the generator that might allow you to release the core\n"
     )
+    player["introduced_to_core"] = True
     while True:
         suspense_print("1) try to manually release the core")
         suspense_print("2) use the computer to release the core")
@@ -6797,7 +6969,7 @@ def chat_with_ai(player):
                     add_item(player, "energy_core", 1)
                     player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 1
                     player["activated_security_system"] = True
-                    main_corridor(player)
+                    armory(player)
                     return
                 else:
                     game_over()
@@ -6836,7 +7008,8 @@ def chat_with_ai(player):
 
         else:
             suspense_print("Invalid choice.")
-
+def nukes_room(player): #to do 
+    pass 
                 
 
 

@@ -213,6 +213,34 @@ ENEMIES = {
 
 
 # ---------------- BOSSES ----------------
+"steel_plated_guardian": {
+    "name": "Steel-Plated Guardian",
+    "health": 50,
+    "hit_chance": 70,
+    "damage": 9,   # slightly lower, phases will raise it
+    "xp": 200,
+
+    "description": (
+        "A massive security construct built for heavy defense. "
+        "Its steel plating is scarred by age, moss creeping between armor seams."
+    ),
+
+    # PHASE 1 — heavy weapon
+    "attack_messages": [
+        "the guardian fires a deafening burst of bullets!",
+        "its mounted weapon rattles as it fills the hall with gunfire!"
+    ],
+    "miss_messages": [
+        "bullets tear into the walls as you narrowly dive aside!",
+        "the floor shatters under the storm of gunfire!"
+    ],
+
+    "special_attack_chance": 0.2,
+    "special_attack_multiplier": 2.3,
+    "special_attack_messages": [
+        "its eyes burn red as it slams the ground, sending a violent shockwave through the hall!"
+    ]
+},
 
 "mutated_capibara": {
     "name": "Mutated Capibara",
@@ -415,25 +443,7 @@ ENEMIES = {
         "Targeting systems recalibrate — critical strike!"
     ]
 },
-"steel_plated_guardian": {
-    "name": "Steel-Plated Guardian",
-    "health": 45,
-    "hit_chance": 70,
-    "damage": 10,
-    "xp": 200,
-    "description": "A massive robot built for heavy defense, its steel plating nearly impervious to damage.",
-    "attack_messages": [
-        "The guardian slams its steel fist down!"
-    ],
-    "miss_messages": [
-        "The ground trembles as its fist crashes beside you."
-    ],
-    "special_attack_chance": 0.2,
-    "special_attack_multiplier": 2.3,
-    "special_attack_messages": [
-        "Its core glows fiercely as it unleashes a powerful shockwave!"
-    ]
-},
+
 
 # ---------------- HORROR CYBORGS ----------------
 "cyborg_horror": {

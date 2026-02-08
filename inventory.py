@@ -613,9 +613,15 @@ ITEMS = {
     },
 
 #_________KEYS_________
-"blast-door key-card": {
+"blast-door_key-card": {
         "name": "Blast-Door Key-Card",
         "type": "key",
         "description": "A key-card that grants access to secure blast-doors.",
     },
+
+#_________BOSS_DROPS_________
+"broken_minigun": {
+        "name": "Broken Minigun",
+        "type": "weapon_part",
+        "description": "A heavily damaged minigun. It’s missing critical components but could be useful for crafting or repairs.",
     }

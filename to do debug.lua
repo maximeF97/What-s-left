@@ -18,7 +18,8 @@ fixe inventory back
 to do 
     use the cowboy is still alive somewhere(horde)
     bastion full clearance questline
-    
+    ADD A player room 
+    made inventory limit 20
         
 
 

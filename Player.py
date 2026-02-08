@@ -161,8 +161,9 @@ player = {
     "has_looted_safe_in_millitary_base": False,
     "has_looted_cabinet_in_millitary_base": False,
     "has_salvaged_armory_in_millitary_base": False,
-    "ai_lied_about_core": False
+    "ai_lied_about_core": False,
     "tried_core_by_force": False,
+    "introduced_to_core": False,
 }
 player.setdefault("outpost_data_count", 0)
 player.setdefault("enemy_in_outpost_killed_count", 0)
