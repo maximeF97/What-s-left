@@ -106,6 +106,17 @@ EQUIPMENT = {
             "understand_alien_language": True   
         }
     },
+    "upgraded_neural_implant": {
+        "slot": "implant",
+        "bonuses": {
+            "intelligence": 5,
+            "perception": 2,
+        },
+        "description": (
+            "An upgraded version of the neural implant, offering enhanced cognitive functions.\n"
+            "It significantly boosts intelligence and perception, allowing you to understand alien technology better and notice details others might miss."
+        ),
+    },
     #exoskeleton
     "old_exoskeleton": {
     "name": "Old Exoskeleton",
@@ -132,6 +143,27 @@ EQUIPMENT = {
         "It reinforces your entire body, enhancing every movement —\n"
         "but it feels heavy, like wearing the past itself."
     )
-}
-
+},
+    "exoskeleton_mk_1'runner'": {
+    "name": "Exoskeleton MK-1 'Runner'",
+    "slot": "body"
+    "bonuses": {
+        "max_hp": 15,
+        "strength": 2,
+        "perception": 2,
+        "endurance": 2,
+        "intelligence": 1,
+        "stealth": 3,
+        "stamina": 4,
+    },
+    "flags": {
+        "damage_reduction_percent": 8,
+        "occupies_hands": True,
+        "occupies_feet": True
+    },
+    "description": (
+        "A sleek, lightweight exoskeleton designed for speed and agility.\n"
+        "Its advanced servos and reinforced joints allow for swift, fluid movement,\n"
+        "making you feel like you're gliding across the wasteland."
+    )
 }

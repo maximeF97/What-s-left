@@ -110,6 +110,7 @@ player = {
     "has_eaten_10_fruits": False,
     "thomas_quest_accepted": False,
     #bastion
+    "bastion_security_level": 0,
     "bastion_entrance_visited": False,
     "way_toward_bastion_after_beast_count": 0,
     "way_toward_bastion_after_beast_luck_check_passed": False,
@@ -120,7 +121,12 @@ player = {
     "complited_bastion_scout_quest": False,
     "bastion_full_clearance": False,
     "has_given_alien_tech_to_engineer": 0,
+    "engineer_reward_15_given": False,
+    "engineer_reward_5_given": False,
+    "engineer_reward_3_given": False,
     "engineer_reward_10_given": False,
+    "has_upgraded_implant": False,
+    "needs_implant_parts": False,
     #factory area
     "has_found_secret_path_near_factory": False,
     "has_looted_secret_stranger": False,

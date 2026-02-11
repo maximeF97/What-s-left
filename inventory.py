@@ -619,10 +619,17 @@ ITEMS = {
         "sell": 8,
         "buy": 25,
     },
+    "alien_implant": {
+        "name": "Alien Neural Implant",
+        "type": "crafting_material",
+        "description": "A neural implant salvaged from a cyborg. It pulses with energy.",
+        "sell": 15,
+        "buy": 50,
+    },
     "alien_targeting_implant": {
         "name": "Alien Targeting Implant",
         "type": "quest_item",
-        "description": "An advanced targeting system salvaged from a cyborg.",
+        "description": "An advanced targeting system salvaged from a special cyborg.",
     },
 
 #_________KEYS_________

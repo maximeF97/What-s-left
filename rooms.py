@@ -3916,8 +3916,6 @@ def bastion_entrance(player):
             suspense_print("2) go toward hospital")
             suspense_print("3) Go toward old factory")
             suspense_print("4) Go in alien land")
-            if "bastion_map" in player.get("inventory", {}):
-                suspense_print("5) go toward twisted forest")
             choice = get_choice()
             if handle_global_input(choice, player):
                 continue
@@ -3933,9 +3931,6 @@ def bastion_entrance(player):
                 return
             elif choice == "4":
                 alien_land_1(player)
-                return
-            elif choice == "5":
-                twisted_forest(player)
                 return
             else:
                 suspense_print("incorect choice")
@@ -4166,23 +4161,23 @@ def Bastion_main(player):
     pass  
 #FINISH BASTION MAIN
 def sergeant_dialogue(player):
-    
     if not player.get("became_bastion_scout", False):
         sergeant_recruitment(player)
     elif player.get("bastion_active_quest") == "scout_outpost":
         sergeant_scout_outpost(player)
     else:
         sergeant_idle(player)
+
 def sergeant_recruitment(player):
     suspense_print(
         "\"Welcome to Bastion,\" the sergeant says.\n"
         "\"We could use someone with your skills.\"\n\n"
-        "\"You’ve already proven yourself.\n"
-        "I’d like to offer you a position as a scout.\"\n\n"
+        "\"You've already proven yourself.\n"
+        "I'd like to offer you a position as a scout.\"\n\n"
         "\"Scouts are vital to our survival.\n"
         "We send them beyond the walls to track alien movement and resources.\""
     )
-    while True:  
+    while True:
         suspense_print("1) Accept the position as a scout")
         suspense_print("2) Decline the position")
         suspense_print("I) Open inventory")
@@ -4193,11 +4188,11 @@ def sergeant_recruitment(player):
 
         if choice == "1":
             suspense_print(
-                "\"Excellent,\" the sergeant says.\n"
-                "\"i already have a mission for you.\"\n"
-                "i need you to go into alien territory and scout an old abandoned military outpost\n"
-                "report back any findings and try to gather any useful resources you can find there\n\""
-                "and i got something for you if you manage to clear the outpost"
+                "\"Your first mission: the old military base, deep in alien land.\"\n"
+                "\"It was a special outpost before the war.\"\n"
+                "\"We need data on hidden weapons and research facilities.\"\n\n"
+                "\"Bring back what you can.\"\n"
+                "\"Clear the base and I'll send scavengers after you.\""
             )
             player["became_bastion_scout"] = True
             player["bastion_active_quest"] = "scout_outpost"
@@ -4213,97 +4208,109 @@ def sergeant_recruitment(player):
             return
 
         else:
-            suspense_print("Invalid choice.") 
+            suspense_print("Invalid choice.")
+
 def sergeant_scout_outpost(player):
-    
+    base_objective_completed = player.get("outpost_data_count", 0) >= 3
+    full_quest_completed = (
+        player.get("enemy_in_outpost_killed_count", 0) >= 10
+        and base_objective_completed
+    )
 
-    # FULL CLEAR PATH (violent)
-    if player.get("enemy_in_outpost_killed_count", 0) >= 10:
-        suspense_print(
-            "\"You did it!\" the sergeant exclaims.\n"
-            "\"The outpost is secure thanks to you.\"\n"
-            "\"Bastion won’t forget this.\""
-        )
-        add_item(player, "combat_knife", 1)
-        add_item(player, "coin", 200)
-        gain_xp(player, 200)
-
-        player["scout_outpost_completed"] = True
-        player["bastion_active_quest"] = "private_mission"
-        player["bastion_rank"] += 1
-        return
-
-    # DATA EXTRACTION PATH (stealth / smart)
-    elif player.get("outpost_data_count", 0) >= 3:
-        suspense_print(
-            "\"You’re back — and alive,\" he says.\n"
-            "\"This data will save lives.\""
-        )
-        add_item(player, "coin", 150)
-        gain_xp(player, 150)
-
-        player["scout_outpost_completed"] = True
-        player["bastion_active_quest"] = "private_mission"
-        player["bastion_rank"] += 1
-        return
-
-    # NOT DONE YET
-    else:
+    if not base_objective_completed:
         suspense_print(
             "\"The outpost is still out there,\" the sergeant says.\n"
             "\"Bring back anything you find.\""
         )
         return
 
-def sergeant_private_mission(player):
+    if full_quest_completed:
+        suspense_print(
+            "\"Outstanding work,\" the sergeant says.\n"
+            "\"You cleared the outpost and secured the data.\"\n"
+            "\"This will help us understand the alien threat and find new resources.\"\n"
+            "\"Reward: a scouting exoskeleton. Not the best, but it will keep you alive.\""
+        )
+        add_item(player, "coin", 150)
+        gain_xp(player, 150)
+        add_item(player, "exoskeleton_mk_1'runner'", 1)
+        player["scout_outpost_completed"] = True
+        player["bastion_active_quest"] = "next_mission"
+        player["bastion_rank"] += 1
+        player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
+
+        sergeant_next(player)
+        return
+
+    suspense_print(
+        "\"Good work finding the data,\" the sergeant says.\n"
+        "\"But the outpost is still crawling with aliens.\"\n"
+        "\"Here's a reward for the intel. You did good.\""
+    )
+    add_item(player, "coin", 50)
+    gain_xp(player, 50)
+    player["scout_outpost_completed"] = True
+    player["bastion_active_quest"] = "next_mission"
+    player["bastion_rank"] += 1
+    player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
+    return
+
+def sergeant_next(player):  # to do
     pass
-
-#todo
-
-
 
 def sergeant_idle(player):
     suspense_print(
         "\"Keep your eyes open out there,\" the sergeant says.\n"
         "\"The aliens are always watching.\""
     )
-  #chech
+
 def engineer_dialogue(player):
+    inventory = player.get("inventory", {})
+    if (
+        "alien_targeting_implant" in inventory
+        and "neural_implant" in inventory
+        and not player.get("has_upgraded_implant", False)
+    ):
+        implant_talk(player)
+        return
+
     given = player.get("has_given_alien_tech_to_engineer", 0)
 
     # --- Milestone dialogue ---
     if given >= 10 and not player.get("engineer_reward_10_given", False):
         suspense_print(
             "The engineer looks up from a half-disassembled turret.\n"
-            "His eyes widen as he sees the pile of alien tech you brought.\n\n"
-            "\"By the rusted gears of Bastion…\"\n"
-            "\"With parts like these, I’ve reinforced the walls, upgraded the guns,\n"
-            "and patched weaknesses we didn’t even know we had.\"\n\n"
+            "His eyes widen at the pile of alien tech in your hands.\n\n"
+            "\"By the rusted gears of Bastion...\"\n"
+            "\"With parts like these, I've reinforced the walls, upgraded the guns,\n"
+            "and patched weak points we didn't even know we had.\"\n\n"
             "He wipes grease from his hands and nods at you.\n"
-            "\"You’ve done more than most soldiers ever will.\"\n"
-            "\"I don’t have the special gear finished yet… but when I do, it’s yours.\""
+            "\"You've done more than most soldiers ever will.\"\n"
+            "\"Special gear isn't finished yet, but when it is, it's yours.\""
         )
         gain_xp(player, 150)
         player["engineer_reward_10_given"] = True
+        player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
 
     elif given >= 5 and not player.get("engineer_reward_5_given", False):
         suspense_print(
             "The engineer tightens a bolt as you approach.\n"
-            "\"Yeah… these parts are good. Real good.\"\n"
-            "\"I’ve already reinforced the outer turrets thanks to you.\"\n\n"
+            "\"Yeah... these parts are good. Real good.\"\n"
+            "\"Outer turrets are holding because of you.\"\n\n"
             "He tosses you a small crate.\n"
-            "\"Take this. Keeps you alive out there — which means more tech for me.\""
+            "\"Take this. Keeps you alive out there, which means more tech for me.\""
         )
         add_item(player, "coin", 100)
         add_item(player, "shotgun_shells", 4)
         add_item(player, "magnum_ammo", 1)
         gain_xp(player, 100)
         player["engineer_reward_5_given"] = True
+        player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
 
     elif given >= 3 and not player.get("engineer_reward_3_given", False):
         suspense_print(
             "\"Thanks for the parts,\" the engineer says.\n"
-            "\"With these and the files our scout brought back I’ve made real progress.\"\n\n"
+            "\"With these and the files our scout brought back, I've made real progress.\"\n\n"
             "He gestures you closer.\n"
             "\"This neural implant should help you decipher their language.\"\n"
             "\"Try not to fry your brain.\""
@@ -4314,6 +4321,7 @@ def engineer_dialogue(player):
         add_item(player, "shotgun_shells", 3)
         gain_xp(player, 50)
         player["engineer_reward_3_given"] = True
+        player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
 
     else:
         suspense_print(
@@ -4336,14 +4344,13 @@ def engineer_dialogue(player):
         if choice == "1":
             suspense_print(
                 "The engineer taps a humming console.\n"
-                "\"Half of this city shouldn’t even work anymore.\"\n"
-                "\"Human steel, alien cores… held together by luck and bad decisions.\"\n"
+                "\"Half of this city shouldn't even work anymore.\"\n"
+                "\"Human steel, alien cores... held together by luck and bad decisions.\"\n"
                 "\"But as long as it runs, Bastion stands.\""
             )
             return
 
         elif choice == "2":
-            inventory = player.get("inventory", {})
             if inventory.get("alien_tech_part", 0) > 0:
                 remove_item(player, "alien_tech_part", 1)
                 player["has_given_alien_tech_to_engineer"] = given + 1
@@ -4351,22 +4358,59 @@ def engineer_dialogue(player):
                 suspense_print(
                     "You hand over the alien tech.\n"
                     "The engineer examines it closely, nodding.\n"
-                    "\"Yeah… this’ll keep a few more people alive.\""
+                    "\"Yeah... this will keep a few more people alive.\""
                 )
                 return  # clean re-entry for milestone check
 
-            else:
-                suspense_print(
-                    "The engineer shakes his head.\n"
-                    "\"No alien tech, no miracles.\""
-                )
+            suspense_print(
+                "The engineer shakes his head.\n"
+                "\"No alien tech, no miracles.\""
+            )
 
         elif choice == "3":
             return
 
         else:
             suspense_print("Invalid choice.")
+def implant_talk(player):
+    suspense_print(
+            "you show the engineer the alien targeting implant you found\n"
+            "he examines it closely, nodding with approval\n"
+            "\"This is top-tier alien tech,\" he says.\n"
+            "i could upgrade your implant with this, but i need more parts to make it work\n"
+            "bring me 4 implant the one those cybornetic monsters have and i can make it work for you\""
+        )
+    while True:
+        suspense_print("1) Agree to find the parts")
+        suspense_print("2) Refuse and go back")
 
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+
+        if choice == "1":
+            if "alien_implant"*4 in player.get("inventory", {}):
+                remove_item(player, "alien_implant", 4)
+                suspense_print(
+                    "The engineer takes the implant and begins working on it.\n"
+                    "After a few moments, he hands it back to you.\n"
+                    "\"Here you go,\" he says.\n"
+                    "\"This should help you hit harder and see better.\""
+                )
+                add_item(player, "upgraded_neural_implant", 1)
+                remove_item(player, "neural_implant", 1)
+                gain_xp(player, 100)
+                player["has_upgraded_implant"] = True
+            else:
+                player["needs_implant_parts"] = True
+            return
+
+        elif choice == "2":
+            suspense_print("The engineer nods and goes back to his work")
+            return
+
+        else:
+            suspense_print("Invalid choice.")
 
 #OLD FACTORY AREA
 def old_factory_way(player):
@@ -5490,6 +5534,8 @@ def secret_factory_room(player):
 
         else:
             suspense_print("Invalid choice.")
+
+
 
 
 #ALIEN LAND AREA
