@@ -1,7 +1,7 @@
 from ui import ui_input, ui_print, ui_update_inventory
 from equipment import EQUIPMENT
 import random
-from text_effect import suspense_print
+from text_effect import slow_print_char, suspense_print
 
 # -----------------------------
 # Input helper (local, safe)
@@ -149,15 +149,15 @@ def handle_weird_fruit(player):
 
     # 🍽️ Always heal a bit when eaten
     heal_player(player, 4)
-    
+   
     # 🔍 3 fruits → perception bonus
     if count == 3:
         ui_print("Your senses sharpen. Sounds feel closer. Shadows clearer.")
         player["status_effects"]["perception_bonus"] = 1
 
     # 🔍 Scaling perception (soft cap)
-    if count > 3:
-        player["status_effects"]["perception_bonus"] = min(3, 1 + count // 5)
+    if count == 3:
+        player["perception"] = player.get("perception", 1) + 1
 
     # 👽 10 fruits → aliens stop attacking
     if count == 7:
@@ -167,10 +167,17 @@ def handle_weird_fruit(player):
         player["can_breathe_in_alien_environments"] = True
         player["has_eaten_10_fruits"] = True
     # ☠️ Too many fruits → body rejection
-    if count >= 8 and random.random() < 0.1:
+    if count == 10:
+        ui_print("Pain erupts in your head. a cacophonie of voices fills your mind, whispering in a language you almost understand.\n"
+              "your vision blurs and your limbs feel like they’re made of lead.\n"
+              "you will now see things no man should see,a voice wispers in your mind, and now you will understand")
+        player["status_effects"]["eldritch_eyes"] = True 
+    if count >= 11 and random.random() < 0.1:
         ui_print("Pain erupts inside you."
-              "tentacles erupt from your skin, writhing wildly before retracting back.")
-        take_damage(player, 25)
+              "tentacles erupt from your skin, writhing wildly before retracting back.\n"
+              "a deep, otherworldly voice echoes in your mind\n")
+        slow_print_char("GREED..\n")
+        take_damage(player, 15)
 
 
 # -----------------------------
@@ -513,6 +520,7 @@ ITEMS = {
         "name": "Bastion Map",
         "type": "misc",
         "description": "A map of a secret path leading to Bastion .",
+    },
     #_____Quest Items_____
     "radio_device": {
         "name": "Radio Device",
@@ -610,6 +618,11 @@ ITEMS = {
         "description": "Durable exoskeleton material from genetically modified centipedes.",
         "sell": 8,
         "buy": 25,
+    },
+    "alien_targeting_implant": {
+        "name": "Alien Targeting Implant",
+        "type": "quest_item",
+        "description": "An advanced targeting system salvaged from a cyborg.",
     },
 
 #_________KEYS_________

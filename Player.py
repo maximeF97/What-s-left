@@ -164,12 +164,14 @@ player = {
     "ai_lied_about_core": False,
     "tried_core_by_force": False,
     "introduced_to_core": False,
+    "understand_security_system": False,
+    "defeated_medical_bay_enemies": False,
 }
 player.setdefault("outpost_data_count", 0)
 player.setdefault("enemy_in_outpost_killed_count", 0)
 player.setdefault("weird_fruit_eaten", 0)
 player.setdefault("status_effects", {})
-
+player.setdefault("eldritch_eyes", False)
 def _coerce_int(value, default):
     """
     Safely convert value to int; if conversion fails, return default.

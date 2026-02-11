@@ -5974,7 +5974,7 @@ def forest_toward_military_base(player):
                 return
             else:
                 suspense_print("Invalid choice.")
-
+#MILITARY BASE AREA
 def military_base_entrance(player):
             
     if player.get("visited_military_base_entrance", False):
@@ -6397,6 +6397,7 @@ def main_hall(player):
             military_base_zone_2(player)
             return
         elif choice == "2":
+            suspense_print("you go up the stairs to the right\n")
             stairs_area(player)
             return
         elif choice == "3":
@@ -6407,7 +6408,7 @@ def main_hall(player):
             return
         else:   
             suspense_print("Invalid choice.")
-
+#MILLITARY BOSS FIGHT
 def boss_intro_guardian(player, beast):
     if beast.get("intro_used", False):
         return True
@@ -6429,7 +6430,6 @@ def boss_intro_guardian(player, beast):
 
     beast["intro_used"] = True
     return True
-
 def update_steel_plated_guardian_phase(player, beast):
     max_hp = beast["max_health"]
     hp_pct = beast["health"] / max_hp
@@ -6507,7 +6507,6 @@ def update_steel_plated_guardian_phase(player, beast):
     beast["special_attack_messages"].extend([
         "it tears open its chest core and unleashes a devastating energy blast!"
     ])
-
 def outpost_boss_fight(player):
     guardian = get_enemy("steel_plated_guardian")
     guardian["max_health"] = guardian["health"]
@@ -6543,12 +6542,174 @@ def outpost_boss_fight(player):
 
     if player["enemy_in_outpost_killed_count"] >= 10:
         suspense_print("you have cleared the outpost\n")
-
-
-                    
-    
+#MILITARY BASE UPSTAIRS AREA
 def stairs_area(player):
-    pass
+    suspense_print(
+        "you step into a break-room. tables are overturned. three doors lead out.\n"
+        "a console hums in the corner, its screen smeared with dried fingerprints.\n"
+    )
+    if skill_check(player, "perception", 40, visible=False):
+        suspense_print(
+            "fresh footprints cross the dust. some overlap yours. some do not.\n"
+        )
+    while True:
+        suspense_print("1) go through the door on the left")
+        suspense_print("2) go through the door in the middle")
+        suspense_print("3) go through the door on the right")
+        suspense_print("4) check the computer console")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print("you go toward the door on the left\n")
+            medical_bay(player)
+            return
+        elif choice == "2":
+            suspense_print("you go toward the door in the middle\n")
+            bed_room(player)
+            return
+        elif choice == "3":
+            suspense_print("you go toward the door on the right\n")
+            storage_room(player)
+            return
+        elif choice == "4":
+            suspense_print(
+                "you check the computer console\n"
+                "a duty log is frozen mid-sentence. they held upstairs for days before the siege broke.\n"
+                "a flickering map lists hidden stashes and supply caches in the wasteland.\n"
+                "an engineering log is locked behind an old access prompt.\n"
+            )
+
+            if skill_check(player, "intelligence", 40, visible=False):
+                suspense_print(
+                    "you piece together the log: a shutdown panel is hidden in the storage room wall.\n"
+                )
+                player["understand_security_system"] = True
+            else:
+                suspense_print("you are unable to understand the engineering log\n")
+
+            player["outpost_data_count"] = player.get("outpost_data_count", 0) + 1
+            if player["outpost_data_count"] >= 3:
+                suspense_print(
+                    "you have enough data to bring back to bastion. it might keep someone alive.\n"
+                )
+            continue
+        else:
+            suspense_print("Invalid choice.")
+def medical_bay(player):
+    if player.get("defeated_medical_bay_enemies", False):
+        medical_bay_after_fight(player)
+    suspense_print(
+        "you enter the medical bay\n"
+        "the air is cold and sterile, ruined by rust and sweet decay\n"
+        "curtains hang like stiff skin. instruments sit too neatly arranged\n"
+    )
+    suspense_print(
+        "for a moment there is only your breathing and a slow drip on metal\n"
+        "then a to your left a body on the table convulses\n"
+    )
+    suspense_print(
+        "an alien scientist is bent over a human. the skull is open, eyes flooded, face twitching in pain\n"
+        "it flips a switch and the body goes still\n"
+    )
+    if player.get("understand_alien_language", False):
+        suspense_print("the alien scientist looks at you and says we made new upgrade on our cyborgs enjoy")
+    else:
+        suspense_print("the alien scientist make some wet cliquing noises and steps back")
+    cyborg = get_enemy("echoframe")
+    alien = get_enemy("alien_scientist")
+    won = fight_multiple_enemies(player, [cyborg, alien])
+    if won:
+        suspense_print(
+            "you have defeated the alien scientist and his cyborg creation\n"
+            "the medical bay is now safe to explore\n"
+        )
+        add_item(player, "alien_tech_part", 1)
+        add_item(player, "healing_salve", 1)
+        randomized_bonus_loot(
+            player,
+            {"alien_energy_cell": (1, 2), "rifled_ammo": (2, 4)}
+        )
+        player["enemy_in_outpost_killed_count"] = player.get("enemy_in_outpost_killed_count", 0) + 2
+        player["defeated_medical_bay_enemies"] = True
+        medical_bay_after_fight(player)
+        return
+    else:
+        game_over()
+        return
+def medical_bay_after_fight(player):
+    suspense_print(
+        "the cyborg lies in a heap of sparking limbs\n"
+        "its chest still ticks, like it forgot to die\n"
+        "the room smells of metal, bleach, and something sweet\n"
+    )
+    while True:
+        suspense_print("1) search the medical bay")
+        suspense_print("2) inspect the cyborg")
+        suspense_print("3) go back to the stairs area")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "you search the medical bay\n"
+                "trays of tools are laid out with ritual precision\n"
+                "the cabinets still contain sealed supplies\n"
+            )
+            add_item(player, "med_kit", 1)
+            add_item(player, "healing_salve", 1)
+            continue
+        elif choice == "2":
+            suspense_print(
+                "you inspect the cyborg more closely\n"
+                "alien filaments crawl along its spine, still warm\n"
+                "the implant is welded deep into the skull\n"
+            )
+            if skill_check(player, "scavenging", 40, visible=False):
+                suspense_print(
+                    "you manage to salvage the implant\n"
+                    "it hums softly in your hand, like it is listening\n"
+                )
+                add_item(player, "alien_targeting_implant", 1)
+                return
+            else:
+                suspense_print(
+                    "you try to remove the implant but the metal fuses to the bone\n"
+                    "you stop before it takes your fingers with it\n"
+                )
+                return
+        elif choice == "3":
+            stairs_area(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def bed_room(player):
+    suspense_print(
+        "you enter a casern bedroom\n"
+        "bunks line the walls, some still made, some in disarray\n"
+        "a few lockers stand at the foot of the beds, an an old vending machine flickers in the corner\n"
+    )
+    while True:
+        suspense_print("1) search the lockers")
+        suspense_print("2) check the vending machine")
+        suspense_print("3) go back to the stairs area")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "you search the lockers\n"
+                "most are empty or contain personal items like photos and letters\n"
+                "one locker is still sealed and contains some supplies\n"
+            )
+            if "base_locker_key" in player.get("inventory", {}):
+                suspense_print(
+                    "you use the base locker key you found earlier to open the sealed locker\n"
+                    "inside you find some useful items\n"
+                )
+                add_item(player, "med_kit", 1)
+                add_item(player, "pulsing_vial", 1)
+                add_item(player, "weird_fruit", 1)
 def main_corridor(player):
     high_alert = player.get("activated_security_system", False)
     if player.get("deactivated_security_robots", False) and high_alert:
@@ -6618,6 +6779,11 @@ def main_corridor(player):
             )
             return
         elif choice == "3":
+            if high_alert:
+                suspense_print("the alarms are getting louder\n"
+                               "there is no time for that"
+                 )
+                continue
             suspense_print(
                 "you examine the robots in the hallway\n"
                 "they are pristine but covered in moss and alien growths\n"
