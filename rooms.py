@@ -4224,7 +4224,7 @@ def sergeant_scout_outpost(player):
         )
         return
 
-    if full_quest_completed:
+    if full_quest_completed and not player.get("received_scout_exoskeleton", False):
         suspense_print(
             "\"Outstanding work,\" the sergeant says.\n"
             "\"You cleared the outpost and secured the data.\"\n"
@@ -4238,22 +4238,29 @@ def sergeant_scout_outpost(player):
         player["bastion_active_quest"] = "next_mission"
         player["bastion_rank"] += 1
         player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
-
+        player["received_scout_exoskeleton"] = True
         sergeant_next(player)
         return
-
-    suspense_print(
-        "\"Good work finding the data,\" the sergeant says.\n"
-        "\"But the outpost is still crawling with aliens.\"\n"
-        "\"Here's a reward for the intel. You did good.\""
-    )
-    add_item(player, "coin", 50)
-    gain_xp(player, 50)
-    player["scout_outpost_completed"] = True
-    player["bastion_active_quest"] = "next_mission"
-    player["bastion_rank"] += 1
-    player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
-    return
+    elif full_quest_completed and player.get("received_scout_exoskeleton", False):
+        suspense_print(
+            "\"You've already earned that reward,\" the sergeant says.\n"
+            "\"Stay sharp. We'll have more work soon.\""
+        )
+        return
+    elif base_objective_completed and not full_quest_completed and not player.get("bastion_base_mission_completed", False):
+        suspense_print(
+            "\"Good work finding the data,\" the sergeant says.\n"
+            "\"But the outpost is still crawling with aliens.\"\n"
+            "\"Here's a reward for the intel. You did good.\""
+        )
+        add_item(player, "coin", 50)
+        gain_xp(player, 50)
+        player["scout_outpost_completed"] = True
+        player["bastion_active_quest"] = "next_mission"
+        player["bastion_rank"] += 1
+        player["bastion_security_level"] = player.get("bastion_security_level", 0) + 1
+        player["bastion_base_mission_completed"] = True
+        return
 
 def sergeant_next(player):  # to do
     pass
@@ -4389,21 +4396,28 @@ def implant_talk(player):
             continue
 
         if choice == "1":
-            if "alien_implant"*4 in player.get("inventory", {}):
+            inventory = player.get("inventory", {})
+
+            if inventory.get("alien_implant", 0) >= 4:
                 remove_item(player, "alien_implant", 4)
+
                 suspense_print(
-                    "The engineer takes the implant and begins working on it.\n"
-                    "After a few moments, he hands it back to you.\n"
-                    "\"Here you go,\" he says.\n"
-                    "\"This should help you hit harder and see better.\""
+                    "The engineer takes the implants and begins working.\n"
+                    "Metal scrapes against metal.\n"
+                    "Something inside it moves.\n\n"
+                    "After a long silence, he hands it back.\n"
+                    "\"It will make you stronger,\" he mutters.\n"
                 )
+
                 add_item(player, "upgraded_neural_implant", 1)
                 remove_item(player, "neural_implant", 1)
                 gain_xp(player, 100)
                 player["has_upgraded_implant"] = True
+                return
             else:
                 player["needs_implant_parts"] = True
-            return
+                return
+
 
         elif choice == "2":
             suspense_print("The engineer nods and goes back to his work")
@@ -6633,7 +6647,13 @@ def stairs_area(player):
                 player["understand_security_system"] = True
             else:
                 suspense_print("you are unable to understand the engineering log\n")
-
+            if player.get("has_checked_computer_console", False):
+                suspense_print(
+                    "you have already checked the computer console\n"
+                    "there is nothing more to find here\n"
+                )
+                continue
+            player["has_checked_computer_console"] = True
             player["outpost_data_count"] = player.get("outpost_data_count", 0) + 1
             if player["outpost_data_count"] >= 3:
                 suspense_print(
@@ -6645,6 +6665,7 @@ def stairs_area(player):
 def medical_bay(player):
     if player.get("defeated_medical_bay_enemies", False):
         medical_bay_after_fight(player)
+        return
     suspense_print(
         "you enter the medical bay\n"
         "the air is cold and sterile, ruined by rust and sweet decay\n"
@@ -6697,6 +6718,13 @@ def medical_bay_after_fight(player):
         if handle_global_input(choice, player):
             continue
         if choice == "1":
+            if player.get("searched_medical_bay_upstairs", False):
+
+                suspense_print(
+                    "you have already searched the medical bay\n"
+                    "there is nothing more to find here\n"
+                )
+                continue
             suspense_print(
                 "you search the medical bay\n"
                 "trays of tools are laid out with ritual precision\n"
@@ -6704,6 +6732,7 @@ def medical_bay_after_fight(player):
             )
             add_item(player, "med_kit", 1)
             add_item(player, "healing_salve", 1)
+            player["searched_medical_bay_upstairs"] = True
             continue
         elif choice == "2":
             suspense_print(
@@ -6729,9 +6758,90 @@ def medical_bay_after_fight(player):
             return
         else:
             suspense_print("Invalid choice.")
+def storage_room(player):
+    suspense_print(
+        "you enter a storage room\n"
+        "the shelves are mostly empty, but some still hold dusty supplies\n"
+        "a faint noise comes from the back of the room\n"
+    )
+    while True:
+        suspense_print("1) search the shelves")
+        suspense_print("2) investigate the noise")
+        suspense_print("3) go back to the stairs area")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if player.get("searched_storage_room", False):
+                suspense_print(
+                    "you have already searched the shelves\n"
+                    "there is nothing more to find here\n"
+                )
+                continue
+            suspense_print(
+                "you search the shelves\n"
+                "most of the supplies are ruined or covered in alien growths\n"
+                "you manage to find a few usable items\n"
+            )
+            add_item(player, "rifle_ammo", 5)
+            add_item(player, "healing_salve", 1)
+            player["searched_storage_room"] = True
+            continue
+        elif choice == "2":
+            suspense_print(
+                "you move toward the noise it sounds like mumbling and scratching\n"
+                "as you get closer you see a figure standing near a wall full of strange markings\n"
+                "He stand naked the body decaying, he is mumbling to himself and scratching the wall with his nails\n"
+
+            )
+            eldrichEncounter(player)
+            return
+
+               
+        elif choice == "3":
+            stairs_area(player)
+            return
+        else :
+            suspense_print("Invalid choice.")
+def eldrichEncounter(player):
+    while True:
+        suspense_print("1) try to communicate with the figure")
+        suspense_print("2) attack the figure")
+        suspense_print("3) retreat back to the storage room")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if player.get("eldritch_eyes", False):
+                suspense_print(
+                    "you try to communicate with the figure\n"
+                    "You hear his sound too, the chorus of the cosmos\n"
+                    "he wants me to give you this ... give me your hand.\n"
+                    "you feel a strange compulsion to give him your hand\n"
+                    "you take his hand and suddenly you see flashes of cosmic visions\n"
+                    # wake in tower with new weapon
+                    )
+                midnight_tower(player)
+                return
+                
+            suspense_print(
+                "you try to communicate with the figure\n"
+                "he dosent seem to notice you and keep mumbling to himself\n")
+            continue
+        elif choice == "2":
+            suspense_print(
+                "you stab the figure but is flesh instantly regenerate\n"
+                "he keeps mumbling and scratching the wall, seemingly unaffected by your attack\n"
+            )
+            continue
+        elif choice == "3":
+            storage_room(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
 def bed_room(player):
     suspense_print(
-        "you enter a casern bedroom\n"
+        "you enter a casern bedroom, something quickly vanish in the vent\n"
         "bunks line the walls, some still made, some in disarray\n"
         "a few lockers stand at the foot of the beds, an an old vending machine flickers in the corner\n"
     )
@@ -6748,14 +6858,86 @@ def bed_room(player):
                 "most are empty or contain personal items like photos and letters\n"
                 "one locker is still sealed and contains some supplies\n"
             )
-            if "base_locker_key" in player.get("inventory", {}):
+            if ("base_locker_key" in player.get("inventory", {}) and not player.get("opend_bedroom_locker", False)) or (skill_check(player, "lockpicking", 40, visible=False) and not player.get("opend_bedroom_locker", False)
+            ):
                 suspense_print(
-                    "you use the base locker key you found earlier to open the sealed locker\n"
+                    "your open the sealed locker\n"
                     "inside you find some useful items\n"
                 )
                 add_item(player, "med_kit", 1)
                 add_item(player, "pulsing_vial", 1)
                 add_item(player, "weird_fruit", 1)
+                player["opend_bedroom_locker"] = True
+                return
+            else:
+                suspense_print("the locker is locked and you don't have the key or the skills to open it.")
+                continue
+        elif choice == "2":
+            if skill_check(player, "perception", 60, visible=False):
+                suspense_print(
+                    "you check the vending machine more closely\n"
+                    "there is a hidden passage behind it\n"
+                    "you squeeze through the passage and find a hidden storage room\n"
+                )
+                hidden_storage_room(player)
+                return
+            suspense_print(
+                "you check the vending machine\n"
+                "it is mostly empty and what remains is covered in alien growths\n"
+            )
+            return
+        elif choice == "3":
+            stairs_area(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def hidden_storage_room(player):
+    suspense_print(
+        "you crawl through the hidden passage and enter a small storage room\n"
+        "the air is stale and coppery, like rust and old blood\n"
+        "this was a place to hide, not to die\n"
+        "two soldiers lie on the ground\n"
+        "one with a bullet wound in the head, the other with a strange mark on his neck\n"
+    )
+    while True:
+        suspense_print("1) search the storage room")
+        suspense_print("2) examine the soldiers")
+        suspense_print("3) go back to the bedroom")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            if player.get("searched_bedroom_secret_room", False):
+                suspense_print(
+                    "you have already searched the storage room\n"
+                    "there is nothing more to find here\n"
+                )
+                
+                continue
+            suspense_print(
+                "you search the storage room\n"
+                "there are some supplies hidden here\n"
+            )
+            add_item(player, "medkit", 1)
+            add_item(player, "rifle_ammo", 5)
+            add_item(player, "4_leaf_clover", 1)
+            player["searched_bedroom_secret_room"] = True
+            return
+        elif choice == "2":
+            suspense_print(
+                "you find a note on one of the soldiers\n"
+                "it reads:\n"
+                "Day 2: the base became a nightmare. the creatures are everywhere. we can't hold them back. if anyone finds this, something has gone wrong with the security AI. be careful.\n"
+                "Day 5: we can still hear them crawling in the walls. they are getting louder. the security system is offline. we are trapped.\n"
+                "Day 7: no food left. jean managed to steal some weird fruit from the aliens. he says 'it tastes like sweet metal' but it seems to give him energy. i'd rather eat bugs than eat those.\n"
+                "Day 10: something is wrong with jean. he is always tired but can't sleep. always hungry but doesn't eat. yesterday i found him in the corner of the room staring at the wall. when i asked him what he was doing, he said 'i'm listening to the chorus of the cosmos. they tell me their secrets.'\n"
+                "Day 12: something is really wrong with jean. he keeps mumbling to himself. i swear i see something moving in the corner of my eye. i think jean is infected. i need to restrain him.\n"
+            )
+            add_item(player, "soldier_note", 1)
+            return
+        elif choice == "3":
+            bed_room(player)
+            return
 def main_corridor(player):
     high_alert = player.get("activated_security_system", False)
     if player.get("deactivated_security_robots", False) and high_alert:
@@ -7224,7 +7406,13 @@ def nukes_room(player): #to do
     pass 
                 
 
-
+#alt ending eldrich dominion
+def midnight_tower(player)
+    pass
+def midday_tower(player)
+    pass
+def twilight_tower(player)
+    pass
             
 
 

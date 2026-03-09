@@ -127,6 +127,8 @@ player = {
     "engineer_reward_10_given": False,
     "has_upgraded_implant": False,
     "needs_implant_parts": False,
+    "bastion_base_mission_completed": False,
+    "received_scout_exoskeleton": False,
     #factory area
     "has_found_secret_path_near_factory": False,
     "has_looted_secret_stranger": False,
@@ -172,6 +174,11 @@ player = {
     "introduced_to_core": False,
     "understand_security_system": False,
     "defeated_medical_bay_enemies": False,
+    "opend_bedroom_locker" : False,
+    "searched_bedroom_secret_room": False,
+    "searched_storage_room": False,
+    "has_checked_computer_console": False,
+    "searched_medical_bay_upstairs": False,
 }
 player.setdefault("outpost_data_count", 0)
 player.setdefault("enemy_in_outpost_killed_count", 0)

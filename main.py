@@ -36,7 +36,7 @@ def resume_game(player):
     elif scene in ("wasteland",):
         return wasteland(player)
     elif scene in ("millitary_base_inside", "military_base", "base_inside"):
-        return military_base_inside(player):
+        return military_base_inside(player)
     return old_bunker(player)
 
 

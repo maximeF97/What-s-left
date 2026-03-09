@@ -288,7 +288,15 @@ def read_note(player, note_id):
                         "in serious gear leaving. He came back with bugs in a jar...\n"
                         "A ship landed. They loaded vats inside.\n"
                         "Something big is happening.\n"
-                        "I need to g—"),
+                        "I need to g—"
+        
+        ),
+        "soldier_note": ("Day 2: the base became a nightmare. the creatures are everywhere. we can't hold them back. if anyone finds this, something has gone wrong with the security AI. be careful.\n"
+                "Day 5: we can still hear them crawling in the walls. they are getting louder. the security system is offline. we are trapped.\n"
+                "Day 7: no food left. jean managed to steal some weird fruit from the aliens. he says 'it tastes like sweet metal' but it seems to give him energy. i'd rather eat bugs than eat those.\n"
+                "Day 10: something is wrong with jean. he is always tired but can't sleep. always hungry but doesn't eat. yesterday i found him in the corner of the room staring at the wall. when i asked him what he was doing, he said 'i'm listening to the chorus of the cosmos. they tell me their secrets.'\n"
+                "Day 12: something is really wrong with jean. he keeps mumbling to himself. i swear i see something moving in the corner of my eye. i think jean is infected. i need to restrain him.\n"
+            ),  
     }
 
     ui_print(notes.get(note_id, "The note is unreadable."))
@@ -521,6 +529,10 @@ ITEMS = {
         "type": "misc",
         "description": "A map of a secret path leading to Bastion .",
     },
+    "soldier_note": {
+        "name": "Soldier's Note",
+        "type": "note",
+    },
     #_____Quest Items_____
     "radio_device": {
         "name": "Radio Device",
@@ -645,3 +657,4 @@ ITEMS = {
         "type": "weapon_part",
         "description": "A heavily damaged minigun. It’s missing critical components but could be useful for crafting or repairs.",
     }
+},

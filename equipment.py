@@ -146,7 +146,7 @@ EQUIPMENT = {
 },
     "exoskeleton_mk_1'runner'": {
     "name": "Exoskeleton MK-1 'Runner'",
-    "slot": "body"
+    "slot": "body",
     "bonuses": {
         "max_hp": 15,
         "strength": 2,
@@ -166,4 +166,5 @@ EQUIPMENT = {
         "Its advanced servos and reinforced joints allow for swift, fluid movement,\n"
         "making you feel like you're gliding across the wasteland."
     )
+}
 }
