@@ -5635,10 +5635,51 @@ def alien_land_2(player):
         elif choice == "3":
             bastion_entrance(player)
             return
-def way_toward_organic_structures(player): # to finish
-    pass 
-
-
+def way_toward_organic_structures(player): 
+    suspense_print(
+        "you walk for a while true the alien land everithing around you is strange and colorful\n"
+        "the plants and creatures seem to be thriving so much compare to the other side of bastion\n"
+        "you feel a strange energy pulsing through the place\n"
+    )
+    while True:
+        suspense_print("1) take some time to enjoy the alien land")
+        suspense_print("2) move towards the alien structures")
+        suspense_print("3) go toward bastion")
+        choice = get_choice()
+        if handle_global_input(choice, player):
+            continue
+        if choice == "1":
+            suspense_print(
+                "you take some time to enjoy the alien land\n"
+                "you feel a strange sense of wonder and curiosity\n"
+                "but also a sense of danger and unease\n"
+                "you realize that this is not the world you knew and that there is much more to discover and explore in this strange new world\n"
+            )
+        elif choice == "2":
+            way_toward_organic_structures_2(player)
+            return
+        elif choice == "3":
+            bastion_entrance(player)
+            return
+        else:
+            suspense_print("Invalid choice.")
+def way_toward_organic_structures_2(player):
+    if player.get("eldritch_eyes", False):
+        suspense_print(
+            "as you approach the monolithic alien structures, whispers bloom in your mind\n"
+            "as you get closer, the whispers deepen, pulling you forward like a tide\n"
+            "long organic tendrils unfurl from the towers, pulsing with slow, чуж, living light\n"
+            "they reach for you, not quite touching, as if tasting the air around your skin\n"
+            "'COME TO US,' says a voice that speaks through your skull, not your ears\n"
+            "you step forward and the tendrils close, swallowing you whole.\n"
+        )
+        midday_tower(player)
+    else:
+        suspense_print(
+            "you approach a massive organic monolith\n"
+            "its surface is veined with pulsing tissue and alien symbols that seem to shift\n"
+            "as you draw closer, a stinging pressure emanates from the tower, forcing you back\n"
+        )
 #horde encounter 
 def spore_wall_investigation(player):
     if player.get("spore_wall_zombie_killed", False) and player.get("has_survived_horde_in_alien_land", False):
@@ -6682,7 +6723,7 @@ def medical_bay(player):
     if player.get("understand_alien_language", False):
         suspense_print("the alien scientist looks at you and says we made new upgrade on our cyborgs enjoy")
     else:
-        suspense_print("the alien scientist make some wet cliquing noises and steps back")
+        suspense_print("the alien scientist makes some wet clicking noises and steps back")
     cyborg = get_enemy("echoframe")
     alien = get_enemy("alien_scientist")
     won = fight_multiple_enemies(player, [cyborg, alien])
@@ -6730,7 +6771,7 @@ def medical_bay_after_fight(player):
                 "trays of tools are laid out with ritual precision\n"
                 "the cabinets still contain sealed supplies\n"
             )
-            add_item(player, "med_kit", 1)
+            add_item(player, "medkit", 1)
             add_item(player, "healing_salve", 1)
             player["searched_medical_bay_upstairs"] = True
             continue
@@ -6740,12 +6781,13 @@ def medical_bay_after_fight(player):
                 "alien filaments crawl along its spine, still warm\n"
                 "the implant is welded deep into the skull\n"
             )
-            if skill_check(player, "scavenging", 40, visible=False):
+            if skill_check(player, "scavenging", 40, visible=False)and not player.get("has_alien_targeting_implant", False):
                 suspense_print(
                     "you manage to salvage the implant\n"
                     "it hums softly in your hand, like it is listening\n"
                 )
                 add_item(player, "alien_targeting_implant", 1)
+                player["has_alien_targeting_implant"] = True
                 return
             else:
                 suspense_print(
@@ -6791,7 +6833,7 @@ def storage_room(player):
             suspense_print(
                 "you move toward the noise it sounds like mumbling and scratching\n"
                 "as you get closer you see a figure standing near a wall full of strange markings\n"
-                "He stand naked the body decaying, he is mumbling to himself and scratching the wall with his nails\n"
+                "He stands naked the body decaying, he is mumbling to himself and scratching the wall with his nails\n"
 
             )
             eldrichEncounter(player)
@@ -6826,11 +6868,11 @@ def eldrichEncounter(player):
                 
             suspense_print(
                 "you try to communicate with the figure\n"
-                "he dosent seem to notice you and keep mumbling to himself\n")
+                "he doesn't seem to notice you and keeps mumbling to himself\n")
             continue
         elif choice == "2":
             suspense_print(
-                "you stab the figure but is flesh instantly regenerate\n"
+                "you stab the figure but his flesh instantly regenerate\n"
                 "he keeps mumbling and scratching the wall, seemingly unaffected by your attack\n"
             )
             continue
@@ -6841,9 +6883,9 @@ def eldrichEncounter(player):
             suspense_print("Invalid choice.")
 def bed_room(player):
     suspense_print(
-        "you enter a casern bedroom, something quickly vanish in the vent\n"
+        "you enter a barracks bedroom, something quickly vanishes in the vent\n"
         "bunks line the walls, some still made, some in disarray\n"
-        "a few lockers stand at the foot of the beds, an an old vending machine flickers in the corner\n"
+        "a few lockers stand at the foot of the beds, and an old vending machine flickers in the corner\n"
     )
     while True:
         suspense_print("1) search the lockers")
@@ -6861,7 +6903,7 @@ def bed_room(player):
             if ("base_locker_key" in player.get("inventory", {}) and not player.get("opend_bedroom_locker", False)) or (skill_check(player, "lockpicking", 40, visible=False) and not player.get("opend_bedroom_locker", False)
             ):
                 suspense_print(
-                    "your open the sealed locker\n"
+                    "you open the sealed locker\n"
                     "inside you find some useful items\n"
                 )
                 add_item(player, "med_kit", 1)
@@ -6938,6 +6980,9 @@ def hidden_storage_room(player):
         elif choice == "3":
             bed_room(player)
             return
+        else:
+            suspense_print("Invalid choice.")
+#MILITARY BASE DOWNSTAIRS
 def main_corridor(player):
     high_alert = player.get("activated_security_system", False)
     if player.get("deactivated_security_robots", False) and high_alert:
@@ -7024,7 +7069,6 @@ def main_corridor(player):
             return
         else:
             suspense_print("Invalid choice.")
-
 def bot_check(player):
     
     suspense_print(
@@ -7182,7 +7226,6 @@ def armory(player):
 
         else:
             suspense_print("Invalid choice.")
-
 def core_room(player):
     if player.get("activated_security_system", False):
         suspense_print("you are back at the core room\n"
@@ -7407,9 +7450,9 @@ def nukes_room(player): #to do
                 
 
 #alt ending eldrich dominion
-def midnight_tower(player)
+def midnight_tower(player)#after eldrich encounter if you take the figure hand 
     pass
-def midday_tower(player)
+def midday_tower(player) #after way_toward_organic_structures_2 on line 5666
     pass
 def twilight_tower(player)
     pass

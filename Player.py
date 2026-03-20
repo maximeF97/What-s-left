@@ -179,6 +179,7 @@ player = {
     "searched_storage_room": False,
     "has_checked_computer_console": False,
     "searched_medical_bay_upstairs": False,
+    "has_alien_targeting_implant": False,
 }
 player.setdefault("outpost_data_count", 0)
 player.setdefault("enemy_in_outpost_killed_count", 0)
