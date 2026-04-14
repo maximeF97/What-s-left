@@ -1,3 +1,4 @@
+
 EQUIPMENT = {
     #headgear
     "cowboy_hat": {
@@ -117,6 +118,22 @@ EQUIPMENT = {
             "It significantly boosts intelligence and perception, allowing you to understand alien technology better and notice details others might miss."
         ),
     },
+    "alien_tech_implant": {
+        "slot": "implant",
+        "bonuses": {
+            "intelligence": 6,
+            "perception": 3,
+            "max_hp": 5
+        },
+        "flags": {
+            "double_attack": True
+        },
+        "description": (
+            "A cutting-edge alien implant that interfaces with your nervous system.\n"
+            "Grants enhanced intelligence and perception, with a 20% chance to attack twice per turn.\n"
+            "Hums with otherworldly power."
+        )
+    },
     #exoskeleton
     "old_exoskeleton": {
     "name": "Old Exoskeleton",
@@ -166,5 +183,27 @@ EQUIPMENT = {
         "Its advanced servos and reinforced joints allow for swift, fluid movement,\n"
         "making you feel like you're gliding across the wasteland."
     )
-}
+},
+    "exoskeleton_mk_2'warrior'": {
+    "name": "Exoskeleton MK-2 'Warrior'",
+    "slot": "body",
+    "bonuses": {
+        "max_hp": 25,
+        "strength": 4,
+        "perception": 1,
+        "endurance": 4,
+        "intelligence": 1,
+        "stealth": 1,
+        "stamina": 3,
+    },
+    "flags": {
+        "damage_reduction_percent": 12,
+        "occupies_hands": True,
+        "occupies_feet": True
+    },
+    "description": (
+        "A heavily armored exoskeleton built for combat and durability.\n"
+        "Its reinforced plating and powerful servos provide superior protection and strength,\n"
+        "but it feels bulky, like wearing a suit of armor."
+    )
 }

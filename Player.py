@@ -149,6 +149,7 @@ player = {
     "factory_main_turret_destroyed": False, 
     "machine_room_looted": False,
     "understand_alien_language" : False,#implimentation later--------------------------------
+    "eldritch_heart_seized": 0,
     #based on bastion system
     "became_bastion_scout": True,
     "bastion_rank": 1,
@@ -180,12 +181,19 @@ player = {
     "has_checked_computer_console": False,
     "searched_medical_bay_upstairs": False,
     "has_alien_targeting_implant": False,
+    #prison ark related
+    "has_oppend_fence_gate": False,
+
+    "sporebound_slave_killed_in_forest": False,
+    #eldrich heart related
+    "midnight_tower_seized_heart": False,
 }
 player.setdefault("outpost_data_count", 0)
 player.setdefault("enemy_in_outpost_killed_count", 0)
 player.setdefault("weird_fruit_eaten", 0)
 player.setdefault("status_effects", {})
 player.setdefault("eldritch_eyes", False)
+player.setdefault("eldritch_heart_seized", 0)
 def _coerce_int(value, default):
     """
     Safely convert value to int; if conversion fails, return default.
@@ -194,6 +202,10 @@ def _coerce_int(value, default):
         return int(value)
     except (TypeError, ValueError):
         return int(default)
+def eldrich_heart_seize(player):
+    if player.get("eldritch_heart_seized", 0) == 3:
+            eldrich_ending(player)
+        
 def apply_setup_to_player(player_dict: dict, setup: dict) -> dict:
     """
     Apply the dict returned by choose_name_and_stats() to the module-level player dict.

@@ -128,7 +128,7 @@ def handle_old_bunker(player, choice):
 import tkinter as tk
 from gui import GameUI
 from game_output import set_ui
-from rooms import old_bunker
+from game_area.rooms import old_bunker
 from player import player
 
 root = tk.Tk()

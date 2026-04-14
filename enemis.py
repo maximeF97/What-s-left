@@ -28,6 +28,25 @@ ENEMIES = {
         "The alien shrieks as barbed tendrils whip toward your throat!"
     ]
 },
+"augmented_alien": {
+    "name": "Augmented Alien",
+    "health": 12,
+    "hit_chance": 70,
+    "damage": 5,
+    "xp": 50,
+    "description": "A insectoid alien with cybernetic enhancements, its limbs whirring with mechanical precision.",
+    "attack_messages": [
+        "The augmented alien strikes with blinding speed!"
+    ],
+    "miss_messages": [
+        "The alien's limbs twitch past you harmlessly."
+    ],
+    "special_attack_chance": 0.2,
+    "special_attack_multiplier": 2.0,
+    "special_attack_messages": [
+        "It emits a piercing screech as it unleashes a devastating strike!"
+    ]
+},
 
 "small_metamorph": {
     "name": "Small Metamorph",
@@ -213,7 +232,7 @@ ENEMIES = {
 
 
 # ---------------- BOSSES ----------------
-"steel_plated_guardian": {
+"steel_plated_guardian": {#millitary_base_boss
     "name": "Steel-Plated Guardian",
     "health": 50,
     "hit_chance": 70,
@@ -242,7 +261,7 @@ ENEMIES = {
     ]
 },
 
-"mutated_capibara": {
+"mutated_capibara": {#old_factory_boss
     "name": "Mutated Capibara",
     "health": 40,
     "hit_chance": 75,
@@ -264,7 +283,7 @@ ENEMIES = {
     ]
 },
 
-"iron_warden": {
+"iron_warden": {#secret_mountain_boss
     "name": "Iron Warden",
     "health": 40,
     "hit_chance": 85,
@@ -283,7 +302,7 @@ ENEMIES = {
     ]
 },
 "hell_genetically_altered_bat": {
-    "name": "Altered Bat",
+    "name": "Altered Bat",#farmhouseboss
     "health": 25,
     "hit_chance": 66,
     "damage": 6,

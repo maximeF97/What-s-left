@@ -15,12 +15,20 @@ def blood(player):
     player["health"] -= health_cost
     print("You use 1 health to fuel the symbiotic blood pistol.")
     return True
+def double_attack(player):
+    roll = random.randint(1, 100)
+    if roll <= 20:
+        print("Your implant surges with power, allowing you to attack twice this turn!")
+        return True
+    return False
 
 WEAPONS: Dict[str, Dict] = {
     # Melee
     "rusty_knife": {"min_damage": 1, "max_damage": 3, "hit_chance": 70, "uses_ammo": False},
     "sharp_kitchen_knife": {"min_damage": 2, "max_damage": 4, "hit_chance": 75, "uses_ammo": False},
     "combat_knife": {"min_damage": 3, "max_damage": 5, "hit_chance": 80, "uses_ammo": False},
+    "crowbar": {"min_damage": 4, "max_damage": 6, "hit_chance": 75, "uses_ammo": False},
+    "eldrich_bone_dagger": {"min_damage": 6, "max_damage": 8, "hit_chance": 85, "uses_ammo": False},
     # Ranged
     "revolver": {"min_damage": 3, "max_damage": 6, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
     "cowboy_revolver": {"min_damage": 5, "max_damage": 8, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
@@ -99,7 +107,9 @@ def get_current_weapon(player: Dict) -> Tuple[Optional[str], Optional[Dict]]:
 
 def _default_melee(player: Dict) -> None:
     """Set a deterministic melee fallback for the player."""
-    if "combat_knife" in player.get("inventory", {}):
+    if "eldrich_bone_dagger" in player.get("inventory", {}):
+        player["weapon"] = "eldrich_bone_dagger"
+    elif "combat_knife" in player.get("inventory", {}):
         player["weapon"] = "combat_knife"
     elif "sharp_kitchen_knife" in player.get("inventory", {}):
         player["weapon"] = "sharp_kitchen_knife"
@@ -307,7 +317,13 @@ def combats(player: Dict, enemy: Dict) -> Dict[str, int | str]:
         # Player turn
         if choice == "1":
             acted = player_attack(player, enemy)
-            if acted and enemy["health"] <= 0:
+            if acted:
+                # Check for double attack from alien_tech_implant
+                if player.get("equip_double_attack") and double_attack(player):
+                    if enemy["health"] > 0:
+                        player_attack(player, enemy)
+            
+            if enemy["health"] <= 0:
                 print("You defeated the enemy!")
                 return {"result": "win", "xp": int(enemy.get("xp", 0))}
 
