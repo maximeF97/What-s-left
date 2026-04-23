@@ -473,12 +473,17 @@ def wasteland_cross_road(player):
 
 #GROVE_TOWN_ARC
 def grove_town(player):
-    suspense_print("you arrived at grove_town, nothing remains but the ruins of a police station and a few burned down houses.")
+    suspense_print(
+        "The sign reads 'Grovetown' — but the name feels like a lie.\n"
+        "Nothing grew here. Nothing will again.\n"
+        "A gutted police station leans against the sky like a broken jaw.\n"
+        "Charred skeletons of houses line the road, still smelling of ash and something worse."
+    )
     while True:
-        suspense_print("1) explore the police station")
-        suspense_print("2) explore the burned down houses")
-        suspense_print("3) go back to the crossroad")
-        suspense_print("4) move forward")
+        suspense_print("1) Enter the police station — something moved in a window")
+        suspense_print("2) Pick through the burned houses")
+        suspense_print("3) Turn back to the crossroad")
+        suspense_print("4) Push deeper into the wasteland")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -492,10 +497,11 @@ def grove_town(player):
         elif choice == "2":
             burned_houses(player)
         elif choice == "3":
-            suspense_print("you go back to the crossroad")
+            suspense_print("You turn your back on Grovetown. The silence behind you feels deliberate.")
             wasteland_cross_road(player)
             return
         elif choice =="4":
+            suspense_print("You leave the dead town behind. The road ahead is worse.")
             mountain_tunnel(player)
             return
                 
@@ -503,15 +509,20 @@ def grove_town(player):
             suspense_print("Invalid choice")
 def police_station(player):
     if not player.get("has_seen_police_station_alien", False):
-        suspense_print("\nYou are inside the ruined police station you see something moving to a other room but when you go there you only see a mug on a desk.")
+        suspense_print(
+            "\nThe door groans open. Inside, the air is thick with dust and the copper tang of old blood.\n"
+            "Something shifts in the next room — a wet, scraping sound.\n"
+            "When you get there — nothing. Just a mug on a desk.\n"
+            "Still warm."
+        )
     else:
-        suspense_print("\nYou are back inside the police station.")
+        suspense_print("\nThe station remembers you. The stains on the floor haven't dried.")
     while True:
 
-        suspense_print("1) Inspect the desk")
-        suspense_print("2) Explore the cells")
-        suspense_print("3) Enter the evidence room")
-        suspense_print("4) Leave the police station")
+        suspense_print("1) Inspect the desk — the mug hasn't moved")
+        suspense_print("2) Descend into the holding cells")
+        suspense_print("3) Try the evidence room")
+        suspense_print("4) Get out of here")
         suspense_print("I) Open inventory")
         choice = get_choice()
 
@@ -530,14 +541,19 @@ def police_station(player):
             evidence_room(player)
 
         elif choice == "4":
-            suspense_print("You leave the police station.")
+            suspense_print("You back out slowly. The station watches you leave.")
             return
 
         else:
             suspense_print("Invalid choice.")
 def inspect_desk(player):
     if not player.get("has_seen_police_station_alien", False):
-        suspense_print("The mug suddenly transforms into a small alien!")
+        suspense_print(
+            "You reach for the mug.\n"
+            "It *twitches*.\n\n"
+            "The ceramic splits apart — wet, glistening flesh unfolds from within.\n"
+            "What was a mug is now a thing with too many limbs and a mouth that shouldn't exist."
+        )
 
         alien = {"health": 4, "hit_chance": 65, "xp": 25}
         result = combats(player, alien)
@@ -546,7 +562,10 @@ def inspect_desk(player):
 
         if result["result"] == "win":
             gain_xp(player, result["xp"])
-            suspense_print("You defeat the alien and find supplies and the key to the police station.")
+            suspense_print(
+                "It stops twitching. The remains ooze across the desk.\n"
+                "Underneath — a bloodied revolver, a handful of rounds, and a key caked in something dark."
+            )
             add_item(player,"revolver", 1)
             add_item(player,"revolver_ammo", 3)
             add_item(player,"police_station_key",1)
@@ -555,16 +574,20 @@ def inspect_desk(player):
         elif result["result"] == "lose":
             exit()
     else:
-        suspense_print("Just an empty desk and dead alien")
+        suspense_print("The desk is empty. The dead thing's stain still glistens in the half-light.")
 def explore_cells(player):
     while True:
         if player["has_freed_police_station_prisoner"]:
-            suspense_print("The cells are empty.")
+            suspense_print("The cells reek of bile and silence. Whatever was here is gone — or became something else.")
             return
 
-        suspense_print("A man is locked in a cell. A note reads: 'Do not free him. He is an alien.'")
-        suspense_print("1) Free him")
-        suspense_print("2) Leave him")
+        suspense_print(
+            "A figure crouches in the last cell, rocking slowly.\n"
+            "The bars are scratched from the inside — deep grooves, inhuman.\n"
+            "A note nailed to the wall reads: 'DO NOT OPEN. IT IS NOT HIM ANYMORE.'"
+        )
+        suspense_print("1) Open the cell")
+        suspense_print("2) Walk away — some doors should stay closed")
         suspense_print("I) Open inventory")
 
         choice = get_choice()
@@ -576,14 +599,23 @@ def explore_cells(player):
 
 
         if choice == "1":
-            suspense_print("The prisoner transforms into a large hostile alien!")
+            suspense_print(
+                "The lock clicks open.\n"
+                "The figure stands — too tall, too fast.\n"
+                "Its skin splits like wet paper, revealing something pale and writhing underneath.\n"
+                "The thing that was pretending to be a man lunges at you."
+            )
 
             alien = {"health": 15, "hit_chance": 70, "xp": 100}
             result = combats(player, alien)
 
             if result["result"] == "win":
                 gain_xp(player, result["xp"])
-                suspense_print("You defeated the alien prisoner and find a weird looking key.")
+                suspense_print(
+                    "It collapses into a heap of twitching limbs.\n"
+                    "Among the remains, something glints — a key, slick with black ichor.\n"
+                    "You pocket it. Your hands won't stop shaking."
+                )
                 add_item(player,"hospital_safe_key", 1)
                 gain_xp(player, 30)
                 player["has_freed_police_station_prisoner"] = True
@@ -591,18 +623,18 @@ def explore_cells(player):
             elif result["result"] == "lose":
                 exit()
         elif choice == "2":
-            suspense_print("You leave the prisoner locked up.")
+            suspense_print("You step back. The figure's head snaps toward you — then slowly turns away. You don't breathe until you're out.")
             return        
 def evidence_room(player):
     if "police_station_key" not in player["inventory"]:
-        suspense_print("The door is locked.")
+        suspense_print("The door won't budge. The lock is caked in something organic.")
         return
 
     if player["has_unlocked_police_station_evidence_room"]:
-        suspense_print("The evidence room is empty.")
+        suspense_print("The evidence room gapes open. Nothing left but the smell.")
         return
-    suspense_print("your using the police station key to unlock the door")
-    suspense_print("You find ammo and a medkit.")
+    suspense_print("The key grinds in the lock. Something cracks — the mechanism or the bone-like crust around it.")
+    suspense_print("Inside: scattered rounds, a dented medkit caked in dried blood. Better than nothing.")
     add_item(player,"revolver_ammo", 4)
     add_item(player,"medkit",1)
     add_item(player,"grovetown_note_2",1)
@@ -619,9 +651,14 @@ def evidence_room(player):
 def burned_houses(player):
     
     if not player.get("burned_houses_looted", False):
-        suspense_print("you explore the burned down houses and find an leaking healing salve, you use it before it run out and recover 3 health points.")
+        suspense_print(
+            "The houses are hollowed-out husks. Blackened walls. Melted furniture.\n"
+            "The smell — charred wood and something underneath it, something sweet and rotten.\n"
+            "You find a cracked tube of healing salve leaking between the floorboards.\n"
+            "You smear it on before it drains away. It stings. You'll take stinging over dying."
+        )
         player["health"] += 3
-        suspense_print(f"your health is now {player['health']}")
+        suspense_print(f"Health claws back to {player['health']}. It won't last.")
         player["burned_houses_looted"] = True
         if skill_check(player, "scavenging", 30):
             gain_xp(player, 10)
@@ -634,7 +671,7 @@ def burned_houses(player):
                     "Like an animal.\n\n")
 
     else:
-        suspense_print("nothing else of interest here")
+        suspense_print("You sift through the ashes again. Nothing. Just the ghosts of whoever lived here.")
 
 #ROADS_________
 def hospital_road(player):
@@ -1203,7 +1240,7 @@ from game_area.Farme_house import farm_house_inside
 
 
 #old survivor base and underground complex
-from game_area.Old_survivor_baseand_underground_complex import 
+from game_area.Old_survivor_base_and_Montain_secret_base import mountain_tunnel
 
 #need to finish underground complex main hall
 #road to bastion

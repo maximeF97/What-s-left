@@ -297,6 +297,7 @@ def read_note(player, note_id):
                 "Day 10: something is wrong with jean. he is always tired but can't sleep. always hungry but doesn't eat. yesterday i found him in the corner of the room staring at the wall. when i asked him what he was doing, he said 'i'm listening to the chorus of the cosmos. they tell me their secrets.'\n"
                 "Day 12: something is really wrong with jean. he keeps mumbling to himself. i swear i see something moving in the corner of my eye. i think jean is infected. i need to restrain him.\n"
             ),  
+        "ray_gun_note": ("The ray gun is a powerful weapon that can deal massive damage to enemies. It uses alien energy cells as ammo and has a high hit chance. However, it is also very rare and difficult to find. If you manage to get your hands on one, make sure to use it wisely and conserve your ammo."
     }
 
     ui_print(notes.get(note_id, "The note is unreadable."))
@@ -547,7 +548,12 @@ ITEMS = {
         "name": "Scout Note",
         "type": "note",
         "description": "A hastily written note from a scout about alien activity.",
+    },"psychic_artifact": {
+        "name": "Psychic Artifact",
+        "type": "quest_item",
+        "description": "An alien artifact that seems to resonate with psychic energy.",
     },
+
     #_____Skill_Boosters_____
     
     "scavenging_notebook": {
@@ -607,6 +613,7 @@ ITEMS = {
             "carisma": 2
         },
         "description": "A vial containing a substance that enhances charisma.",
+    ""
     },
 #weapon________
     "magnum": {

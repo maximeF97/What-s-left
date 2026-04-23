@@ -91,6 +91,7 @@ player = {
     "has_left_the_bunker": False,  
     "has_accepted_leader_quest": False,
     "has_accepted_leader_second_quest": False,
+    #abandoned outpost related
     "abandoned_outpost_tent_searched": False,
     "abandoned_outpost_device_examined": False,
     "mountain_door_opened": False,
@@ -102,6 +103,11 @@ player = {
     "thomas_killed": False,
     "thomas_seemed_human": False,
     "thomas_allied": False,
+    #secret mountain base related
+    "cafeteria_hidden_compartment_found": False,
+    "basement_machine_deactivated": False,
+    "find_secret_ray_gun_in_basement": False,
+
     "can_accept_thomas_quest": False,
     "found_invisible_alien": False,
     "wasteland_4_count": 0,

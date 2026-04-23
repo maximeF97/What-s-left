@@ -11,8 +11,8 @@ make it millitary recharche base
 make a concequence toward leting wounded woman leave or not
 fixe inventory back
 make targeting implant in bastion
-make midnight,midday,twilight towers in the wasteland
-
+make midnight,midday,twilight towers in the wasteland #done
+do something with psychic_artifact
 
 
 

@@ -31,6 +31,7 @@ WEAPONS: Dict[str, Dict] = {
     "eldrich_bone_dagger": {"min_damage": 6, "max_damage": 8, "hit_chance": 85, "uses_ammo": False},
     # Ranged
     "revolver": {"min_damage": 3, "max_damage": 6, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
+    "sfx9_handgun": {"min_damage": 4, "max_damage": 10, "hit_chance": 80, "uses_ammo": True, "ammo_type": "revolver_ammo"},
     "cowboy_revolver": {"min_damage": 5, "max_damage": 8, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
     "symbiotic_blood_pistol": {"min_damage": 7, "max_damage": 7, "hit_chance": 80, "uses_ammo": True, "ammo_type": blood},
     "alien_laser_rifle": {"min_damage": 7, "max_damage": 12, "hit_chance": 90, "uses_ammo": True, "ammo_type": "alien_energy_cell"},
@@ -39,7 +40,9 @@ WEAPONS: Dict[str, Dict] = {
     "rifle": {"min_damage": 5, "max_damage": 10, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
     "cowboy_rifle": {"min_damage": 7, "max_damage": 14, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
     "grenade_launcher": {"min_damage": 12, "max_damage": 16, "hit_chance": 70, "uses_ammo": True, "ammo_type": "grenades_ammo"},
-
+    "plasma_rifle": {"min_damage": 10, "max_damage": 15, "hit_chance": 85, "uses_ammo": True, "ammo_type": "plasma_cells"},
+    "secret_ray_gun": {"min_damage": 10000, "max_damage": 10000, "hit_chance": 100, "uses_ammo": True, "ammo_type": "secret_ray_gun"}
+}  
 }   
 
 
@@ -55,7 +58,7 @@ def shoot_and_remove_ranged_ammo(player: Dict) -> int:
     inventory = player.get("inventory", {})
 
     ranged_weapons = [
-        weapon for weapon in ("revolver", "shotgun", "alien_laser_rifle", "magnum", "rifle", "symbiotic_blood_pistol", "cowboy_revolver", "cowboy_rifle", "grenade_launcher")
+        weapon for weapon in ("revolver", "shotgun", "alien_laser_rifle", "magnum", "rifle", "symbiotic_blood_pistol", "cowboy_revolver", "cowboy_rifle", "grenade_launcher", "plasma_rifle", "secret_ray_gun")
         if weapon in inventory
     ]
 
