@@ -874,7 +874,93 @@ def cafeteria(player):
 def researched_and_development_lab(player):
     pass
 def legionaire_room(player):
-    pass
+    if player.get("power_turnd_on", False):
+        suspense_print(
+            "You see a massive blast door, scorched and scarred but still sealed tight.\n"
+            "The red light above it is dark.\n"
+            "there must be a way to turn the power on and open it, but for now, it's just a barrier.")
+        underground_complex_main_hall(player)
+        return
+    if not player.get("power_turnd_on", False) and player.get("first_visite_to_legionaire_room", False):
+        suspense_print(
+            "With the power back on the blast door oppens slowly as you approach, behind it you can hear a fast shifting of gears and a low growl, like something big waking up.\n"
+            "The door opens fully, revealing a pristine high tech legionaire automaton, his blade slowly extends as he steps forward, his eyes glowing red as he locks onto you as his target.")
+        won = fight_enemy(player, get_enemy("iron_legionnaire")
+        )
+        if won:
+            suspense_print(
+                "The legionnaire collapses, sparks flying from his joints.\n"
+                "His eyes go dark. The growling stops.\n"
+                "The blast door behind him is now open, the sign above says: `ARMORY`"
+            )
+            gain_xp(player, 200)
+            add_item(player, "rifle_ammo", 20)
+            randomized_bonus_loot(
+                player,
+                {"coin": (50, 100), "alien_power_cell": (2, 4), "shotgun_shells": (10, 20)}
+                player["first_visite_to_legionaire_room"] = True
+            )
+
+            underground_complex_armory(player)
+            return
+        else:
+            suspense_print("Everything goes dark.")
+            game_over()
+    if not player.get("power_turnd_on", False) and not player.get("first_visite_to_legionaire_room", False):
+        suspense_print(" the legionaire is stil tweaking on the ground, why was it not rusted like the other machines?")
+        while True:
+            suspense_print("1 go the the armory")
+            suspense_print("2) go back to the main hall")
+            choice = get_choice()
+            if choice == "1":
+                underground_complex_armory(player)
+                return
+            elif choice == "2":
+                underground_complex_main_hall(player)
+                return
+            else:
+                suspense_print("Invalid choice.")
+
+def underground_complex_armory(player):
+    suspense_print(
+        "you enter the armory, the walls are lined with racks of weapons and armor, most of it is damaged and rusted, but some pieces are still in good condition.\n"
+        "Behind a air tight plexiglass wall in the back of the room, you can see a sleek, high-tech exosuit, and a bieutiful plasma rifle resting on a pedestal, the sign above it says: `EXPERIMENTAL WEAPONRY - DO NOT TOUCH - Thomas'"
+    )
+    while True:
+        suspense_print("1) Scavenge the armory")
+        suspense_print("2) Try to access the experimental weaponry")
+        suspense_print("3) Go back")
+        choice = get_choice()
+        if choice == "1":
+            if skill_check(player, "perception", 30) and not player.get("armory_hidden_compartment_found", False):
+                suspense_print(
+                    "You notice one of the weapon racks is slightly loose.\n"
+                    "Behind it, a hidden compartment.\n"
+                    "Inside: grenades, energy cells, and a prototype combat stim."
+                )
+                add_item(player, "grenade", 2)
+                add_item(player, "magnum_ammo", 2)
+                add_item(player, "combat_stim", 1)
+                player["armory_hidden_compartment_found"] = True
+            suspense_print("The armory yields nothing else. Just racks and silence.")    
+        if choice == "2":
+            suspense_print(
+                "You try to access the experimental weaponry, but it's locked behind a security system.\n"
+                "A card reader wait blinking red. You need a keycard to access it."
+            )
+            if player.inventory.get("armory_keycard", False):
+                suspense_print("You insert the keycard into the reader.")
+                suspense_print(
+                    "The system beeps and the plexiglass wall slides open.\n"
+                    "You step inside, the airlock seals behind you.\n"
+                    "The plasma rifle hums with barely contained energy. The exosuit looks like it could withstand a nuclear blast."
+                )
+                add_item(player, "plasma_rifle", 1)
+                add_item(player, "experimental_exosuit", 1)
+            else:
+                suspense_print("You don't have the right keycard.")
+
+#downstairs area
 def underground_complex_basement(player):
     suspense_print(
         "The basement swallows sound.\n"
@@ -945,6 +1031,8 @@ def underground_complex_basement(player):
         elif choice == "4":
             underground_complex_inside(player)
             return
+        else:
+            suspense_print("Invalid choice.")
 def underground_complex_reactor_room(player):
     suspense_print(
         "The reactor chamber reeks of ozone and decay.\n"

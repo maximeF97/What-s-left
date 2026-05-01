@@ -107,6 +107,7 @@ player = {
     "cafeteria_hidden_compartment_found": False,
     "basement_machine_deactivated": False,
     "find_secret_ray_gun_in_basement": False,
+    "first_visite_to_legionaire_room": False,
 
     "can_accept_thomas_quest": False,
     "found_invisible_alien": False,

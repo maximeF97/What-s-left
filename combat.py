@@ -35,13 +35,17 @@ WEAPONS: Dict[str, Dict] = {
     "cowboy_revolver": {"min_damage": 5, "max_damage": 8, "hit_chance": 85, "uses_ammo": True, "ammo_type": "revolver_ammo"},
     "symbiotic_blood_pistol": {"min_damage": 7, "max_damage": 7, "hit_chance": 80, "uses_ammo": True, "ammo_type": blood},
     "alien_laser_rifle": {"min_damage": 7, "max_damage": 12, "hit_chance": 90, "uses_ammo": True, "ammo_type": "alien_energy_cell"},
+    ""
     "shotgun": {"min_damage": 6, "max_damage": 8, "hit_chance": 75, "uses_ammo": True, "ammo_type": "shotgun_shells"},
     "magnum": {"min_damage": 8, "max_damage": 12, "hit_chance": 80, "uses_ammo": True, "ammo_type": "magnum_ammo"},
     "rifle": {"min_damage": 5, "max_damage": 10, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
     "cowboy_rifle": {"min_damage": 7, "max_damage": 14, "hit_chance":90, "uses_ammo": True, "ammo_type": "rifle_ammo"},
     "grenade_launcher": {"min_damage": 12, "max_damage": 16, "hit_chance": 70, "uses_ammo": True, "ammo_type": "grenades_ammo"},
     "plasma_rifle": {"min_damage": 10, "max_damage": 15, "hit_chance": 85, "uses_ammo": True, "ammo_type": "plasma_cells"},
-    "secret_ray_gun": {"min_damage": 10000, "max_damage": 10000, "hit_chance": 100, "uses_ammo": True, "ammo_type": "secret_ray_gun"}
+    
+    #singel use
+    "secret_ray_gun": {"min_damage": 10000, "max_damage": 10000, "hit_chance": 100, "uses_ammo": True, "ammo_type": "secret_ray_gun"},
+    "grenade": {"min_damage": 15, "max_damage": 20, "hit_chance": 80, "uses_ammo": False, "ammo_type": "grenade"},  
 }  
 }   
 

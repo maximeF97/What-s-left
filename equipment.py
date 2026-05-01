@@ -206,4 +206,27 @@ EQUIPMENT = {
         "Its reinforced plating and powerful servos provide superior protection and strength,\n"
         "but it feels bulky, like wearing a suit of armor."
     )
+},"experimental_exoskeleton_mk_3'prototype'": {
+    "name": "Experimental Exoskeleton MK-3 'Prototype'",
+    "slot": "body",
+    "bonuses": {
+        "max_hp": 40,
+        "strength": 5,
+        "perception": 5,
+        "endurance": 5,
+        "intelligence": 3,
+        "stealth": 2,
+        "stamina": 5,
+    },
+    "flags": {
+        "damage_reduction_percent": 15,
+        "occupies_hands": True,
+        "occupies_feet": True
+    },
+    "description": (
+        "An experimental exoskeleton prototype, its design cutting-edge and untested.\n"
+        "It offers unparalleled protection and strength, but its advanced technology is unpredictable —\n"
+        "its bulky and yet it feels like a extention of your own body, responding to your every move with uncanny precision."
+    )
+},
 }

@@ -342,6 +342,11 @@ def use_item(player):
         heal = data.get("heal", 0)
         max_bonus = data.get("max_health_bonus", 0)
 
+        if heal == "full":
+            heal = player["max_health"] - player["health"]
+        elif callable(heal):
+            heal = heal(player)
+
         if heal:
             player["health"] = min(
                 player["health"] + heal,
@@ -352,6 +357,9 @@ def use_item(player):
             player["max_health"] += max_bonus
 
         remove_item(player, item_id, 1)
+
+        if data.get("on_use"):
+            data["on_use"](player)
 
         suspense_print(f"You use the {data['name']}.")
         if heal:
@@ -425,6 +433,15 @@ ITEMS = {
         "sell": 5,
         "buy": 7,
     },
+    "combat_stim": {
+        "name": "Combat Stim",
+        "type": "consumable",
+        "heal": "full",
+        "sell": 20,
+        "buy": 50,
+        "description": "A powerful stimulant that fully restores your health",
+    },
+
     # TOOLS
     "bobby_pins": {
         "name": "Bobby Pins",
@@ -613,7 +630,6 @@ ITEMS = {
             "carisma": 2
         },
         "description": "A vial containing a substance that enhances charisma.",
-    ""
     },
 #weapon________
     "magnum": {
