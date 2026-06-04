@@ -283,9 +283,9 @@ ENEMIES = {
     ]
 },
 
-"iron_warden": {#secret_mountain_boss
-    "name": "Iron Warden",
-    "health": 40,
+"iron_wardens": {#secret_mountain_boss
+    "name": "Iron Wardens",
+    "health": 100,
     "hit_chance": 85,
     "damage": 10,
     "xp": 300,

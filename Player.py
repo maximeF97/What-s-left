@@ -102,12 +102,19 @@ player = {
     "thomas_encountered": False,
     "thomas_killed": False,
     "thomas_seemed_human": False,
+    "thomas_suspicious": False,
     "thomas_allied": False,
     #secret mountain base related
     "cafeteria_hidden_compartment_found": False,
     "basement_machine_deactivated": False,
     "find_secret_ray_gun_in_basement": False,
     "first_visite_to_legionaire_room": False,
+    "has_help_said": False,
+    "woken_gardian": False,
+    "found_research_development_lab_code": False,
+    "found_red_striped_keycard": False,
+
+
 
     "can_accept_thomas_quest": False,
     "found_invisible_alien": False,

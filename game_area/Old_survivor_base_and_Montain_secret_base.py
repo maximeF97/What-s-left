@@ -125,7 +125,7 @@ def thomas_encounter(player):
 
         # ---- PERCEPTION CHECK ----
         elif choice == "2":
-            if player.get("thomas_seems_human", False) or player.get("thomas_suspicious", False):
+            if player.get("thomas_seemed_human", False) or player.get("thomas_suspicious", False):
                 suspense_print(
                     "You've already studied Thomas.\n"
                     "Staring longer won't reveal anything new.\n"
@@ -139,7 +139,7 @@ def thomas_encounter(player):
                     "Nothing stands out.\n"
                     "If he's something else… he hides it well."
                 )
-                player["thomas_seems_human"] = True
+                player["thomas_seemed_human"] = True
                 # Remove the continue here - let it fall through to show menu again
             else:
                 suspense_print(
@@ -629,10 +629,11 @@ def underground_complex_entrance(player):
             if "mountain_base_secret_lab_key" in player.get("inventory", {}):
                 suspense_print(
                     "You use the secret lab key.\n"
-                    "The lock clicks open."
+                    "The lock clicks open.\n"
                     "You push against the door.\n"
-                "It resists, then slowly grinds open.\n\n"
+                    "It resists, then slowly grinds open.\n\n"
                 )
+                remove_item(player, "mountain_base_secret_lab_key", 1)
                 underground_complex_inside(player)
                 return
             suspense_print(
@@ -814,6 +815,8 @@ def underground_complex_main_hall(player):
                     "\"INTRUDER DETECTED.\"\n\n"
                     "The ground trembles as they advance."
                 )
+                remove_item(player, "bot_left_shield_key", 1)
+                remove_item(player, "bot_right_shield_key", 1)
                 montain_base_secret_lab_boss(player)
                 return
             else:
@@ -832,8 +835,81 @@ def underground_complex_main_hall(player):
             return
         else:
             suspense_print("Invalid choice.")
+def build_lab_boss(beast, player):
+    """Mutate the boss based on remaining health."""
+    max_hp = beast.get("max_health", beast["health"])
+    current_hp = beast["health"]
+    hp_pct = current_hp / max_hp
+
+    # Phase 2: Frenzied
+    if hp_pct <= 0.6 and not beast.get("phase_2", False):
+        beast["phase_2"] = True
+        beast["damage"] += 2
+        beast["special_attack_chance"] = 0.25
+        beast["attack_messages"].extend([
+            "The wardens put their heavy shields together before slamming them into you. The impact throws you to the other side of the room, and you can feel your bones cracking under the force of the blow!"
+        ])
+        suspense_print(
+            "An alarm blares through the complex. The bots are damaged but not destroyed. They’re coming for you, and they’re angry."
+        )
+
+    # Phase 3: Death Spiral
+    if hp_pct <= 0.25 and not beast.get("phase_3", False):
+        beast["phase_3"] = True
+        beast["damage"] += 3
+        beast["special_attack_chance"] = 0.4
+        beast["special_attack_multiplier"] = 2.5
+        beast["attack_messages"].extend([
+            "The bots slam their shields together, creating a shockwave that knocks you off your feet and sends you crashing into the wall. The force is intense enough to leave you gasping for air and struggling to stay conscious."
+        ])
+        suspense_print(
+            "The bots are on the verge of destruction, but they’re not going down without a fight. They’re throwing everything they have at you."
+        )
+
+    if hp_pct <= 0.15 and not beast.get("phase_4", False) and not player.get("thomas_allied", False):
+        beast["phase_4"] = True
+        suspense_print(
+            "GET DOWN! Thomas bursts into the room, wielding a makeshift weapon. A powerful laser shoots from the weapon, hitting one of the bots and causing it to spark and falter. Thomas shouts, 'That's all I got, but it should be enough to help you finish them off!'"
+        )
+        beast["health"] -= 15
+
+
 def montain_base_secret_lab_boss(player):
-    pass
+    try:
+        iron_wardens = get_enemy("iron_wardens")
+    except Exception:
+        iron_wardens = {
+            "name": "Iron Wardens",
+            "health": 120,
+            "hit_chance": 85,
+            "damage": 10,
+            "xp": 300,
+            "attack_messages": [
+                "The Warden brings its fist down like a hammer!"
+            ],
+            "miss_messages": [
+                "The blow shatters the ground beside you."
+            ],
+            "special_attack_chance": 0.25,
+            "special_attack_multiplier": 2.0,
+            "special_attack_messages": [
+                "Its core glows white-hot as it unleashes a crushing strike!"
+            ]
+        }
+    build_lab_boss(iron_wardens, player)
+    suspense_print(
+        "The bots lurch forward, their movements stiff but relentless.\n"
+        "Their attacks are powerful, but slow. You might be able to outmaneuver them — if you can survive the hits."
+    )
+    won = fight_enemy(player, iron_wardens)
+    won = fight_enemy(player, iron_wardens)
+    if won:
+        suspense_print(
+            "The last bot collapses with a shower of sparks and twisted metal.\n"
+            "The sealed door behind them clicks open, revealing a stairwell descending into darkness.\n\n"
+            "You’ve made it past the guardians. Whatever’s down there is important. It has to be."
+        )
+        underground_complex_secret_room(player)
 def cafeteria(player):
     suspense_print(
         "You step into what used to be a cafeteria.\n"
@@ -853,10 +929,12 @@ def cafeteria(player):
                     "Underneath, a hollow space.\n"
                     "Shells. Power cells. Plasma rounds. Someone's stash. Someone who never made it out."
                 )
-                add_item(player, "shotgun_shell", 4)
+                add_item(player, "shotgun_shells", 4)
                 add_item(player, "alien_power_cell", 1)
-                add_item(player, "plasma_cells", 1) 
+                add_item(player, "plasma_cells", 1)
                 player["cafeteria_hidden_compartment_found"] = True
+                player["found_research_development_lab_code"] = True
+                suspense_print("Among the scrap is a faded note with the access code for the red-lit door.")
             suspense_print("The room yields nothing else. Just tables and silence and the smell.")
         elif choice == "2":
             suspense_print(
@@ -864,7 +942,7 @@ def cafeteria(player):
                 "The red light pulses faster as you get closer — rhythm accelerating, like a heartbeat that knows you're here.\n"
                 "Energy hums from behind it. Warm. Hungry."
             )
-            if player.get("found_ressearched_and_development_lab_code", False):
+            if player.get("found_research_development_lab_code", False):
                 suspense_print("You punch in the code you found. The door hisses open, revealing a stairwell descending into absolute darkness.")
                 researched_and_development_lab(player)
             else:
@@ -872,7 +950,73 @@ def cafeteria(player):
         else:
             suspense_print("Invalid choice.")
 def researched_and_development_lab(player):
-    pass
+    suspense_print(
+        "You enter the research and development lab. It's empty and it looks pristine, like it was never used or someone cleaned it very well. The only thing in the room is a terminal with a blinking red light.\n"
+        "A massive blast door is on the other side of the room. The door is slightly open and closes with a mechanical hissing sound. The sign above it says: `S.A.I.D.`"
+    )
+    while True:
+        suspense_print("1) Examine the terminal")
+        suspense_print("2) Approach the blast door")
+        choice = get_choice()
+        if choice == "1":
+            suspense_print(
+                "The terminal's screen flickers to life as you approach, displaying some research data and logs.\n"
+                "The moment you see the data, the screen goes black, and the terminal powers down. The red light on it goes off, and you hear a loud mechanical noise coming from the blast door, like something is moving behind it. You can feel the ground tremble slightly under your feet.\n"
+            )
+            player["woken_gardian"] = True
+            continue
+        if choice == "2":
+            if player.get("woken_gardian", False):
+                suspense_print(
+                    "You approach the blast door, and it opens slowly, revealing a massive high-tech legionnaire automaton. Its blade extends as it steps forward, its eyes glowing red as it locks onto you as its target."
+                )
+                suspense_print(
+                    "The legionnaire turns off powering down, and a voice echoes from the back of the dark room, saying: `Hello, sir. I am S.A.I.D.\n"
+                    "S-System for Automated Intelligence and Defense...\n"
+                    "I was designed to protect this facility and its secrets, but it seems I have been dormant for a long time...`\n"
+                    "Come inside. Let's talk."
+                )
+                underground_complex_said_room(player)
+                return
+            else:
+                suspense_print("The blast door is sealed tight. The red light above it is dark. You can hear something moving behind it, but it's not active yet.")
+                continue
+def underground_complex_said_room(player):
+    suspense_print(
+        "You step inside the room, and the blast door closes behind you with a loud mechanical hissing sound, light turn on revealing a massive computer system, with multiple screens and a central console, the wall are filled with vats with wats seems to be brain in them"
+        "hello player{name}, i am S.A.I.D. the system for automated intelligence and defense, i was designed to protect this facility and its secrets, but it seems i have been dormant for a long time, i can help you with information about this place and its secrets, but first, i need help"
+    )
+    while True:
+        suspense_print("1) Ask S.A.I.D. for information about the facility")
+        suspense_print("2) Ask S.A.I.D. what it needs help with")
+        suspense_print("3) Try to shut down S.A.I.D.")
+        suspense_print("4) Leave the room")
+        choice = get_choice()
+        if choice == "1" and not player.get("has_help_said", False):
+            suspense_print("help me first, and i will tell you everything you want to know about this place")
+        elif choice == "1" and player.get("has_help_said", False):
+            question_said(player)
+        elif choice == "2":
+            suspense_print(
+                "S.A.I.D. explains that it was disconnected from the main mainframe of the facility, and it needs to be reconnected in order to access its full capabilities. It asks that you validate a connection request in the general office.\n"
+                "You will need this key to get to the general office, but be careful. The place is dangerous, and you will need to be prepared before going there."
+            )
+            add_item(player, "bot_right_shield_key", 1)
+        elif choice == "3":
+            suspense_print(
+                "You try to shut down S.A.I.D. A mysterious haze fills the air, choking you as you collapse to the ground. You can hear S.A.I.D.'s voice echoing in your head saying: `You can't shut me down. I am the guardian of this place, and I will protect it at all costs... your brain will do great processing power for me now...`"
+            )
+            game_over()
+        elif choice == "4":
+            underground_complex_main_hall(player)
+            return
+def question_said(player):
+    suspense_print(
+        "S.A.I.D. answers your questions and describes the facility layout. A small compartment opens on the console, and a keycard drops into your hand."
+    )
+    add_item(player, "armory_keycard", 1)
+    player["has_help_said"] = True
+    suspense_print("You now have an armory keycard.")
 def legionaire_room(player):
     if player.get("power_turnd_on", False):
         suspense_print(
@@ -883,10 +1027,9 @@ def legionaire_room(player):
         return
     if not player.get("power_turnd_on", False) and player.get("first_visite_to_legionaire_room", False):
         suspense_print(
-            "With the power back on the blast door oppens slowly as you approach, behind it you can hear a fast shifting of gears and a low growl, like something big waking up.\n"
+            "With the power back on the blast door opens slowly as you approach, behind it you can hear a fast shifting of gears and a low growl, like something big waking up.\n"
             "The door opens fully, revealing a pristine high tech legionaire automaton, his blade slowly extends as he steps forward, his eyes glowing red as he locks onto you as his target.")
-        won = fight_enemy(player, get_enemy("iron_legionnaire")
-        )
+        won = fight_enemy(player, get_enemy("iron_legionnaire"))
         if won:
             suspense_print(
                 "The legionnaire collapses, sparks flying from his joints.\n"
@@ -898,8 +1041,8 @@ def legionaire_room(player):
             randomized_bonus_loot(
                 player,
                 {"coin": (50, 100), "alien_power_cell": (2, 4), "shotgun_shells": (10, 20)}
-                player["first_visite_to_legionaire_room"] = True
             )
+            player["first_visite_to_legionaire_room"] = True
 
             underground_complex_armory(player)
             return
@@ -907,7 +1050,7 @@ def legionaire_room(player):
             suspense_print("Everything goes dark.")
             game_over()
     if not player.get("power_turnd_on", False) and not player.get("first_visite_to_legionaire_room", False):
-        suspense_print(" the legionaire is stil tweaking on the ground, why was it not rusted like the other machines?")
+        suspense_print("The legionnaire is still tweaking on the ground. Why was it not rusted like the other machines?")
         while True:
             suspense_print("1 go the the armory")
             suspense_print("2) go back to the main hall")
@@ -923,8 +1066,8 @@ def legionaire_room(player):
 
 def underground_complex_armory(player):
     suspense_print(
-        "you enter the armory, the walls are lined with racks of weapons and armor, most of it is damaged and rusted, but some pieces are still in good condition.\n"
-        "Behind a air tight plexiglass wall in the back of the room, you can see a sleek, high-tech exosuit, and a bieutiful plasma rifle resting on a pedestal, the sign above it says: `EXPERIMENTAL WEAPONRY - DO NOT TOUCH - Thomas'"
+        "You enter the armory. The walls are lined with racks of weapons and armor—most damaged and rusted, but some pieces remain in good condition.\n"
+        "Behind an airtight plexiglass wall at the back, a sleek high-tech exosuit and a beautiful plasma rifle rest on a pedestal. The sign above reads: `EXPERIMENTAL WEAPONRY - DO NOT TOUCH - Thomas'"
     )
     while True:
         suspense_print("1) Scavenge the armory")
@@ -948,7 +1091,7 @@ def underground_complex_armory(player):
                 "You try to access the experimental weaponry, but it's locked behind a security system.\n"
                 "A card reader wait blinking red. You need a keycard to access it."
             )
-            if player.inventory.get("armory_keycard", False):
+            if player.get("inventory", {}).get("armory_keycard", False):
                 suspense_print("You insert the keycard into the reader.")
                 suspense_print(
                     "The system beeps and the plexiglass wall slides open.\n"
@@ -963,13 +1106,7 @@ def underground_complex_armory(player):
 #downstairs area
 def underground_complex_basement(player):
     suspense_print(
-        "The basement swallows sound.\n"
-        "Cold that feels like it has weight. Like pressure.\n"
-        "Old machinery lines the walls, rust weeping down like tears.\n\n"
-        "The floor is painted in dried blood. Not scattered. Not chaotic.\n"
-        "Dragged. Long streaks where something heavy (or someone) was pulled across concrete.\n"
-        "No body. No remains.\n"
-        "Just the evidence that something terrible happened here, and whatever it was — it walked away."
+        "Sound dies in the basement. Cold presses at your bones, heavy as a hand. Rust runs down the machines like old tears. The floor is painted with dried blood — dragged in long streaks, as if something was hauled away. No body. No remains. Just the proof that whatever happened here left on its own feet."
     )
     while True:
         suspense_print("1) Examine the machine")
@@ -1007,7 +1144,7 @@ def underground_complex_basement(player):
                 )
                 continue
         elif choice == "2":
-            if skill_check(player, "luck", 100) and not player.get("find_secret_ray_gun_in_basement", False):
+            if skill_check(player, "luck", 80) and not player.get("find_secret_ray_gun_in_basement", False):
                 suspense_print(
                     "You're about to leave when your boot catches something beneath the floorboards.\n"
                     "The wood gives way — rotten, deliberate.\n\n"
@@ -1203,3 +1340,13 @@ def alien_storage_room(player):
             return
         else:
             suspense_print("Invalid choice.")
+
+#final zone
+def underground_complex_secret_room(player):
+    suspense_print(
+        "You step through the opened door and into the heart of the facility.\n"
+        "Dim lights reveal a chamber lined with dormant equipment and a final console at the center.\n"
+        "The air hums with a low, patient energy. This room feels like the end of a long, terrible path."
+    )
+    suspense_print("For now, the secrets here are not yet unlocked.")
+    return
